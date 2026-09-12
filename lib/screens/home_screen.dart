@@ -7,6 +7,7 @@ import 'bottom_nav.dart';
 import 'subscriptions_srcreen.dart';
 import 'utilities_screen.dart';
 import 'staff_screen.dart';
+import 'analytics_screen.dart';
 
 enum SpendingTab { subscriptions, utilities, staff }
 
@@ -69,7 +70,15 @@ class _HomeScreenState extends State<HomeScreen> {
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       bottomNavigationBar: BottomNav(
         index: _navIndex,
-        onTap: (i) => setState(() => _navIndex = i),
+        onTap: (i) {
+          if (i == 2) {
+            Navigator.of(context).push(
+              MaterialPageRoute<void>(builder: (_) => const AnalyticsScreen()),
+            );
+          } else {
+            setState(() => _navIndex = i);
+          }
+        },
       ),
     );
   }

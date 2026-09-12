@@ -1,0 +1,595 @@
+import 'dart:math' as math;
+import 'package:flutter/material.dart';
+import '../data/analytics_data.dart';
+import '../theme/app_theme.dart';
+import '../widgets/coin_back_button.dart';
+
+class AnalyticsScreen extends StatefulWidget {
+  const AnalyticsScreen({super.key, this.category});
+  final String? category;
+  @override
+  State<AnalyticsScreen> createState() => _AnalyticsScreenState();
+}
+
+class _AnalyticsScreenState extends State<AnalyticsScreen> {
+  late String? _category = widget.category;
+  String _period = 'Month';
+  final DateTime _today = DateTime.now();
+  static const _months = [
+    'Jan',
+    'Feb',
+    'Mar',
+    'Apr',
+    'May',
+    'Jun',
+    'Jul',
+    'Aug',
+    'Sep',
+    'Oct',
+    'Nov',
+    'Dec',
+  ];
+  static const _palette = [
+    AppColors.subscriptions,
+    AppColors.utilities,
+    AppColors.gold,
+    AppColors.textSecondary,
+    AppColors.goldDark,
+  ];
+  String _money(double amount) => 'SAR ${amount.toStringAsFixed(0)}';
+
+  @override
+  Widget build(BuildContext context) {
+    final items =
+        analyticsItems
+            .where((i) => _category == null || i.category == _category)
+            .toList()
+          ..sort((a, b) => a.days.compareTo(b.days));
+    final factor = switch (_period) {
+      'Week' => 7 / 30,
+      'Year' => 12.0,
+      _ => 1.0,
+    };
+    final periodName = _period.toLowerCase();
+    final total = items.fold(0.0, (sum, item) => sum + item.amount) * factor;
+    final monthlyHistory = List.generate(
+      6,
+      (index) => analyticsHistory.entries
+          .where((e) => _category == null || e.key == _category)
+          .fold(0.0, (sum, e) => sum + e.value[index]),
+    );
+    // Illustrative weekly/yearly scenarios, not a live transaction aggregation.
+    final history = _period == 'Month'
+        ? monthlyHistory
+        : (_period == 'Week'
+                  ? [0.72, 0.85, 0.78, 0.94, 0.90, 1.0]
+                  : [0.55, 0.64, 0.73, 0.81, 0.92, 1.0])
+              .map((weight) => total * weight)
+              .toList();
+    final change = (total - history[4]) / history[4] * 100;
+    final monthlyBudget = _category == null
+        ? overallAnalyticsBudget
+        : analyticsBudgets[_category]!;
+    final budget = monthlyBudget * factor;
+    final highest = items.reduce((a, b) => a.amount >= b.amount ? a : b);
+    final highestNames = items
+        .where((i) => i.amount == highest.amount)
+        .map((i) => i.name)
+        .join(' & ');
+    final breakdown = <String, double>{};
+    for (final item in items) {
+      final key = _category == null ? item.category : item.group;
+      breakdown[key] = (breakdown[key] ?? 0) + item.amount * factor;
+    }
+    final labels = List.generate(6, (i) {
+      if (_period == 'Year') return '${_today.year - 5 + i}';
+      if (_period == 'Week') {
+        final date = _today.subtract(Duration(days: (5 - i) * 7));
+        return '${date.day}/${date.month}';
+      }
+      return _months[DateTime(_today.year, _today.month - 5 + i).month - 1];
+    });
+    final periodLabel = _period == 'Year'
+        ? '${_today.year}'
+        : _period == 'Week'
+        ? 'Week ending ${_today.day} ${_months[_today.month - 1]} ${_today.year}'
+        : '${_months[_today.month - 1]} ${_today.year}';
+    return Scaffold(
+      backgroundColor: AppColors.background,
+      appBar: AppBar(
+        leading: const CoinBackButton(),
+        backgroundColor: AppColors.background,
+        foregroundColor: AppColors.textPrimary,
+        title: Text(
+          _category == null ? 'General analytics' : '$_category analytics',
+        ),
+      ),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.fromLTRB(20, 8, 20, 32),
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 1000),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  '$periodLabel / Sample data',
+                  style: const TextStyle(color: AppColors.textSecondary),
+                ),
+                const SizedBox(height: 18),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: [
+                    for (final category in <String?>[
+                      null,
+                      'Subscriptions',
+                      'Utilities',
+                      'Staff',
+                    ])
+                      ChoiceChip(
+                        label: Text(category ?? 'General'),
+                        selected: _category == category,
+                        selectedColor: AppColors.gold,
+                        labelStyle: TextStyle(
+                          color: _category == category
+                              ? AppColors.background
+                              : AppColors.textSecondary,
+                        ),
+                        onSelected: (_) => setState(() => _category = category),
+                      ),
+                  ],
+                ),
+                const SizedBox(height: 14),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: [
+                    for (final period in ['Week', 'Month', 'Year'])
+                      ChoiceChip(
+                        label: Text(period),
+                        selected: _period == period,
+                        selectedColor: AppColors.gold,
+                        labelStyle: TextStyle(
+                          color: _period == period
+                              ? AppColors.background
+                              : AppColors.textSecondary,
+                        ),
+                        onSelected: (_) => setState(() => _period = period),
+                      ),
+                  ],
+                ),
+                if (_period != 'Month') ...[
+                  const SizedBox(height: 8),
+                  const Text(
+                    'Illustrative estimates from the monthly demo data.',
+                    style: TextStyle(
+                      color: AppColors.textSecondary,
+                      fontSize: 12,
+                    ),
+                  ),
+                ],
+                const SizedBox(height: 22),
+                _card(
+                  'Total spend this $periodName',
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        _money(total),
+                        style: const TextStyle(
+                          fontSize: 36,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.textPrimary,
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                      Wrap(
+                        spacing: 18,
+                        runSpacing: 10,
+                        children: [
+                          Text(
+                            '${change >= 0 ? '+' : ''}${change.toStringAsFixed(1)}% vs. last $periodName',
+                            style: const TextStyle(color: AppColors.gold),
+                          ),
+                          Text(
+                            '${items.length} active items',
+                            style: const TextStyle(
+                              color: AppColors.textSecondary,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 16),
+                _card(
+                  'Spend over time',
+                  Column(
+                    children: [
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: Text(
+                          '${_period == 'Week'
+                              ? 'Weekly'
+                              : _period == 'Year'
+                              ? 'Yearly'
+                              : 'Monthly'} spend · SAR',
+                          style: TextStyle(
+                            color: AppColors.textSecondary,
+                            fontSize: 12,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      SizedBox(
+                        height: 190,
+                        width: double.infinity,
+                        child: CustomPaint(painter: _TrendPainter(history)),
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: labels
+                            .map(
+                              (m) => Text(
+                                m,
+                                style: const TextStyle(
+                                  color: AppColors.textSecondary,
+                                  fontSize: 12,
+                                ),
+                              ),
+                            )
+                            .toList(),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 16),
+                _card(
+                  _category == null ? 'Category split' : 'Spending breakdown',
+                  LayoutBuilder(
+                    builder: (context, constraints) {
+                      final chart = SizedBox(
+                        width: 160,
+                        height: 160,
+                        child: Stack(
+                          alignment: Alignment.center,
+                          children: [
+                            Positioned.fill(
+                              child: CustomPaint(
+                                painter: _SplitPainter(
+                                  breakdown.values.toList(),
+                                  _palette,
+                                ),
+                              ),
+                            ),
+                            const Text(
+                              '100%',
+                              style: TextStyle(
+                                fontSize: 24,
+                                fontWeight: FontWeight.w600,
+                                color: AppColors.textPrimary,
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                      final legend = Column(
+                        children: [
+                          for (var i = 0; i < breakdown.length; i++)
+                            Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 9),
+                              child: Row(
+                                children: [
+                                  Container(
+                                    width: 9,
+                                    height: 9,
+                                    decoration: BoxDecoration(
+                                      color: _palette[i % _palette.length],
+                                      shape: BoxShape.circle,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 10),
+                                  Expanded(
+                                    child: Text(
+                                      breakdown.keys.elementAt(i),
+                                      style: const TextStyle(
+                                        color: AppColors.textPrimary,
+                                      ),
+                                    ),
+                                  ),
+                                  Text(
+                                    '${(breakdown.values.elementAt(i) / total * 100).toStringAsFixed(1)}%  ·  ${_money(breakdown.values.elementAt(i))}',
+                                    style: const TextStyle(
+                                      color: AppColors.textSecondary,
+                                      fontSize: 12,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                        ],
+                      );
+                      return constraints.maxWidth > 580
+                          ? Row(
+                              children: [
+                                chart,
+                                const SizedBox(width: 32),
+                                Expanded(child: legend),
+                              ],
+                            )
+                          : Column(
+                              children: [
+                                chart,
+                                const SizedBox(height: 16),
+                                legend,
+                              ],
+                            );
+                    },
+                  ),
+                ),
+                const SizedBox(height: 16),
+                _card(
+                  _category == null
+                      ? 'Overall budget vs. actual'
+                      : 'Category budget vs. actual',
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        '${_money(total)} / ${_money(budget)}',
+                        style: const TextStyle(
+                          color: AppColors.textPrimary,
+                          fontSize: 20,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      const SizedBox(height: 14),
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(8),
+                        child: LinearProgressIndicator(
+                          value: (total / budget).clamp(0.0, 1.0),
+                          minHeight: 10,
+                          backgroundColor: AppColors.trackBackground,
+                          color: AppColors.gold,
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      Text(
+                        '${(total / budget * 100).toStringAsFixed(0)}% used · ${_money((budget - total).abs())} ${total <= budget ? 'remaining' : 'over budget'}',
+                        style: const TextStyle(color: AppColors.textSecondary),
+                      ),
+                      if (_category == null) ...[
+                        const SizedBox(height: 8),
+                        const Text(
+                          'Combined budget, separate from category limits.',
+                          style: TextStyle(
+                            color: AppColors.textSecondary,
+                            fontSize: 12,
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 16),
+                _card(
+                  'Highest-cost item${items.where((i) => i.amount == highest.amount).length > 1 ? 's · tied' : ''}',
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        highestNames,
+                        style: const TextStyle(
+                          color: AppColors.textPrimary,
+                          fontSize: 18,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        '${_money(highest.amount * factor)} / $periodName${items.where((i) => i.amount == highest.amount).length > 1 ? ' each' : ''}',
+                        style: const TextStyle(color: AppColors.gold),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 16),
+                _card(
+                  'Upcoming renewals',
+                  Column(
+                    children: [
+                      for (var i = 0; i < items.length; i++) ...[
+                        if (i > 0)
+                          const Divider(
+                            color: AppColors.cardBorder,
+                            height: 24,
+                          ),
+                        _renewal(items[i]),
+                      ],
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _renewal(AnalyticsItem item) {
+    final date = DateTime(_today.year, _today.month, _today.day + item.days);
+    return Row(
+      children: [
+        Container(
+          padding: const EdgeInsets.all(10),
+          decoration: BoxDecoration(
+            color: AppColors.trackBackground,
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Icon(
+            item.category == 'Subscriptions'
+                ? Icons.autorenew
+                : item.category == 'Utilities'
+                ? Icons.bolt_outlined
+                : Icons.person_outline,
+            color: AppColors.gold,
+          ),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                item.name,
+                style: const TextStyle(
+                  color: AppColors.textPrimary,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                '${date.day} ${_months[date.month - 1]} · in ${item.days} days',
+                style: const TextStyle(
+                  color: AppColors.textSecondary,
+                  fontSize: 12,
+                ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(width: 8),
+        Text(
+          _money(item.amount),
+          style: const TextStyle(
+            color: AppColors.gold,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _card(String title, Widget content) => Container(
+    width: double.infinity,
+    padding: const EdgeInsets.all(20),
+    decoration: BoxDecoration(
+      color: AppColors.surface,
+      borderRadius: BorderRadius.circular(24),
+      border: Border.all(color: AppColors.cardBorder),
+    ),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          title,
+          style: const TextStyle(color: AppColors.textSecondary, fontSize: 15),
+        ),
+        const SizedBox(height: 16),
+        content,
+      ],
+    ),
+  );
+}
+
+class _TrendPainter extends CustomPainter {
+  _TrendPainter(this.values);
+  final List<double> values;
+  @override
+  void paint(Canvas canvas, Size size) {
+    final maxValue = (values.reduce(math.max) / 500).ceil() * 500.0;
+    final height = size.height - 24;
+    final width = size.width - 48;
+    for (var i = 0; i <= 2; i++) {
+      final y = 12 + height * i / 2;
+      canvas.drawLine(
+        Offset(42, y),
+        Offset(size.width, y),
+        Paint()
+          ..color = AppColors.cardBorder
+          ..strokeWidth = 0.6,
+      );
+      final label = TextPainter(
+        text: TextSpan(
+          text: (maxValue * (1 - i / 2)).toStringAsFixed(0),
+          style: const TextStyle(color: AppColors.textSecondary, fontSize: 10),
+        ),
+        textDirection: TextDirection.ltr,
+      )..layout();
+      label.paint(canvas, Offset(0, y - 6));
+    }
+    final points = List.generate(
+      values.length,
+      (i) => Offset(
+        42 + width * i / (values.length - 1),
+        12 + height * (1 - values[i] / maxValue),
+      ),
+    );
+    final path = Path()..moveTo(points.first.dx, points.first.dy);
+    for (final p in points.skip(1)) {
+      path.lineTo(p.dx, p.dy);
+    }
+    final area = Path.from(path)
+      ..lineTo(points.last.dx, size.height - 12)
+      ..lineTo(points.first.dx, size.height - 12)
+      ..close();
+    canvas.drawPath(
+      area,
+      Paint()
+        ..shader = LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [
+            AppColors.gold.withValues(alpha: 0.22),
+            AppColors.gold.withValues(alpha: 0),
+          ],
+        ).createShader(Offset.zero & size),
+    );
+    canvas.drawPath(
+      path,
+      Paint()
+        ..color = AppColors.gold
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 3
+        ..strokeJoin = StrokeJoin.round,
+    );
+    for (final p in points) {
+      canvas.drawCircle(p, 4, Paint()..color = AppColors.gold);
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant _TrendPainter oldDelegate) => true;
+}
+
+class _SplitPainter extends CustomPainter {
+  _SplitPainter(this.values, this.colors);
+  final List<double> values;
+  final List<Color> colors;
+  @override
+  void paint(Canvas canvas, Size size) {
+    final total = values.fold(0.0, (a, b) => a + b);
+    final rect = (Offset.zero & size).deflate(14);
+    var start = -math.pi / 2;
+    for (var i = 0; i < values.length; i++) {
+      final sweep = values[i] / total * math.pi * 2;
+      canvas.drawArc(
+        rect,
+        start + 0.015,
+        sweep - 0.03,
+        false,
+        Paint()
+          ..color = colors[i % colors.length]
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 20,
+      );
+      start += sweep;
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant _SplitPainter oldDelegate) => true;
+}
