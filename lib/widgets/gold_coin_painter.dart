@@ -92,3 +92,66 @@ class GoldCoinPainter extends CustomPainter {
   @override
   bool shouldRepaint(covariant GoldCoinPainter oldDelegate) => false;
 }
+
+/// A small, flat-shaded "cartoon coin" treatment for icon-sized circles
+/// (e.g. the nav bar's floating action button) — solid fill colors and
+/// chunky rim notches outlined in a soft bronze, not black. Deliberately
+/// avoids the metallic gradient shine [GoldCoinPainter] uses for the big
+/// auth-screen coin; at ~50px that shine just reads as a blurry glow, and
+/// flat cel-shading reads clearer at this size anyway.
+class NavCoinPainter extends CustomPainter {
+  const NavCoinPainter();
+
+  static const _outline = Color(0xFF8A6423);
+  static const _rim = AppColors.goldDark;
+  static const _face = AppColors.gold;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final center = size.center(Offset.zero);
+    final radius = size.shortestSide / 2;
+
+    // Outer rim, flat fill + bold outline.
+    canvas.drawCircle(center, radius, Paint()..color = _rim);
+    canvas.drawCircle(
+      center,
+      radius - 1.2,
+      Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 2.4
+        ..color = _outline,
+    );
+
+    // Chunky, evenly-spaced ridge notches — flat color, no shading.
+    const tickCount = 16;
+    final tickInner = radius * 0.86;
+    final tickOuter = radius - 1.6;
+    for (var i = 0; i < tickCount; i++) {
+      final angle = i * math.pi * 2 / tickCount;
+      final direction = Offset(math.cos(angle), math.sin(angle));
+      canvas.drawLine(
+        center + direction * tickInner,
+        center + direction * tickOuter,
+        Paint()
+          ..color = _outline
+          ..strokeWidth = 2.6
+          ..strokeCap = StrokeCap.round,
+      );
+    }
+
+    // Inner face, flat fill + bold outline separating it from the rim.
+    final faceRadius = radius * 0.78;
+    canvas.drawCircle(center, faceRadius, Paint()..color = _face);
+    canvas.drawCircle(
+      center,
+      faceRadius,
+      Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 2.2
+        ..color = _outline,
+    );
+  }
+
+  @override
+  bool shouldRepaint(covariant NavCoinPainter oldDelegate) => false;
+}

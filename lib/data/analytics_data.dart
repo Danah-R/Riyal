@@ -17,15 +17,9 @@ class AnalyticsItem {
 
 // Monthly demo amounts reconcile with the Home overview (950 + 620 + 770).
 final analyticsItems = <AnalyticsItem>[
-  ...upcomingRenewals.map(
-    (r) => AnalyticsItem(
-      r.name,
-      'Subscriptions',
-      r.amount,
-      r.renewsInDays,
-      r.name == 'Netflix' ? 'Streaming' : 'Productivity',
-    ),
-  ),
+  const AnalyticsItem('Netflix', 'Subscriptions', 45, 3, 'Streaming'),
+  const AnalyticsItem('ChatGPT Plus', 'Subscriptions', 80, 10, 'Productivity'),
+  const AnalyticsItem('Duolingo', 'Subscriptions', 30, 12, 'Productivity'),
   const AnalyticsItem(
     'Fitness membership',
     'Subscriptions',

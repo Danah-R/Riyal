@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 import '../theme/app_theme.dart';
-import '../widgets/app_icon.dart';
+import '../widgets/gold_coin_painter.dart';
 
 class BottomNav extends StatelessWidget {
   const BottomNav({super.key, required this.index, required this.onTap});
@@ -24,32 +25,39 @@ class BottomNav extends StatelessWidget {
             border: Border.all(color: AppColors.cardBorder),
           ),
           child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
-              NavItem(
-                icon: Icons.home_rounded,
-                label: 'Home',
-                isActive: index == 0,
-                onTap: () => onTap(0),
+              Expanded(
+                child: NavItem(
+                  icon: Icons.home_rounded,
+                  label: 'Home',
+                  isActive: index == 0,
+                  onTap: () => onTap(0),
+                ),
               ),
-              NavItem(
-                icon: Icons.payments_outlined,
-                label: 'Payments',
-                isActive: index == 1,
-                onTap: () => onTap(1),
+              Expanded(
+                child: NavItem(
+                  icon: Icons.subscriptions_outlined,
+                  label: 'Subscriptions',
+                  isActive: index == 1,
+                  onTap: () => onTap(1),
+                ),
               ),
-              const SizedBox(width: 56),
-              NavItem(
-                icon: Icons.bar_chart_rounded,
-                label: 'Analytics',
-                isActive: index == 2,
-                onTap: () => onTap(2),
+              const SizedBox(width: 48),
+              Expanded(
+                child: NavItem(
+                  icon: Icons.bolt_outlined,
+                  label: 'Utilities',
+                  isActive: index == 2,
+                  onTap: () => onTap(2),
+                ),
               ),
-              NavItem(
-                icon: Icons.person_outline_rounded,
-                label: 'Profile',
-                isActive: index == 3,
-                onTap: () => onTap(3),
+              Expanded(
+                child: NavItem(
+                  icon: Icons.groups_outlined,
+                  label: 'Staff',
+                  isActive: index == 3,
+                  onTap: () => onTap(3),
+                ),
               ),
             ],
           ),
@@ -84,7 +92,14 @@ class NavItem extends StatelessWidget {
         children: [
           Icon(icon, color: color, size: 22),
           const SizedBox(height: 4),
-          Text(label, style: TextStyle(color: color, fontSize: 11)),
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Text(
+              label,
+              maxLines: 1,
+              style: TextStyle(color: color, fontSize: 11),
+            ),
+          ),
         ],
       ),
     );
@@ -96,15 +111,23 @@ class NavFab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return SizedBox(
       width: 56,
       height: 56,
-      alignment: Alignment.center,
-      decoration: const BoxDecoration(
-        color: AppColors.gold,
-        shape: BoxShape.circle,
+      child: CustomPaint(
+        painter: const NavCoinPainter(),
+        child: Center(
+          child: SvgPicture.asset(
+            'assets/icons/saudi_riyal.svg',
+            width: 22,
+            semanticsLabel: 'Saudi riyal',
+            colorFilter: const ColorFilter.mode(
+              AppColors.surface,
+              BlendMode.srcIn,
+            ),
+          ),
+        ),
       ),
-      child: const AppIcon(assetPath: 'assets/icons/app_logo.svg', size: 30),
     );
   }
 }

@@ -1,27 +1,16 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 
-import '../theme/app_theme.dart';
+import '../data/utilities_domain.dart';
+import 'tracked_items_screen.dart';
 
-class UtilitiesScreen extends StatelessWidget {
-  const UtilitiesScreen({super.key});
+/// The Utilities tab's content. Lives inside [MainShell]'s [IndexedStack] —
+/// no Scaffold/bottom nav of its own. Same layout as [SubscriptionsBody],
+/// backed by [utilitiesDomain] instead.
+class UtilitiesBody extends StatelessWidget {
+  const UtilitiesBody({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
-      backgroundColor: AppColors.background,
-      body: SafeArea(
-        child: Center(
-          child: Text(
-            'utilities_screen.dart',
-            style: TextStyle(
-              color: AppColors.textPrimary,
-              fontSize: 20,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-        ),
-      ),
-    );
+    return TrackedItemsScreen(title: 'Utilities', domain: utilitiesDomain);
   }
 }
-

@@ -1,27 +1,16 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 
-import '../theme/app_theme.dart';
+import '../data/staff_domain.dart';
+import 'tracked_items_screen.dart';
 
-class StaffScreen extends StatelessWidget {
-  const StaffScreen({super.key});
+/// The Staff tab's content. Lives inside [MainShell]'s [IndexedStack] — no
+/// Scaffold/bottom nav of its own. Same layout as [SubscriptionsBody],
+/// backed by [staffDomain] instead.
+class StaffBody extends StatelessWidget {
+  const StaffBody({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
-      backgroundColor: AppColors.background,
-      body: SafeArea(
-        child: Center(
-          child: Text(
-            'staff_screen.dart',
-            style: TextStyle(
-              color: AppColors.textPrimary,
-              fontSize: 20,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-        ),
-      ),
-    );
+    return TrackedItemsScreen(title: 'Staff', domain: staffDomain);
   }
 }
-

@@ -1,84 +1,80 @@
 import 'package:flutter/material.dart';
 
 import '../data/home_data.dart';
+import '../data/subscription.dart';
+import '../data/subscriptions_store.dart';
 import '../theme/app_theme.dart';
-import '../widgets/app_icon.dart';
-import 'bottom_nav.dart';
-import 'subscriptions_srcreen.dart';
-import 'utilities_screen.dart';
-import 'staff_screen.dart';
+import '../widgets/flipping_coin_icon.dart';
+import '../widgets/logo_image.dart';
 import 'analytics_screen.dart';
 
 enum SpendingTab { subscriptions, utilities, staff }
 
-class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
+/// The Home tab's content. Lives inside [MainShell]'s [IndexedStack], so it
+/// has no Scaffold/bottom nav of its own — the shell provides those once for
+/// all tabs. Tapping a category pill switches the shell's active tab instead
+/// of pushing a new route.
+class HomeBody extends StatefulWidget {
+  const HomeBody({super.key, required this.onNavigateToTab});
+
+  /// Called with the shell's tab index (1 = Subscriptions, 2 = Utilities,
+  /// 3 = Staff) when a category pill is tapped.
+  final ValueChanged<int> onNavigateToTab;
 
   @override
-  State<HomeScreen> createState() => _HomeScreenState();
+  State<HomeBody> createState() => _HomeBodyState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class _HomeBodyState extends State<HomeBody> {
   SpendingTab _tab = SpendingTab.subscriptions;
-  int _navIndex = 0;
 
-  void _openCategory(SpendingTab tab) {
+  void _selectTab(SpendingTab tab) {
     setState(() => _tab = tab);
-    final Widget screen = switch (tab) {
-      SpendingTab.subscriptions => const SubscriptionsScreen(),
-      SpendingTab.utilities => const UtilitiesScreen(),
-      SpendingTab.staff => const StaffScreen(),
+    final index = switch (tab) {
+      SpendingTab.subscriptions => 1,
+      SpendingTab.utilities => 2,
+      SpendingTab.staff => 3,
     };
-    Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => screen));
+    widget.onNavigateToTab(index);
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      body: SafeArea(
-        bottom: false,
-        child: ListView(
-          padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
-          children: [
-            _TopBar(),
-            const SizedBox(height: 24),
+    return SafeArea(
+      bottom: false,
+      child: ListView(
+        padding: const EdgeInsets.fromLTRB(20, 8, 20, 130),
+        children: [
+          _TopBar(),
+          const SizedBox(height: 24),
 
-            const SizedBox(height: 20),
-            _TabSelector(selected: _tab, onChanged: _openCategory),
-            const SizedBox(height: 16),
-            const _SpendingCard(),
-            const SizedBox(height: 28),
-            const _SectionHeader(title: 'Overview'),
-            const SizedBox(height: 14),
-            const _OverviewBar(),
-            const SizedBox(height: 16),
-            const _OverviewStats(),
-            const SizedBox(height: 28),
-            const _SectionHeader(title: 'Upcoming renewals'),
-            const SizedBox(height: 14),
-            ...upcomingRenewals.map(
-              (r) => Padding(
-                padding: const EdgeInsets.only(bottom: 12),
-                child: _RenewalTile(renewal: r),
+          const SizedBox(height: 20),
+          _TabSelector(selected: _tab, onChanged: _selectTab),
+          const SizedBox(height: 16),
+          const _SpendingCard(),
+          const SizedBox(height: 28),
+          _SectionHeader(
+            title: 'Overview',
+            onSeeAll: () => Navigator.of(context).push(
+              MaterialPageRoute<void>(builder: (_) => const AnalyticsScreen()),
+            ),
+          ),
+          const SizedBox(height: 14),
+          const _OverviewBar(),
+          const SizedBox(height: 16),
+          const _OverviewStats(),
+          const SizedBox(height: 28),
+          _SectionHeader(
+            title: 'Upcoming renewals',
+            onSeeAll: () => Navigator.of(context).push(
+              MaterialPageRoute<void>(
+                builder: (_) => const AnalyticsScreen(category: 'Subscriptions'),
               ),
             ),
-          ],
-        ),
-      ),
-      floatingActionButton: const NavFab(),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-      bottomNavigationBar: BottomNav(
-        index: _navIndex,
-        onTap: (i) {
-          if (i == 2) {
-            Navigator.of(context).push(
-              MaterialPageRoute<void>(builder: (_) => const AnalyticsScreen()),
-            );
-          } else {
-            setState(() => _navIndex = i);
-          }
-        },
+          ),
+          const SizedBox(height: 14),
+          const _UpcomingRenewals(),
+        ],
       ),
     );
   }
@@ -90,19 +86,7 @@ class _TopBar extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Container(
-          width: 44,
-          height: 44,
-          alignment: Alignment.center,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            border: Border.all(color: AppColors.gold, width: 1.4),
-          ),
-          child: const AppIcon(
-            assetPath: 'assets/icons/app_logo.svg',
-            size: 26,
-          ),
-        ),
+        const FlippingCoinIcon(),
         Container(
           width: 44,
           height: 44,
@@ -154,14 +138,19 @@ class _TabSelector extends StatelessWidget {
       );
     }
 
-    return Row(
-      children: [
-        tab('Subscriptions', SpendingTab.subscriptions),
-        const SizedBox(width: 6),
-        tab('Utilities', SpendingTab.utilities),
-        const SizedBox(width: 6),
-        tab('Staff', SpendingTab.staff),
-      ],
+    return FittedBox(
+      fit: BoxFit.scaleDown,
+      alignment: Alignment.centerLeft,
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          tab('Subscriptions', SpendingTab.subscriptions),
+          const SizedBox(width: 6),
+          tab('Utilities', SpendingTab.utilities),
+          const SizedBox(width: 6),
+          tab('Staff', SpendingTab.staff),
+        ],
+      ),
     );
   }
 }
@@ -204,7 +193,14 @@ class _SpendingCard extends StatelessWidget {
                   fontWeight: FontWeight.w600,
                 ),
               ),
-              const Icon(Icons.chevron_right, color: AppColors.gold, size: 26),
+              GestureDetector(
+                onTap: () => Navigator.of(context).push(
+                  MaterialPageRoute<void>(
+                    builder: (_) => const AnalyticsScreen(category: 'Subscriptions'),
+                  ),
+                ),
+                child: const Icon(Icons.chevron_right, color: AppColors.gold, size: 26),
+              ),
             ],
           ),
           const SizedBox(height: 14),
@@ -219,15 +215,18 @@ class _SpendingCard extends StatelessWidget {
           ),
           const SizedBox(height: 10),
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                'of SAR ${subscriptionsBudget.toStringAsFixed(0)} budget',
-                style: const TextStyle(
-                  color: AppColors.textSecondary,
-                  fontSize: 13,
+              Expanded(
+                child: Text(
+                  'of SAR ${subscriptionsBudget.toStringAsFixed(0)} budget',
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    color: AppColors.textSecondary,
+                    fontSize: 13,
+                  ),
                 ),
               ),
+              const SizedBox(width: 8),
               Text(
                 'SAR ${left.toStringAsFixed(0)} left',
                 style: const TextStyle(
@@ -244,29 +243,36 @@ class _SpendingCard extends StatelessWidget {
 }
 
 class _SectionHeader extends StatelessWidget {
-  const _SectionHeader({required this.title});
+  const _SectionHeader({required this.title, this.onSeeAll});
 
   final String title;
+  final VoidCallback? onSeeAll;
 
   @override
   Widget build(BuildContext context) {
     return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(
-          title,
-          style: const TextStyle(
-            color: AppColors.textPrimary,
-            fontSize: 18,
-            fontWeight: FontWeight.w600,
+        Expanded(
+          child: Text(
+            title,
+            overflow: TextOverflow.ellipsis,
+            style: const TextStyle(
+              color: AppColors.textPrimary,
+              fontSize: 18,
+              fontWeight: FontWeight.w600,
+            ),
           ),
         ),
-        const Text(
-          'See all',
-          style: TextStyle(
-            color: AppColors.gold,
-            fontSize: 13,
-            fontWeight: FontWeight.w500,
+        const SizedBox(width: 8),
+        GestureDetector(
+          onTap: onSeeAll,
+          child: const Text(
+            'See all',
+            style: TextStyle(
+              color: AppColors.gold,
+              fontSize: 13,
+              fontWeight: FontWeight.w500,
+            ),
           ),
         ),
       ],
@@ -324,12 +330,15 @@ class _OverviewStats extends StatelessWidget {
                           ),
                         ),
                         const SizedBox(width: 6),
-                        Text(
-                          'SAR ${c.amount.toStringAsFixed(0)}',
-                          style: const TextStyle(
-                            color: AppColors.textPrimary,
-                            fontSize: 14,
-                            fontWeight: FontWeight.w600,
+                        Flexible(
+                          child: Text(
+                            'SAR ${c.amount.toStringAsFixed(0)}',
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                              color: AppColors.textPrimary,
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                            ),
                           ),
                         ),
                       ],
@@ -352,13 +361,46 @@ class _OverviewStats extends StatelessWidget {
   }
 }
 
-class _RenewalTile extends StatelessWidget {
-  const _RenewalTile({required this.renewal});
-
-  final Renewal renewal;
+class _UpcomingRenewals extends StatelessWidget {
+  const _UpcomingRenewals();
 
   @override
   Widget build(BuildContext context) {
+    return ValueListenableBuilder<List<Subscription>>(
+      valueListenable: SubscriptionsStore.instance.subscriptions,
+      builder: (context, subs, _) {
+        if (subs.isEmpty) {
+          return const Text(
+            'No subscriptions yet.',
+            style: TextStyle(color: AppColors.textSecondary, fontSize: 13),
+          );
+        }
+        final upcoming = [...subs]
+          ..sort((a, b) => a.renewsInDays.compareTo(b.renewsInDays));
+        return Column(
+          children: upcoming
+              .take(5)
+              .map(
+                (s) => Padding(
+                  padding: const EdgeInsets.only(bottom: 12),
+                  child: _RenewalTile(subscription: s),
+                ),
+              )
+              .toList(),
+        );
+      },
+    );
+  }
+}
+
+class _RenewalTile extends StatelessWidget {
+  const _RenewalTile({required this.subscription});
+
+  final Subscription subscription;
+
+  @override
+  Widget build(BuildContext context) {
+    final s = subscription;
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
@@ -367,14 +409,14 @@ class _RenewalTile extends StatelessWidget {
       ),
       child: Row(
         children: [
-          AppIcon(assetPath: renewal.iconAsset, size: 44),
+          LogoImage(assetPath: s.logoAsset, size: 44),
           const SizedBox(width: 14),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  renewal.name,
+                  s.name,
                   style: const TextStyle(
                     color: AppColors.textPrimary,
                     fontSize: 15,
@@ -383,7 +425,9 @@ class _RenewalTile extends StatelessWidget {
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  'Renews in ${renewal.renewsInDays} days',
+                  s.renewsInDays <= 0
+                      ? 'Renews today'
+                      : 'Renews in ${s.renewsInDays} days',
                   style: const TextStyle(
                     color: AppColors.textSecondary,
                     fontSize: 12.5,
@@ -393,7 +437,7 @@ class _RenewalTile extends StatelessWidget {
             ),
           ),
           Text(
-            'SAR ${renewal.amount.toStringAsFixed(0)}',
+            'SAR ${s.amount.toStringAsFixed(0)}',
             style: const TextStyle(
               color: AppColors.textPrimary,
               fontSize: 14,

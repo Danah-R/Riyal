@@ -2,7 +2,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import '../theme/app_theme.dart';
-import 'home_screen.dart';
+import 'main_shell.dart';
 import '../widgets/gold_coin_painter.dart';
 import '../widgets/auth_coin_flip.dart';
 
@@ -26,7 +26,7 @@ class _SignupScreenState extends State<SignupScreen> {
   void _signUp() {
     if (!_formKey.currentState!.validate()) return;
     Navigator.of(context).pushAndRemoveUntil(
-      MaterialPageRoute<void>(builder: (_) => const HomeScreen()),
+      MaterialPageRoute<void>(builder: (_) => const MainShell()),
       (_) => false,
     );
   }

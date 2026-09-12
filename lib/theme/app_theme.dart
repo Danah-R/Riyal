@@ -6,7 +6,7 @@ class AppColors {
   static const background = Color(0xFF0B0F0C);
   static const surface = Color(0xFF141914);
   static const cardBorder = Color(0xFF3A4A3A);
-  static const gold = Color(0xFFD4AF6A);
+  static const gold = Color.fromARGB(255, 183, 158, 60);
   static const goldDark = Color(0xFF9C7C3D);
   static const textPrimary = Color(0xFFF5F3EC);
   static const textSecondary = Color(0xFFAAB2A6);
@@ -24,7 +24,7 @@ ThemeData buildAppTheme() {
     brightness: Brightness.dark,
     fontFamily: 'Roboto',
     colorScheme: ColorScheme.fromSeed(
-      seedColor: AppColors.gold,
+      seedColor: const Color.fromARGB(255, 215, 184, 61),
       brightness: Brightness.dark,
       surface: AppColors.surface,
     ),
