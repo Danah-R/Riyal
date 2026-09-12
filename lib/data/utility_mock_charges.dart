@@ -1,5 +1,3 @@
-import 'package:flutter/material.dart';
-
 import 'mock_charge.dart';
 import 'utility_categories.dart';
 
@@ -9,8 +7,7 @@ const List<MockCharge> utilityMockCharges = [
     amount: 150,
     daysAgo: 4,
     matchedName: 'Saudi Electricity Company',
-    matchedIcon: Icons.bolt_outlined,
-    matchedIconColor: Color(0xFFB8860B),
+    matchedLogo: 'lib/assets/logos/1696007538-89-saudi-electricity-company.jpg',
     matchedCategory: UtilityCategories.electricity,
   ),
   MockCharge(
@@ -26,8 +23,7 @@ const List<MockCharge> utilityMockCharges = [
     amount: 70,
     daysAgo: 18,
     matchedName: 'National Water Company',
-    matchedIcon: Icons.water_drop_outlined,
-    matchedIconColor: Color(0xFF2B6CB0),
+    matchedLogo: 'lib/assets/logos/saudi water comp.png',
     matchedCategory: UtilityCategories.water,
   ),
   MockCharge(

@@ -6,8 +6,11 @@ import '../data/subscriptions_store.dart';
 import '../data/tracked_category.dart';
 import '../theme/app_theme.dart';
 import '../widgets/category_filter_bar.dart';
+import '../widgets/circle_icon_button.dart';
+import '../widgets/inline_search_field.dart';
 import '../widgets/logo_image.dart';
 import 'add_subscription_sheet.dart';
+import 'analytics_screen.dart';
 
 enum _PageTab { subscriptions, analytics }
 
@@ -23,56 +26,85 @@ class SubscriptionsBody extends StatefulWidget {
 class _SubscriptionsBodyState extends State<SubscriptionsBody> {
   _PageTab _tab = _PageTab.subscriptions;
   TrackedCategory? _category;
+  bool _searching = false;
+  String _query = '';
+
+  void _stopSearching() => setState(() {
+    _searching = false;
+    _query = '';
+  });
 
   @override
   Widget build(BuildContext context) {
     return SafeArea(
       bottom: false,
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(20, 8, 20, 0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
+      child: Stack(
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 8, 20, 0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                if (_searching)
+                  InlineSearchField(
+                    autofocus: true,
+                    hintText: 'Search subscriptions',
+                    onChanged: (v) => setState(() => _query = v),
+                    onClose: _stopSearching,
+                  )
+                else
+                  Row(
+                    children: [
+                      Expanded(
+                        child: _TopTabs(
+                          selected: _tab,
+                          onChanged: (t) => setState(() => _tab = t),
+                        ),
+                      ),
+                      if (_tab == _PageTab.subscriptions) ...[
+                        const SizedBox(width: 12),
+                        CircleIconButton(
+                          icon: Icons.search_rounded,
+                          onTap: () => setState(() => _searching = true),
+                        ),
+                      ],
+                    ],
+                  ),
+                if (_tab == _PageTab.subscriptions) ...[
+                  const SizedBox(height: 16),
+                  CategoryFilterBar(
+                    categories: SubscriptionCategories.values,
+                    selected: _category,
+                    onChanged: (c) => setState(() => _category = c),
+                  ),
+                ],
+                const SizedBox(height: 16),
                 Expanded(
-                  child: _TopTabs(
-                    selected: _tab,
-                    onChanged: (t) => setState(() => _tab = t),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                GestureDetector(
-                  onTap: () => showAddSubscriptionSheet(context),
-                  child: Container(
-                    width: 44,
-                    height: 44,
-                    decoration: const BoxDecoration(
-                      color: AppColors.gold,
-                      shape: BoxShape.circle,
-                    ),
-                    child: const Icon(Icons.add_rounded,
-                        color: Color(0xFF1B1F16), size: 26),
-                  ),
+                  child: _tab == _PageTab.subscriptions
+                      ? _SubscriptionsList(category: _category, query: _query)
+                      : const AnalyticsContent(
+                          category: 'Subscriptions',
+                          showCategoryPicker: false,
+                          horizontalPadding: 0,
+                          bottomPadding: 120,
+                        ),
                 ),
               ],
             ),
-            if (_tab == _PageTab.subscriptions) ...[
-              const SizedBox(height: 16),
-              CategoryFilterBar(
-                categories: SubscriptionCategories.values,
-                selected: _category,
-                onChanged: (c) => setState(() => _category = c),
+          ),
+          if (_tab == _PageTab.subscriptions)
+            Positioned(
+              right: 20,
+              bottom: 130,
+              child: CircleIconButton(
+                icon: Icons.add_rounded,
+                background: AppColors.gold,
+                iconColor: const Color(0xFF1B1F16),
+                size: 44,
+                onTap: () => showAddSubscriptionSheet(context),
               ),
-            ],
-            const SizedBox(height: 16),
-            Expanded(
-              child: _tab == _PageTab.subscriptions
-                  ? _SubscriptionsList(category: _category)
-                  : const _AnalyticsPlaceholder(),
             ),
-          ],
-        ),
+        ],
       ),
     );
   }
@@ -125,18 +157,24 @@ class _TopTabs extends StatelessWidget {
 }
 
 class _SubscriptionsList extends StatelessWidget {
-  const _SubscriptionsList({this.category});
+  const _SubscriptionsList({this.category, this.query = ''});
 
   final TrackedCategory? category;
+  final String query;
 
   @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder<List<Subscription>>(
       valueListenable: SubscriptionsStore.instance.subscriptions,
       builder: (context, allSubs, _) {
-        final subs = category == null
+        var subs = category == null
             ? allSubs
             : allSubs.where((s) => s.category == category).toList();
+        if (query.trim().isNotEmpty) {
+          subs = subs
+              .where((s) => s.name.toLowerCase().contains(query.trim().toLowerCase()))
+              .toList();
+        }
 
         if (allSubs.isEmpty) {
           return const Center(
@@ -150,14 +188,16 @@ class _SubscriptionsList extends StatelessWidget {
         if (subs.isEmpty) {
           return Center(
             child: Text(
-              'No ${category!.label.toLowerCase()} subscriptions yet.',
+              query.trim().isNotEmpty
+                  ? 'No subscriptions match "$query".'
+                  : 'No ${category!.label.toLowerCase()} subscriptions yet.',
               textAlign: TextAlign.center,
               style: const TextStyle(color: AppColors.textSecondary, fontSize: 14),
             ),
           );
         }
         return ListView.separated(
-          padding: const EdgeInsets.only(bottom: 130),
+          padding: const EdgeInsets.only(bottom: 190),
           itemCount: subs.length,
           separatorBuilder: (_, _) => const SizedBox(height: 12),
           itemBuilder: (context, i) => _SubscriptionTile(subscription: subs[i]),
@@ -217,67 +257,6 @@ class _SubscriptionTile extends StatelessWidget {
           ),
         ],
       ),
-    );
-  }
-}
-
-class _AnalyticsPlaceholder extends StatelessWidget {
-  const _AnalyticsPlaceholder();
-
-  @override
-  Widget build(BuildContext context) {
-    return ValueListenableBuilder<List<Subscription>>(
-      valueListenable: SubscriptionsStore.instance.subscriptions,
-      builder: (context, subs, _) {
-        final total = subs.fold<double>(0, (sum, s) => sum + s.monthlyAmount);
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                color: AppColors.surface,
-                borderRadius: BorderRadius.circular(24),
-                border: Border.all(color: AppColors.cardBorder),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    'Estimated monthly total',
-                    style: TextStyle(color: AppColors.textSecondary, fontSize: 14),
-                  ),
-                  const SizedBox(height: 10),
-                  Text(
-                    'SAR ${total.toStringAsFixed(0)}',
-                    style: const TextStyle(
-                      color: AppColors.textPrimary,
-                      fontSize: 30,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    'across ${subs.length} subscription${subs.length == 1 ? '' : 's'}',
-                    style: const TextStyle(color: AppColors.textSecondary, fontSize: 13),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 24),
-            const Expanded(
-              child: Center(
-                child: Text(
-                  'Detailed spending breakdown\ncoming soon.',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(color: AppColors.textSecondary, fontSize: 13),
-                ),
-              ),
-            ),
-          ],
-        );
-      },
     );
   }
 }

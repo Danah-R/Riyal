@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import '../theme/app_theme.dart';
+import 'gold_coin_painter.dart';
 
 class CoinBackButton extends StatefulWidget {
   const CoinBackButton({super.key});
@@ -54,44 +55,20 @@ class _CoinBackButtonState extends State<CoinBackButton>
           transform: Matrix4.identity()
             ..setEntry(3, 2, 0.002)
             ..rotateY(angle),
-          child: Container(
+          child: SizedBox(
             width: 40,
             height: 40,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              gradient: const LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [
-                  Color(0xFFFFEBA5),
-                  AppColors.gold,
-                  AppColors.goldDark,
-                  Color(0xFFFFEBA5),
-                ],
-                stops: [0, 0.4, 0.8, 1],
-              ),
-              border: Border.all(color: const Color(0xFFFFEBA5), width: 1.5),
-              boxShadow: [
-                BoxShadow(
-                  color: AppColors.gold.withValues(alpha: 0.18),
-                  blurRadius: 8,
-                  offset: const Offset(0, 2),
-                ),
-              ],
-            ),
-            padding: const EdgeInsets.all(3),
-            child: DecoratedBox(
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                border: Border.all(color: AppColors.goldDark),
-              ),
-              child: Transform(
-                alignment: Alignment.center,
-                transform: Matrix4.rotationY(math.cos(angle) < 0 ? math.pi : 0),
-                child: const Icon(
-                  Icons.arrow_back_rounded,
-                  color: AppColors.background,
-                  size: 21,
+            child: CustomPaint(
+              painter: const NavCoinPainter(),
+              child: Center(
+                child: Transform(
+                  alignment: Alignment.center,
+                  transform: Matrix4.rotationY(math.cos(angle) < 0 ? math.pi : 0),
+                  child: const Icon(
+                    Icons.arrow_back_rounded,
+                    color: AppColors.surface,
+                    size: 21,
+                  ),
                 ),
               ),
             ),

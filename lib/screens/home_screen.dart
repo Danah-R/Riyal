@@ -46,9 +46,7 @@ class _HomeBodyState extends State<HomeBody> {
         padding: const EdgeInsets.fromLTRB(20, 8, 20, 130),
         children: [
           _TopBar(),
-          const SizedBox(height: 24),
-
-          const SizedBox(height: 20),
+          const SizedBox(height: 16),
           _TabSelector(selected: _tab, onChanged: _selectTab),
           const SizedBox(height: 16),
           const _SpendingCard(),

@@ -102,8 +102,8 @@ class GoldCoinPainter extends CustomPainter {
 class NavCoinPainter extends CustomPainter {
   const NavCoinPainter();
 
-  static const _outline = Color(0xFF8A6423);
-  static const _rim = AppColors.goldDark;
+  static const _outline = Color(0xFFB08D4C);
+  static const _rim = Color(0xFFE3C989);
   static const _face = AppColors.gold;
 
   @override

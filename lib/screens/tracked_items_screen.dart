@@ -5,8 +5,11 @@ import '../data/tracked_domain.dart';
 import '../data/tracked_item.dart';
 import '../theme/app_theme.dart';
 import '../widgets/category_filter_bar.dart';
+import '../widgets/circle_icon_button.dart';
+import '../widgets/inline_search_field.dart';
 import '../widgets/logo_image.dart';
 import 'add_tracked_item_sheet.dart';
+import 'analytics_screen.dart';
 
 enum _PageTab { items, analytics }
 
@@ -25,57 +28,90 @@ class TrackedItemsScreen extends StatefulWidget {
 class _TrackedItemsScreenState extends State<TrackedItemsScreen> {
   _PageTab _tab = _PageTab.items;
   TrackedCategory? _category;
+  bool _searching = false;
+  String _query = '';
+
+  void _stopSearching() => setState(() {
+    _searching = false;
+    _query = '';
+  });
 
   @override
   Widget build(BuildContext context) {
     return SafeArea(
       bottom: false,
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(20, 8, 20, 0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
+      child: Stack(
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 8, 20, 0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                if (_searching)
+                  InlineSearchField(
+                    autofocus: true,
+                    hintText: 'Search ${widget.title.toLowerCase()}',
+                    onChanged: (v) => setState(() => _query = v),
+                    onClose: _stopSearching,
+                  )
+                else
+                  Row(
+                    children: [
+                      Expanded(
+                        child: _TopTabs(
+                          title: widget.title,
+                          selected: _tab,
+                          onChanged: (t) => setState(() => _tab = t),
+                        ),
+                      ),
+                      if (_tab == _PageTab.items) ...[
+                        const SizedBox(width: 12),
+                        CircleIconButton(
+                          icon: Icons.search_rounded,
+                          onTap: () => setState(() => _searching = true),
+                        ),
+                      ],
+                    ],
+                  ),
+                if (_tab == _PageTab.items) ...[
+                  const SizedBox(height: 16),
+                  CategoryFilterBar(
+                    categories: widget.domain.categories,
+                    selected: _category,
+                    onChanged: (c) => setState(() => _category = c),
+                  ),
+                ],
+                const SizedBox(height: 16),
                 Expanded(
-                  child: _TopTabs(
-                    title: widget.title,
-                    selected: _tab,
-                    onChanged: (t) => setState(() => _tab = t),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                GestureDetector(
-                  onTap: () => showAddTrackedItemSheet(context, widget.domain),
-                  child: Container(
-                    width: 44,
-                    height: 44,
-                    decoration: const BoxDecoration(
-                      color: AppColors.gold,
-                      shape: BoxShape.circle,
-                    ),
-                    child: const Icon(Icons.add_rounded,
-                        color: Color(0xFF1B1F16), size: 26),
-                  ),
+                  child: _tab == _PageTab.items
+                      ? _TrackedItemsList(
+                          domain: widget.domain,
+                          category: _category,
+                          query: _query,
+                        )
+                      : AnalyticsContent(
+                          category: widget.title,
+                          showCategoryPicker: false,
+                          horizontalPadding: 0,
+                          bottomPadding: 120,
+                        ),
                 ),
               ],
             ),
-            if (_tab == _PageTab.items) ...[
-              const SizedBox(height: 16),
-              CategoryFilterBar(
-                categories: widget.domain.categories,
-                selected: _category,
-                onChanged: (c) => setState(() => _category = c),
+          ),
+          if (_tab == _PageTab.items)
+            Positioned(
+              right: 20,
+              bottom: 130,
+              child: CircleIconButton(
+                icon: Icons.add_rounded,
+                background: AppColors.gold,
+                iconColor: const Color(0xFF1B1F16),
+                size: 44,
+                onTap: () => showAddTrackedItemSheet(context, widget.domain),
               ),
-            ],
-            const SizedBox(height: 16),
-            Expanded(
-              child: _tab == _PageTab.items
-                  ? _TrackedItemsList(domain: widget.domain, category: _category)
-                  : _AnalyticsPlaceholder(domain: widget.domain),
             ),
-          ],
-        ),
+        ],
       ),
     );
   }
@@ -129,19 +165,25 @@ class _TopTabs extends StatelessWidget {
 }
 
 class _TrackedItemsList extends StatelessWidget {
-  const _TrackedItemsList({required this.domain, this.category});
+  const _TrackedItemsList({required this.domain, this.category, this.query = ''});
 
   final TrackedDomain domain;
   final TrackedCategory? category;
+  final String query;
 
   @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder<List<TrackedItem>>(
       valueListenable: domain.store.items,
       builder: (context, allItems, _) {
-        final items = category == null
+        var items = category == null
             ? allItems
             : allItems.where((s) => s.category == category).toList();
+        if (query.trim().isNotEmpty) {
+          items = items
+              .where((s) => s.name.toLowerCase().contains(query.trim().toLowerCase()))
+              .toList();
+        }
 
         if (allItems.isEmpty) {
           return Center(
@@ -155,14 +197,16 @@ class _TrackedItemsList extends StatelessWidget {
         if (items.isEmpty) {
           return Center(
             child: Text(
-              'No ${category!.label.toLowerCase()} ${domain.itemNounSingular}s yet.',
+              query.trim().isNotEmpty
+                  ? 'No ${domain.itemNounSingular}s match "$query".'
+                  : 'No ${category!.label.toLowerCase()} ${domain.itemNounSingular}s yet.',
               textAlign: TextAlign.center,
               style: const TextStyle(color: AppColors.textSecondary, fontSize: 14),
             ),
           );
         }
         return ListView.separated(
-          padding: const EdgeInsets.only(bottom: 130),
+          padding: const EdgeInsets.only(bottom: 190),
           itemCount: items.length,
           separatorBuilder: (_, _) => const SizedBox(height: 12),
           itemBuilder: (context, i) => _TrackedItemTile(item: items[i]),
@@ -222,69 +266,6 @@ class _TrackedItemTile extends StatelessWidget {
           ),
         ],
       ),
-    );
-  }
-}
-
-class _AnalyticsPlaceholder extends StatelessWidget {
-  const _AnalyticsPlaceholder({required this.domain});
-
-  final TrackedDomain domain;
-
-  @override
-  Widget build(BuildContext context) {
-    return ValueListenableBuilder<List<TrackedItem>>(
-      valueListenable: domain.store.items,
-      builder: (context, items, _) {
-        final total = items.fold<double>(0, (sum, s) => sum + s.monthlyAmount);
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                color: AppColors.surface,
-                borderRadius: BorderRadius.circular(24),
-                border: Border.all(color: AppColors.cardBorder),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    'Estimated monthly total',
-                    style: TextStyle(color: AppColors.textSecondary, fontSize: 14),
-                  ),
-                  const SizedBox(height: 10),
-                  Text(
-                    'SAR ${total.toStringAsFixed(0)}',
-                    style: const TextStyle(
-                      color: AppColors.textPrimary,
-                      fontSize: 30,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    'across ${items.length} ${items.length == 1 ? domain.itemNounSingular : '${domain.itemNounSingular}s'}',
-                    style: const TextStyle(color: AppColors.textSecondary, fontSize: 13),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 24),
-            const Expanded(
-              child: Center(
-                child: Text(
-                  'Detailed spending breakdown\ncoming soon.',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(color: AppColors.textSecondary, fontSize: 13),
-                ),
-              ),
-            ),
-          ],
-        );
-      },
     );
   }
 }
