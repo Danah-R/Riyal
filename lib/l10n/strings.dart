@@ -139,6 +139,17 @@ class Strings {
     'settings_header_title': 'Make Riyal yours',
     'settings_header_subtitle': 'A few preferences for your everyday payments.',
     'payment_reminders_section': 'PAYMENT REMINDERS',
+    'monthly_review_setting': 'Monthly money check-in',
+    'monthly_review_setting_sub':
+        'Get one reminder each month to review all commitments.',
+    'monthly_review_day': 'Review reminder day',
+    'day_of_month': 'Day %s',
+    'monthly_review_card_title': 'Monthly money check-in',
+    'monthly_review_card_sub':
+        'Review your commitments and find saving opportunities.',
+    'monthly_review_completed': 'Monthly review completed',
+    'monthly_review_completed_sub':
+        'View your suggestions. Your next check-in is next month.',
     'upcoming_payments': 'Upcoming payments',
     'upcoming_payments_sub': 'Renewals, utility bills and staff payments.',
     'remind_before_payment': 'Remind me before payment',
@@ -423,6 +434,9 @@ class Strings {
     'notice_new_commitment': 'New payment commitment',
     'notice_renewal_reminder': 'Subscription renewal reminder',
     'notice_payment_reminder': 'Payment reminder',
+    'monthly_review_notice_title': 'Your monthly money check-in is ready',
+    'monthly_review_notice_message':
+        'Review your subscriptions and payment commitments to find saving opportunities.',
   };
 
   static const _ar = <String, String>{
@@ -445,6 +459,16 @@ class Strings {
     'settings_header_title': 'اجعل ريال خاصًا بك',
     'settings_header_subtitle': 'بعض التفضيلات لمدفوعاتك اليومية.',
     'payment_reminders_section': 'تذكيرات الدفع',
+    'monthly_review_setting': 'المراجعة المالية الشهرية',
+    'monthly_review_setting_sub':
+        'استلم تذكيرًا واحدًا كل شهر لمراجعة جميع التزاماتك.',
+    'monthly_review_day': 'يوم تذكير المراجعة',
+    'day_of_month': 'يوم %s',
+    'monthly_review_card_title': 'مراجعتك المالية الشهرية',
+    'monthly_review_card_sub': 'راجع التزاماتك واكتشف فرص التوفير.',
+    'monthly_review_completed': 'اكتملت مراجعة هذا الشهر',
+    'monthly_review_completed_sub':
+        'اعرض اقتراحاتك. ستتوفر المراجعة القادمة الشهر المقبل.',
     'upcoming_payments': 'المدفوعات القادمة',
     'upcoming_payments_sub': 'التجديدات وفواتير المرافق ومدفوعات الموظفين.',
     'remind_before_payment': 'ذكّرني قبل الدفع',
@@ -709,5 +733,8 @@ class Strings {
     'notice_new_commitment': 'التزام دفع جديد',
     'notice_renewal_reminder': 'تذكير بتجديد الاشتراك',
     'notice_payment_reminder': 'تذكير بالدفع',
+    'monthly_review_notice_title': 'مراجعتك المالية الشهرية جاهزة',
+    'monthly_review_notice_message':
+        'راجع اشتراكاتك والتزاماتك المالية واكتشف فرص التوفير.',
   };
 }

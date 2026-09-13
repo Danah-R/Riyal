@@ -4,8 +4,11 @@ import 'subscriptions_store.dart';
 import 'utilities_store.dart';
 import 'staff_store.dart';
 import 'app_settings.dart';
+import 'monthly_review.dart';
 import 'notice_read_state.dart';
 import 'dart:convert';
+
+enum PaymentNoticeKind { itemAdded, paymentReminder, monthlyReview }
 
 class PaymentNotice {
   const PaymentNotice({
@@ -14,12 +17,14 @@ class PaymentNotice {
     required this.message,
     required this.createdAt,
     required this.reminder,
+    this.kind = PaymentNoticeKind.itemAdded,
   });
   final String id;
   final String title;
   final String message;
   final DateTime createdAt;
   final bool reminder;
+  final PaymentNoticeKind kind;
 }
 
 /// In-app demo inbox, fed by the same observable stores as the payment screens.
@@ -29,6 +34,7 @@ class NotificationsStore {
     SubscriptionsStore.instance.subscriptions.addListener(refresh);
     UtilitiesStore.instance.items.addListener(refresh);
     StaffStore.instance.items.addListener(refresh);
+    MonthlyReviewStore.instance.revision.addListener(refresh);
   }
   static final instance = NotificationsStore._();
   final notices = ValueNotifier<List<PaymentNotice>>([]);
@@ -93,6 +99,7 @@ class NotificationsStore {
                 '$name · $categoryDisplay\nSAR ${amount.toStringAsFixed(2)} due $formattedDate\n${Strings.reminderLeadNote(leadDays)}',
             createdAt: reminderDate,
             reminder: true,
+            kind: PaymentNoticeKind.paymentReminder,
           ),
         );
       }
@@ -113,9 +120,34 @@ class NotificationsStore {
     for (final item in StaffStore.instance.items.value) {
       visit(item, item.name, 'Staff', item.amount, item.nextBillingDate);
     }
+    final reviewStore = MonthlyReviewStore.instance;
+    final reviewId = 'monthly-review:${reviewStore.currentPeriod}';
+    final reviewIsDue =
+        reviewStore.initialized &&
+        AppSettings.instance.monthlyReviewReminders &&
+        DateTime.now().day >= AppSettings.instance.monthlyReviewDay &&
+        !reviewStore.isCurrentMonthComplete;
+    if (reviewIsDue && !notices.value.any((notice) => notice.id == reviewId)) {
+      additions.add(
+        PaymentNotice(
+          id: reviewId,
+          title: Strings.t('monthly_review_notice_title'),
+          message: Strings.t('monthly_review_notice_message'),
+          createdAt: now,
+          reminder: true,
+          kind: PaymentNoticeKind.monthlyReview,
+        ),
+      );
+    }
+    final retained = !reviewIsDue
+        ? notices.value.where((notice) => notice.id != reviewId).toList()
+        : notices.value;
     if (additions.isNotEmpty) {
-      notices.value = [...notices.value, ...additions]
+      notices.value = [...retained, ...additions]
         ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+      readState.updateIds(notices.value.map((notice) => notice.id));
+    } else if (retained.length != notices.value.length) {
+      notices.value = retained;
       readState.updateIds(notices.value.map((notice) => notice.id));
     }
   }

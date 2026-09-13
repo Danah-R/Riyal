@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../data/home_data.dart';
+import '../data/monthly_review.dart';
 import '../data/subscription.dart';
 import '../data/subscriptions_store.dart';
 import '../l10n/strings.dart';
@@ -9,6 +10,7 @@ import '../widgets/profile_menu_button.dart';
 import '../widgets/notification_coin_button.dart';
 import '../widgets/logo_image.dart';
 import 'analytics_screen.dart';
+import 'monthly_review_screen.dart';
 
 enum _HomeTab { overview, analytics }
 
@@ -47,6 +49,8 @@ class _HomeBodyState extends State<HomeBody> {
                       padding: const EdgeInsets.only(bottom: 130),
                       children: [
                         const _SpendingCard(),
+                        const SizedBox(height: 16),
+                        const _MonthlyReviewCard(),
                         const SizedBox(height: 28),
                         _SectionHeader(
                           title: Strings.t('overview'),
@@ -85,6 +89,80 @@ class _HomeBodyState extends State<HomeBody> {
       ),
     );
   }
+}
+
+class _MonthlyReviewCard extends StatelessWidget {
+  const _MonthlyReviewCard();
+
+  @override
+  Widget build(BuildContext context) => ValueListenableBuilder<int>(
+    valueListenable: MonthlyReviewStore.instance.revision,
+    builder: (context, _, child) {
+      final completed = MonthlyReviewStore.instance.isCurrentMonthComplete;
+      return InkWell(
+        borderRadius: BorderRadius.circular(20),
+        onTap: () => Navigator.of(context).push(
+          MaterialPageRoute<void>(builder: (_) => const MonthlyReviewScreen()),
+        ),
+        child: Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: AppColors.surface,
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(
+              color: completed ? AppColors.cardBorder : AppColors.goldDark,
+            ),
+          ),
+          child: Row(
+            children: [
+              Container(
+                width: 44,
+                height: 44,
+                decoration: const BoxDecoration(
+                  color: AppColors.trackBackground,
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  completed
+                      ? Icons.check_circle_outline
+                      : Icons.assignment_outlined,
+                  color: AppColors.gold,
+                ),
+              ),
+              const SizedBox(width: 13),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      completed
+                          ? Strings.t('monthly_review_completed')
+                          : Strings.t('monthly_review_card_title'),
+                      style: const TextStyle(
+                        color: AppColors.textPrimary,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      completed
+                          ? Strings.t('monthly_review_completed_sub')
+                          : Strings.t('monthly_review_card_sub'),
+                      style: const TextStyle(
+                        color: AppColors.textSecondary,
+                        fontSize: 12.5,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const Icon(Icons.chevron_right, color: AppColors.gold),
+            ],
+          ),
+        ),
+      );
+    },
+  );
 }
 
 class _TopBar extends StatelessWidget {

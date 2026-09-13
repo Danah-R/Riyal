@@ -5,6 +5,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'screens/splash_screen.dart';
 import 'theme/app_theme.dart';
 import 'data/app_settings.dart';
+import 'data/monthly_review.dart';
 import 'data/bank_accounts_store.dart';
 import 'data/subscriptions_store.dart';
 import 'data/supabase_config.dart';
@@ -21,6 +22,13 @@ Future<void> main() async {
     await AppSettings.instance.load().timeout(const Duration(seconds: 3));
   } catch (error) {
     debugPrint('Settings load failed: $error');
+  }
+  try {
+    await MonthlyReviewStore.instance.initialize().timeout(
+      const Duration(seconds: 3),
+    );
+  } catch (error) {
+    debugPrint('Monthly review load failed: $error');
   }
   try {
     await SupabaseConfig.initialize().timeout(const Duration(seconds: 5));

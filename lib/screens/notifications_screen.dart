@@ -4,6 +4,7 @@ import '../data/notifications_store.dart';
 import '../l10n/strings.dart';
 import '../theme/app_theme.dart';
 import '../widgets/coin_back_button.dart';
+import 'monthly_review_screen.dart';
 
 class NotificationsScreen extends StatelessWidget {
   const NotificationsScreen({super.key});
@@ -23,20 +24,29 @@ class NotificationsScreen extends StatelessWidget {
               padding: const EdgeInsets.all(20),
               itemCount: notices.length,
               separatorBuilder: (_, index) => const SizedBox(height: 12),
-              itemBuilder: (context, index) =>
-                  NoticeTile(notice: notices[index]),
+              itemBuilder: (context, index) => NoticeTile(
+                notice: notices[index],
+                onTap: notices[index].kind == PaymentNoticeKind.monthlyReview
+                    ? () => Navigator.of(context).push(
+                        MaterialPageRoute<void>(
+                          builder: (_) => const MonthlyReviewScreen(),
+                        ),
+                      )
+                    : null,
+              ),
             ),
     ),
   );
 }
 
 class NoticeTile extends StatelessWidget {
-  const NoticeTile({super.key, required this.notice});
+  const NoticeTile({super.key, required this.notice, this.onTap});
   final PaymentNotice notice;
+  final VoidCallback? onTap;
   @override
   Widget build(BuildContext context) {
     final date = notice.createdAt;
-    return Container(
+    final content = Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: AppColors.surface,
@@ -47,7 +57,9 @@ class NoticeTile extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Icon(
-            notice.reminder
+            notice.kind == PaymentNoticeKind.monthlyReview
+                ? Icons.assignment_outlined
+                : notice.reminder
                 ? Icons.notifications_active_outlined
                 : Icons.add_card_rounded,
             color: AppColors.gold,
@@ -83,8 +95,16 @@ class NoticeTile extends StatelessWidget {
               ],
             ),
           ),
+          if (onTap != null)
+            const Icon(Icons.chevron_right, color: AppColors.gold),
         ],
       ),
+    );
+    if (onTap == null) return content;
+    return InkWell(
+      borderRadius: BorderRadius.circular(20),
+      onTap: onTap,
+      child: content,
     );
   }
 }
@@ -93,6 +113,7 @@ Future<void> showNotificationsPreview(BuildContext context) async {
   NotificationsStore.instance.refresh();
   unawaited(NotificationsStore.instance.readState.markOpened());
   if (!context.mounted) return;
+  final pageNavigator = Navigator.of(context);
   final anchor = context.findRenderObject() as RenderBox;
   var expanded = false;
   await showDialog<void>(
@@ -201,8 +222,25 @@ Future<void> showNotificationsPreview(BuildContext context) async {
                                         : notices.take(3).length,
                                     separatorBuilder: (_, index) =>
                                         const SizedBox(height: 10),
-                                    itemBuilder: (context, index) =>
-                                        NoticeTile(notice: notices[index]),
+                                    itemBuilder: (itemContext, index) {
+                                      final notice = notices[index];
+                                      return NoticeTile(
+                                        notice: notice,
+                                        onTap:
+                                            notice.kind ==
+                                                PaymentNoticeKind.monthlyReview
+                                            ? () {
+                                                Navigator.pop(dialogContext);
+                                                pageNavigator.push(
+                                                  MaterialPageRoute<void>(
+                                                    builder: (_) =>
+                                                        const MonthlyReviewScreen(),
+                                                  ),
+                                                );
+                                              }
+                                            : null,
+                                      );
+                                    },
                                   ),
                           ),
                           if (notices.length > 3)

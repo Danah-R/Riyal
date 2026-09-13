@@ -62,6 +62,30 @@ class _SettingsScreenState extends State<SettingsScreen> {
     }
   }
 
+  Future<void> _saveMonthlyReview(bool enabled, int day) async {
+    setState(() => _saving = true);
+    try {
+      await _settings
+          .saveMonthlyReview(enabled: enabled, day: day)
+          .timeout(const Duration(seconds: 5));
+      NotificationsStore.instance.refresh();
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(Strings.t('settings_saved'))));
+      }
+    } catch (error) {
+      debugPrint('Monthly review setting save failed: $error');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(Strings.t('settings_save_failed'))),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _saving = false);
+    }
+  }
+
   @override
   Widget build(BuildContext context) => Scaffold(
     backgroundColor: AppColors.background,
@@ -155,6 +179,59 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         fontSize: 12,
                         height: 1.6,
                       ),
+                    ),
+                    const Divider(color: AppColors.cardBorder, height: 32),
+                    SwitchListTile.adaptive(
+                      contentPadding: EdgeInsets.zero,
+                      activeTrackColor: AppColors.gold,
+                      title: Text(
+                        Strings.t('monthly_review_setting'),
+                        style: const TextStyle(
+                          color: AppColors.textPrimary,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      subtitle: Text(
+                        Strings.t('monthly_review_setting_sub'),
+                        style: const TextStyle(
+                          color: AppColors.textSecondary,
+                          height: 1.5,
+                        ),
+                      ),
+                      value: _settings.monthlyReviewReminders,
+                      onChanged: _saving
+                          ? null
+                          : (value) => _saveMonthlyReview(
+                              value,
+                              _settings.monthlyReviewDay,
+                            ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      Strings.t('monthly_review_day'),
+                      style: const TextStyle(color: AppColors.textPrimary),
+                    ),
+                    const SizedBox(height: 12),
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: [
+                        for (final day in [1, 15, 28])
+                          ChoiceChip(
+                            label: Text(Strings.f('day_of_month', '$day')),
+                            selected: _settings.monthlyReviewDay == day,
+                            selectedColor: AppColors.gold,
+                            labelStyle: TextStyle(
+                              color: _settings.monthlyReviewDay == day
+                                  ? AppColors.background
+                                  : AppColors.textSecondary,
+                            ),
+                            onSelected:
+                                _saving || !_settings.monthlyReviewReminders
+                                ? null
+                                : (_) => _saveMonthlyReview(true, day),
+                          ),
+                      ],
                     ),
                     if (_saving)
                       const Padding(
