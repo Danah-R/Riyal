@@ -4,7 +4,7 @@ import '../data/home_data.dart';
 import '../data/subscription.dart';
 import '../data/subscriptions_store.dart';
 import '../theme/app_theme.dart';
-import '../widgets/flipping_coin_icon.dart';
+import '../widgets/profile_menu_button.dart';
 import '../widgets/notification_coin_button.dart';
 import '../widgets/logo_image.dart';
 import 'analytics_screen.dart';
@@ -85,7 +85,7 @@ class _TopBar extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [const FlippingCoinIcon(), const NotificationCoinButton()],
+      children: [const ProfileMenuButton(), const NotificationCoinButton()],
     );
   }
 }

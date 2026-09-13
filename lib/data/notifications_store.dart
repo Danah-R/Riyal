@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'subscriptions_store.dart';
 import 'utilities_store.dart';
 import 'staff_store.dart';
+import 'app_settings.dart';
 import 'notice_read_state.dart';
 import 'dart:convert';
 
@@ -75,8 +76,10 @@ class NotificationsStore {
         );
       }
       // Calendar subtraction avoids truncating 5 days to 4 due to time of day.
-      final reminderDate = DateTime(date.year, date.month, date.day - 5);
-      if (!reminderDate.isAfter(now) &&
+      final leadDays = AppSettings.instance.reminderDays;
+      final reminderDate = DateTime(date.year, date.month, date.day - leadDays);
+      if (AppSettings.instance.paymentReminders &&
+          !reminderDate.isAfter(now) &&
           (_reminded[identity] ??= {}).add(date)) {
         additions.add(
           PaymentNotice(
@@ -85,7 +88,7 @@ class NotificationsStore {
                 ? 'Subscription renewal reminder'
                 : 'Payment reminder',
             message:
-                '$name · $category\nSAR ${amount.toStringAsFixed(2)} due $formattedDate\nReminder: 5 days before payment.',
+                '$name · $category\nSAR ${amount.toStringAsFixed(2)} due $formattedDate\nReminder: $leadDays days before payment.',
             createdAt: reminderDate,
             reminder: true,
           ),

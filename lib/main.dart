@@ -2,8 +2,15 @@ import 'package:flutter/material.dart';
 
 import 'screens/login_screen.dart';
 import 'theme/app_theme.dart';
+import 'data/app_settings.dart';
 
-void main() {
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  try {
+    await AppSettings.instance.load().timeout(const Duration(seconds: 3));
+  } catch (error) {
+    debugPrint('Settings load failed: ' + error.toString());
+  }
   runApp(const MainApp());
 }
 
