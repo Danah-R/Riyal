@@ -6,6 +6,7 @@ import 'home_screen.dart';
 import 'staff_screen.dart';
 import 'subscriptions_screen.dart';
 import 'utilities_screen.dart';
+import 'riyal_bot_screen.dart';
 
 class MainShell extends StatefulWidget {
   const MainShell({super.key});
@@ -33,7 +34,11 @@ class _MainShellState extends State<MainShell> {
           const StaffBody(),
         ],
       ),
-      floatingActionButton: const NavFab(),
+      floatingActionButton: NavFab(
+        onPressed: () => Navigator.of(
+          context,
+        ).push(MaterialPageRoute<void>(builder: (_) => const RiyalBotScreen())),
+      ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       bottomNavigationBar: BottomNav(index: _index, onTap: _goToTab),
     );

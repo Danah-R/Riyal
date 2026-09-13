@@ -108,23 +108,35 @@ class NavItem extends StatelessWidget {
 }
 
 class NavFab extends StatelessWidget {
-  const NavFab({super.key});
+  const NavFab({super.key, required this.onPressed});
+
+  final VoidCallback onPressed;
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      width: 56,
-      height: 56,
-      child: CustomPaint(
-        painter: const NavCoinPainter(),
-        child: Center(
-          child: SvgPicture.asset(
-            'assets/icons/saudi_riyal.svg',
-            width: 22,
-            semanticsLabel: 'Saudi riyal',
-            colorFilter: const ColorFilter.mode(
-              AppColors.surface,
-              BlendMode.srcIn,
+    return FloatingActionButton(
+      heroTag: 'riyal-bot-button',
+      tooltip: 'ريال بوت / Riyal Bot',
+      onPressed: onPressed,
+      elevation: 0,
+      hoverElevation: 0,
+      focusElevation: 0,
+      highlightElevation: 0,
+      backgroundColor: Colors.transparent,
+      foregroundColor: AppColors.surface,
+      shape: const CircleBorder(),
+      child: SizedBox.expand(
+        child: CustomPaint(
+          painter: const NavCoinPainter(),
+          child: Center(
+            child: SvgPicture.asset(
+              'assets/icons/saudi_riyal.svg',
+              width: 22,
+              semanticsLabel: 'Saudi riyal',
+              colorFilter: const ColorFilter.mode(
+                AppColors.surface,
+                BlendMode.srcIn,
+              ),
             ),
           ),
         ),

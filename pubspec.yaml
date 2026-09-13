@@ -1,4 +1,4 @@
-name: riyal
+﻿name: riyal
 description: "A new Flutter project."
 publish_to: 'none'
 version: 0.1.0
@@ -13,9 +13,9 @@ dependencies:
     sdk: flutter
   flutter_svg: ^2.2.1
   shared_preferences: ^2.5.5
-  flutter_dotenv: ^5.2.1
+  flutter_dotenv: ^6.0.1
   lean_sdk_flutter: ^3.0.17
-  http: ^1.2.2
+  http: ^1.6.0
   supabase_flutter: ^2.8.0
 
 dev_dependencies:
@@ -29,3 +29,4 @@ flutter:
     - assets/icons/
     - lib/assets/logos/
     - .env
+
