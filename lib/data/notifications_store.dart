@@ -2,14 +2,18 @@ import 'package:flutter/foundation.dart';
 import 'subscriptions_store.dart';
 import 'utilities_store.dart';
 import 'staff_store.dart';
+import 'notice_read_state.dart';
+import 'dart:convert';
 
 class PaymentNotice {
   const PaymentNotice({
+    required this.id,
     required this.title,
     required this.message,
     required this.createdAt,
     required this.reminder,
   });
+  final String id;
   final String title;
   final String message;
   final DateTime createdAt;
@@ -26,6 +30,8 @@ class NotificationsStore {
   }
   static final instance = NotificationsStore._();
   final notices = ValueNotifier<List<PaymentNotice>>([]);
+  final readState = NoticeReadState();
+  final Map<Object, String> _itemIds = Map.identity();
   final Set<Object> _seen = Set.identity();
   final Map<Object, Set<DateTime>> _reminded = Map.identity();
 
@@ -40,10 +46,22 @@ class NotificationsStore {
       DateTime due,
     ) {
       final date = DateTime(due.year, due.month, due.day);
+      final itemId = _itemIds.putIfAbsent(
+        identity,
+        () => jsonEncode([
+          seed
+              ? 'demo'
+              : 'added-${now.microsecondsSinceEpoch}-${_itemIds.length}',
+          category,
+          name,
+          amount,
+        ]),
+      );
       final formattedDate = '${date.day}/${date.month}/${date.year}';
       if (_seen.add(identity)) {
         additions.add(
           PaymentNotice(
+            id: 'added:$itemId',
             title: category == 'Subscriptions'
                 ? 'New subscription'
                 : 'New payment commitment',
@@ -62,6 +80,7 @@ class NotificationsStore {
           (_reminded[identity] ??= {}).add(date)) {
         additions.add(
           PaymentNotice(
+            id: 'reminder:$itemId:${itemId.contains('"demo"') ? 'seed' : date.toIso8601String()}',
             title: category == 'Subscriptions'
                 ? 'Subscription renewal reminder'
                 : 'Payment reminder',
@@ -92,6 +111,7 @@ class NotificationsStore {
     if (additions.isNotEmpty) {
       notices.value = [...notices.value, ...additions]
         ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+      readState.updateIds(notices.value.map((notice) => notice.id));
     }
   }
 }

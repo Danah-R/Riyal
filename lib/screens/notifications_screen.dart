@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import '../data/notifications_store.dart';
 import '../theme/app_theme.dart';
@@ -89,6 +90,8 @@ class NoticeTile extends StatelessWidget {
 
 Future<void> showNotificationsPreview(BuildContext context) async {
   NotificationsStore.instance.refresh();
+  unawaited(NotificationsStore.instance.readState.markOpened());
+  if (!context.mounted) return;
   final anchor = context.findRenderObject() as RenderBox;
   var expanded = false;
   await showDialog<void>(
