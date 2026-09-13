@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import '../data/profile_store.dart';
+import '../data/profile_validation.dart';
+import '../widgets/account_section.dart';
 import '../theme/app_theme.dart';
 import '../widgets/coin_back_button.dart';
 import '../widgets/gold_coin_painter.dart';
@@ -14,6 +16,26 @@ class ProfileScreen extends StatefulWidget {
 class _ProfileScreenState extends State<ProfileScreen> {
   final _store = ProfileStore.instance;
   bool _loading = true;
+  bool _saving = false;
+  static const _editable = ['Full name', 'Email', 'Phone number'];
+  List<String> get _missing => _editable
+      .where(
+        (field) => !isProfileFieldComplete(field, _store.values[field] ?? ''),
+      )
+      .toList();
+  String _display(String field) {
+    final value = _store.values[field] ?? '';
+    if (field == 'Joined on') {
+      final date = DateTime.tryParse(value);
+      return date == null
+          ? 'Not available'
+          : MaterialLocalizations.of(context).formatMediumDate(date);
+    }
+    return isProfileFieldComplete(field, value)
+        ? value
+        : 'Add your ${field.toLowerCase()}';
+  }
+
   @override
   void initState() {
     super.initState();
@@ -22,7 +44,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   Future<void> _load() async {
     try {
-      await _store.load();
+      await _store.load().timeout(const Duration(seconds: 5));
     } catch (_) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -36,16 +58,26 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Future<void> _edit(String field) async {
-    if (field == 'Joined on') return;
+    if (_saving || field == 'Joined on') return;
     final result = await showDialog<String>(
       context: context,
-      builder: (_) =>
-          _EditProfileDialog(field: field, value: _store.values[field]!),
+      builder: (_) => _EditProfileDialog(
+        field: field,
+        value: isProfileFieldComplete(field, _store.values[field]!)
+            ? _store.values[field]!
+            : '',
+      ),
     );
     if (result == null || !mounted) return;
+    setState(() => _saving = true);
     try {
-      await _store.save(field, result);
-      if (mounted) setState(() {});
+      await _store.save(field, result).timeout(const Duration(seconds: 5));
+      if (mounted) {
+        setState(() {});
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('$field updated')));
+      }
     } catch (_) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -54,6 +86,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ),
         );
       }
+    } finally {
+      if (mounted) setState(() => _saving = false);
     }
   }
 
@@ -92,7 +126,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     ),
                     const SizedBox(height: 18),
                     Text(
-                      _store.values['Full name']!,
+                      isProfileFieldComplete(
+                            'Full name',
+                            _store.values['Full name']!,
+                          )
+                          ? _store.values['Full name']!
+                          : 'Your profile',
                       style: const TextStyle(
                         fontSize: 24,
                         color: AppColors.textPrimary,
@@ -105,6 +144,59 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       style: TextStyle(color: AppColors.textSecondary),
                     ),
                     const SizedBox(height: 28),
+                    AccountSection(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            _missing.isEmpty
+                                ? 'Your details are complete'
+                                : 'Complete your profile',
+                            style: const TextStyle(
+                              color: AppColors.textPrimary,
+                              fontWeight: FontWeight.w600,
+                              fontSize: 16,
+                            ),
+                          ),
+                          const SizedBox(height: 10),
+                          Text(
+                            '${3 - _missing.length} of 3 details added',
+                            style: const TextStyle(
+                              color: AppColors.textSecondary,
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(8),
+                            child: LinearProgressIndicator(
+                              value: (3 - _missing.length) / 3,
+                              minHeight: 7,
+                              color: AppColors.gold,
+                              backgroundColor: AppColors.trackBackground,
+                            ),
+                          ),
+                          if (_missing.isNotEmpty)
+                            Align(
+                              alignment: Alignment.centerRight,
+                              child: TextButton(
+                                onPressed: _saving
+                                    ? null
+                                    : () => _edit(_missing.first),
+                                child: Text(
+                                  'Add ${_missing.first.toLowerCase()}',
+                                  style: const TextStyle(color: AppColors.gold),
+                                ),
+                              ),
+                            ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    if (_saving)
+                      const Padding(
+                        padding: EdgeInsets.only(bottom: 12),
+                        child: LinearProgressIndicator(color: AppColors.gold),
+                      ),
                     for (final entry in const [
                       ('Full name', Icons.person_outline),
                       ('Email', Icons.email_outlined),
@@ -134,7 +226,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           subtitle: Padding(
                             padding: const EdgeInsets.only(top: 6),
                             child: Text(
-                              _store.values[entry.$1]!,
+                              _display(entry.$1),
                               style: const TextStyle(
                                 color: AppColors.textPrimary,
                                 fontSize: 16,
@@ -145,7 +237,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               ? null
                               : IconButton(
                                   tooltip: 'Edit ${entry.$1}',
-                                  onPressed: () => _edit(entry.$1),
+                                  onPressed: _saving
+                                      ? null
+                                      : () => _edit(entry.$1),
                                   icon: const Icon(
                                     Icons.edit_outlined,
                                     color: AppColors.gold,
@@ -154,6 +248,25 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 ),
                         ),
                       ),
+                    const AccountSection(
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Icon(Icons.shield_outlined, color: AppColors.gold),
+                          SizedBox(width: 12),
+                          Expanded(
+                            child: Text(
+                              'Your profile details are saved on this device. They are not verified account credentials in this demo.',
+                              style: TextStyle(
+                                color: AppColors.textSecondary,
+                                height: 1.5,
+                                fontSize: 12,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
                     const SizedBox(height: 10),
                     ListTile(
                       shape: RoundedRectangleBorder(
@@ -221,21 +334,7 @@ class _EditProfileDialogState extends State<_EditProfileDialog> {
           labelText: widget.field,
           border: const OutlineInputBorder(),
         ),
-        validator: (value) {
-          final text = value?.trim() ?? '';
-          if (text.isEmpty) return 'This field is required';
-          if (widget.field == 'Email' &&
-              !RegExp(r'^[^\s@]+@[^\s@]+\.[^\s@]+$').hasMatch(text)) {
-            return 'Enter a valid email';
-          }
-          if (widget.field == 'Phone number' &&
-              !RegExp(
-                r'^\+?[0-9]{8,15}$',
-              ).hasMatch(text.replaceAll(RegExp(r'[\s()-]'), ''))) {
-            return 'Enter a valid phone number';
-          }
-          return null;
-        },
+        validator: (value) => validateProfileField(widget.field, value ?? ''),
       ),
     ),
     actions: [
@@ -246,7 +345,12 @@ class _EditProfileDialogState extends State<_EditProfileDialog> {
       TextButton(
         onPressed: () {
           if (_form.currentState!.validate()) {
-            Navigator.pop(context, _controller.text.trim());
+            Navigator.pop(
+              context,
+              widget.field == 'Phone number'
+                  ? normalizeProfilePhone(_controller.text)
+                  : _controller.text.trim(),
+            );
           }
         },
         child: const Text('Save'),
