@@ -5,6 +5,7 @@ import '../screens/contact_us_screen.dart';
 import '../screens/login_screen.dart';
 import '../theme/app_theme.dart';
 import 'flipping_coin_icon.dart';
+import 'hero_tags.dart';
 
 class ProfileMenuButton extends StatelessWidget {
   const ProfileMenuButton({super.key});
@@ -175,6 +176,6 @@ class ProfileMenuButton extends StatelessWidget {
     tooltip: 'Account menu',
     padding: EdgeInsets.zero,
     onPressed: () => _open(context),
-    icon: const FlippingCoinIcon(),
+    icon: const Hero(tag: heroAppCoinTag, child: FlippingCoinIcon()),
   );
 }

@@ -86,173 +86,162 @@ class _LoginScreenState extends State<LoginScreen> {
                                   boxShadow: [
                                     BoxShadow(
                                       color: Colors.black.withValues(
-                                        alpha: 0.5,
+                                        alpha: 0.32,
                                       ),
-                                      blurRadius: 40,
-                                      offset: const Offset(0, 22),
+                                      blurRadius: 20,
+                                      offset: const Offset(0, 14),
                                     ),
                                   ],
                                 ),
                                 child: CustomPaint(
                                   painter: GoldCoinPainter(),
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(34),
-                                    child: FittedBox(
-                                      fit: BoxFit.contain,
-                                      child: SizedBox(
-                                        width: 440,
-                                        height: 600,
-                                        child: Form(
-                                          key: _formKey,
-                                          child: Column(
-                                            mainAxisSize: MainAxisSize.min,
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.center,
-                                            children: [
-                                              Semantics(
-                                                label:
-                                                    'Saudi emblem: palm tree and crossed swords',
-                                                image: true,
-                                                child: SizedBox(
-                                                  width: 58,
-                                                  height: 58,
-                                                  child: Image.asset(
-                                                    'assets/icons/saudi_emblem.png',
-                                                    fit: BoxFit.contain,
-                                                    filterQuality:
-                                                        FilterQuality.high,
-                                                    excludeFromSemantics: true,
+                                  child: Stack(
+                                    alignment: Alignment.center,
+                                    children: [
+                                      // Big, translucent riyal watermark
+                                      // sitting behind the form, on the
+                                      // coin's face.
+                                      ExcludeSemantics(
+                                        child: FractionallySizedBox(
+                                          widthFactor: 0.6,
+                                          heightFactor: 0.6,
+                                          child: Opacity(
+                                            opacity: 0.14,
+                                            child: SvgPicture.asset(
+                                              'assets/icons/saudi_riyal.svg',
+                                              colorFilter:
+                                                  const ColorFilter.mode(
+                                                    AppColors.surface,
+                                                    BlendMode.srcIn,
                                                   ),
-                                                ),
-                                              ),
-                                              const SizedBox(height: 8),
-                                              const Text(
-                                                'Login',
-                                                style: TextStyle(
-                                                  fontFamily: 'Georgia',
-                                                  fontSize: 36,
-                                                  fontWeight: FontWeight.w700,
-                                                  color: AppColors.surface,
-                                                  height: 1.1,
-                                                ),
-                                              ),
-                                              const SizedBox(height: 8),
-                                              const Text(
-                                                'Sign in to your account',
-                                                style: TextStyle(
-                                                  color: AppColors.staff,
-                                                  fontSize: 14,
-                                                ),
-                                              ),
-                                              const SizedBox(height: 18),
-                                              _field(
-                                                hint: 'Username',
-                                                icon: Icons
-                                                    .person_outline_rounded,
-                                                autofillHints: const [
-                                                  AutofillHints.username,
-                                                ],
-                                              ),
-                                              const SizedBox(height: 8),
-                                              _field(
-                                                hint: 'Password',
-                                                icon:
-                                                    Icons.lock_outline_rounded,
-                                                password: true,
-                                                autofillHints: const [
-                                                  AutofillHints.password,
-                                                ],
-                                              ),
-                                              const SizedBox(height: 16),
-                                              Container(
-                                                width: 250,
-                                                padding: const EdgeInsets.all(
-                                                  3,
-                                                ),
-                                                decoration: BoxDecoration(
-                                                  borderRadius:
-                                                      BorderRadius.circular(40),
-                                                  gradient:
-                                                      const LinearGradient(
-                                                        begin:
-                                                            Alignment.topLeft,
-                                                        end: Alignment
-                                                            .bottomRight,
-                                                        colors: [
-                                                          Color(0xFFFFF4C6),
-                                                          AppColors.goldDark,
-                                                          Color(0xFFFFE9A6),
-                                                        ],
-                                                      ),
-                                                  boxShadow: [
-                                                    BoxShadow(
-                                                      color: AppColors.goldDark
-                                                          .withValues(
-                                                            alpha: 0.5,
-                                                          ),
-                                                      blurRadius: 8,
-                                                      offset: const Offset(
-                                                        0,
-                                                        4,
-                                                      ),
-                                                    ),
-                                                  ],
-                                                ),
-                                                child: FilledButton(
-                                                  onPressed: _signIn,
-                                                  style: FilledButton.styleFrom(
-                                                    backgroundColor:
-                                                        AppColors.surface,
-                                                    foregroundColor:
-                                                        const Color(0xFFFFF0C2),
-                                                    minimumSize:
-                                                        const Size.fromHeight(
-                                                          42,
-                                                        ),
-                                                    shape:
-                                                        const StadiumBorder(),
-                                                  ),
-                                                  child: const Text(
-                                                    'SIGN IN',
-                                                    style: TextStyle(
-                                                      fontSize: 16,
-                                                      fontWeight:
-                                                          FontWeight.w700,
-                                                      letterSpacing: 1.4,
-                                                    ),
-                                                  ),
-                                                ),
-                                              ),
-                                              const SizedBox(height: 16),
-                                              // Bundled SVG avoids relying on currency glyph support in fonts.
-                                              Container(
-                                                width: 44,
-                                                height: 44,
-                                                padding: const EdgeInsets.all(
-                                                  9,
-                                                ),
-                                                decoration: BoxDecoration(
-                                                  shape: BoxShape.circle,
-                                                  border: Border.all(
-                                                    color: AppColors.goldDark,
-                                                    width: 0.7,
-                                                  ),
-                                                ),
-                                                child: SvgPicture.asset(
-                                                  'assets/icons/saudi_riyal.svg',
-                                                  semanticsLabel: 'Saudi riyal',
-                                                  colorFilter:
-                                                      const ColorFilter.mode(
-                                                        AppColors.surface,
-                                                        BlendMode.srcIn,
-                                                      ),
-                                                ),
-                                              ),
-                                            ],
+                                            ),
                                           ),
                                         ),
                                       ),
-                                    ),
+                                      Padding(
+                                        padding: const EdgeInsets.all(34),
+                                        child: FittedBox(
+                                          fit: BoxFit.contain,
+                                          child: SizedBox(
+                                            width: 440,
+                                            height: 600,
+                                            child: Form(
+                                              key: _formKey,
+                                              child: Column(
+                                                mainAxisSize: MainAxisSize.min,
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment.center,
+                                                children: [
+                                                  const Text(
+                                                    'Login',
+                                                    style: TextStyle(
+                                                      fontFamily: 'Georgia',
+                                                      fontSize: 36,
+                                                      fontWeight:
+                                                          FontWeight.w700,
+                                                      color: AppColors.surface,
+                                                      height: 1.1,
+                                                    ),
+                                                  ),
+                                                  const SizedBox(height: 8),
+                                                  const Text(
+                                                    'Sign in to your account',
+                                                    style: TextStyle(
+                                                      color: AppColors.staff,
+                                                      fontSize: 14,
+                                                    ),
+                                                  ),
+                                                  const SizedBox(height: 18),
+                                                  _field(
+                                                    hint: 'Username',
+                                                    icon: Icons
+                                                        .person_outline_rounded,
+                                                    autofillHints: const [
+                                                      AutofillHints.username,
+                                                    ],
+                                                  ),
+                                                  const SizedBox(height: 8),
+                                                  _field(
+                                                    hint: 'Password',
+                                                    icon: Icons
+                                                        .lock_outline_rounded,
+                                                    password: true,
+                                                    autofillHints: const [
+                                                      AutofillHints.password,
+                                                    ],
+                                                  ),
+                                                  const SizedBox(height: 16),
+                                                  Container(
+                                                    width: 250,
+                                                    padding:
+                                                        const EdgeInsets.all(3),
+                                                    decoration: BoxDecoration(
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                            40,
+                                                          ),
+                                                      gradient:
+                                                          const LinearGradient(
+                                                            begin: Alignment
+                                                                .topLeft,
+                                                            end: Alignment
+                                                                .bottomRight,
+                                                            colors: [
+                                                              Color(0xFFD9C68A),
+                                                              AppColors
+                                                                  .goldDark,
+                                                              Color(0xFFD9C68A),
+                                                            ],
+                                                          ),
+                                                      boxShadow: [
+                                                        BoxShadow(
+                                                          color: AppColors
+                                                              .goldDark
+                                                              .withValues(
+                                                                alpha: 0.28,
+                                                              ),
+                                                          blurRadius: 5,
+                                                          offset: const Offset(
+                                                            0,
+                                                            3,
+                                                          ),
+                                                        ),
+                                                      ],
+                                                    ),
+                                                    child: FilledButton(
+                                                      onPressed: _signIn,
+                                                      style: FilledButton.styleFrom(
+                                                        backgroundColor:
+                                                            AppColors.surface,
+                                                        foregroundColor:
+                                                            const Color(
+                                                              0xFFFFF0C2,
+                                                            ),
+                                                        minimumSize:
+                                                            const Size.fromHeight(
+                                                              42,
+                                                            ),
+                                                        shape:
+                                                            const StadiumBorder(),
+                                                      ),
+                                                      child: const Text(
+                                                        'SIGN IN',
+                                                        style: TextStyle(
+                                                          fontSize: 16,
+                                                          fontWeight:
+                                                              FontWeight.w700,
+                                                          letterSpacing: 1.4,
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ],
                                   ),
                                 ),
                               ),

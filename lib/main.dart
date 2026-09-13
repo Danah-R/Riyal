@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'screens/login_screen.dart';
+import 'screens/splash_screen.dart';
 import 'theme/app_theme.dart';
 import 'data/app_settings.dart';
 
@@ -23,7 +23,7 @@ class MainApp extends StatelessWidget {
       title: 'Riyal',
       debugShowCheckedModeBanner: false,
       theme: buildAppTheme(),
-      home: const LoginScreen(),
+      home: const SplashScreen(),
     );
   }
 }

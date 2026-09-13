@@ -16,9 +16,9 @@ class GoldCoinPainter extends CustomPainter {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            Color(0xFFFFEBA5),
+            AppColors.gold,
             AppColors.goldDark,
-            Color(0xFFFFE8A1),
+            Color(0xFFC2A458),
             Color(0xFF806024),
           ],
           stops: [0, 0.35, 0.65, 1],
@@ -31,7 +31,7 @@ class GoldCoinPainter extends CustomPainter {
         center + direction * (radius - 7),
         center + direction * (radius - 1),
         Paint()
-          ..color = (i.isEven ? const Color(0xFFFFE6A0) : AppColors.goldDark)
+          ..color = (i.isEven ? AppColors.gold : AppColors.goldDark)
           ..strokeWidth = 1.5,
       );
     }
@@ -44,10 +44,10 @@ class GoldCoinPainter extends CustomPainter {
           end: Alignment.bottomRight,
           colors: [
             Color(0xFFB58B42),
-            Color(0xFFFFE7A0),
-            Color(0xFFFFF4CF),
+            Color(0xFFC2A458),
+            Color(0xFFD3BE7E),
             AppColors.gold,
-            Color(0xFFF0D48F),
+            Color(0xFFC2A458),
             Color(0xFFB18A42),
           ],
           stops: [0, 0.2, 0.38, 0.64, 0.82, 1],
@@ -59,7 +59,7 @@ class GoldCoinPainter extends CustomPainter {
         radius - inset,
         Paint()
           ..color = (inset == 10 || inset == 23
-              ? const Color(0xFFFFF1BA)
+              ? const Color(0xFFD3BE7E)
               : AppColors.goldDark)
           ..style = PaintingStyle.stroke
           ..strokeWidth = 1.2,
