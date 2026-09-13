@@ -5,6 +5,7 @@ import '../data/subscription.dart';
 import '../data/subscriptions_store.dart';
 import '../theme/app_theme.dart';
 import '../widgets/flipping_coin_icon.dart';
+import '../widgets/notification_coin_button.dart';
 import '../widgets/logo_image.dart';
 import 'analytics_screen.dart';
 
@@ -66,7 +67,8 @@ class _HomeBodyState extends State<HomeBody> {
             title: 'Upcoming renewals',
             onSeeAll: () => Navigator.of(context).push(
               MaterialPageRoute<void>(
-                builder: (_) => const AnalyticsScreen(category: 'Subscriptions'),
+                builder: (_) =>
+                    const AnalyticsScreen(category: 'Subscriptions'),
               ),
             ),
           ),
@@ -83,22 +85,7 @@ class _TopBar extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        const FlippingCoinIcon(),
-        Container(
-          width: 44,
-          height: 44,
-          decoration: const BoxDecoration(
-            shape: BoxShape.circle,
-            color: AppColors.surface,
-          ),
-          child: const Icon(
-            Icons.notifications_none_rounded,
-            color: AppColors.textPrimary,
-            size: 22,
-          ),
-        ),
-      ],
+      children: [const FlippingCoinIcon(), const NotificationCoinButton()],
     );
   }
 }
@@ -194,10 +181,15 @@ class _SpendingCard extends StatelessWidget {
               GestureDetector(
                 onTap: () => Navigator.of(context).push(
                   MaterialPageRoute<void>(
-                    builder: (_) => const AnalyticsScreen(category: 'Subscriptions'),
+                    builder: (_) =>
+                        const AnalyticsScreen(category: 'Subscriptions'),
                   ),
                 ),
-                child: const Icon(Icons.chevron_right, color: AppColors.gold, size: 26),
+                child: const Icon(
+                  Icons.chevron_right,
+                  color: AppColors.gold,
+                  size: 26,
+                ),
               ),
             ],
           ),
