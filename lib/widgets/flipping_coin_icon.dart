@@ -7,12 +7,20 @@ import '../theme/app_theme.dart';
 import 'gold_coin_painter.dart';
 
 /// A small cartoon coin (see [NavCoinPainter]) that continuously flips in
-/// place between a profile icon and a settings icon for as long as it's on
-/// screen — no tap needed to trigger it.
+/// place between two configurable icons for as long as it's on screen.
 class FlippingCoinIcon extends StatefulWidget {
-  const FlippingCoinIcon({super.key, this.size = 44});
+  const FlippingCoinIcon({
+    super.key,
+    this.size = 44,
+    this.frontIcon = Icons.person_outline_rounded,
+    this.backIcon = Icons.settings_outlined,
+    this.flipInterval = const Duration(seconds: 5),
+  });
 
   final double size;
+  final IconData frontIcon;
+  final IconData backIcon;
+  final Duration flipInterval;
 
   @override
   State<FlippingCoinIcon> createState() => _FlippingCoinIconState();
@@ -35,7 +43,7 @@ class _FlippingCoinIconState extends State<FlippingCoinIcon>
   }
 
   void _scheduleNextFlip() {
-    _delayTimer = Timer(const Duration(seconds: 3), () async {
+    _delayTimer = Timer(widget.flipInterval, () async {
       if (!mounted) return;
       await _controller.forward(from: 0);
       if (!mounted) return;
@@ -77,9 +85,7 @@ class _FlippingCoinIconState extends State<FlippingCoinIcon>
               painter: const NavCoinPainter(),
               child: Center(
                 child: Icon(
-                  isProfileFace
-                      ? Icons.person_outline_rounded
-                      : Icons.settings_outlined,
+                  isProfileFace ? widget.frontIcon : widget.backIcon,
                   color: AppColors.surface,
                   size: widget.size * 0.46,
                 ),

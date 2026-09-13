@@ -9,6 +9,7 @@ class AppSettings {
   bool monthlyReviewReminders = true;
   int monthlyReviewDay = 1;
   String languageCode = 'en';
+  bool onboardingCompleted = false;
 
   Future<void> load() async {
     final raw = await _prefs.getString('riyal.settings.v1');
@@ -22,6 +23,7 @@ class AppSettings {
     monthlyReviewDay = [1, 15, 28].contains(reviewDay) ? reviewDay as int : 1;
     final language = data['languageCode'];
     languageCode = ['en', 'ar'].contains(language) ? language as String : 'en';
+    onboardingCompleted = data['onboardingCompleted'] as bool? ?? false;
   }
 
   Future<void> save({required bool enabled, required int days}) async {
@@ -34,6 +36,7 @@ class AppSettings {
         'monthlyReviewReminders': monthlyReviewReminders,
         'monthlyReviewDay': monthlyReviewDay,
         'languageCode': languageCode,
+        'onboardingCompleted': onboardingCompleted,
       }),
     );
     paymentReminders = enabled;
@@ -53,6 +56,7 @@ class AppSettings {
         'monthlyReviewReminders': enabled,
         'monthlyReviewDay': day,
         'languageCode': languageCode,
+        'onboardingCompleted': onboardingCompleted,
       }),
     );
     monthlyReviewReminders = enabled;
@@ -69,8 +73,24 @@ class AppSettings {
         'monthlyReviewReminders': monthlyReviewReminders,
         'monthlyReviewDay': monthlyReviewDay,
         'languageCode': code,
+        'onboardingCompleted': onboardingCompleted,
       }),
     );
     languageCode = code;
+  }
+
+  Future<void> completeOnboarding() async {
+    onboardingCompleted = true;
+    await _prefs.setString(
+      'riyal.settings.v1',
+      jsonEncode({
+        'paymentReminders': paymentReminders,
+        'reminderDays': reminderDays,
+        'monthlyReviewReminders': monthlyReviewReminders,
+        'monthlyReviewDay': monthlyReviewDay,
+        'languageCode': languageCode,
+        'onboardingCompleted': true,
+      }),
+    );
   }
 }

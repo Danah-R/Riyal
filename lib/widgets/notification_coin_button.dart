@@ -4,7 +4,7 @@ import '../data/notifications_store.dart';
 import '../l10n/strings.dart';
 import '../screens/notifications_screen.dart';
 import '../theme/app_theme.dart';
-import 'gold_coin_painter.dart';
+import 'flipping_coin_icon.dart';
 
 class NotificationCoinButton extends StatefulWidget {
   const NotificationCoinButton({super.key});
@@ -59,16 +59,10 @@ class _NotificationCoinButtonState extends State<NotificationCoinButton>
           child: Stack(
             clipBehavior: Clip.none,
             children: [
-              Positioned.fill(
-                child: CustomPaint(
-                  painter: const NavCoinPainter(),
-                  child: const Center(
-                    child: Icon(
-                      Icons.notifications_none_rounded,
-                      color: AppColors.surface,
-                      size: 23,
-                    ),
-                  ),
+              const Positioned.fill(
+                child: FlippingCoinIcon(
+                  frontIcon: Icons.notifications_none_rounded,
+                  backIcon: Icons.notifications_active_outlined,
                 ),
               ),
               if (unread)

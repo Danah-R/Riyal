@@ -7,7 +7,9 @@ import '../theme/app_theme.dart';
 import '../widgets/gold_coin_painter.dart';
 import '../l10n/strings.dart';
 import '../widgets/hero_tags.dart';
-import 'main_shell.dart';
+import '../data/app_settings.dart';
+import 'login_screen.dart';
+import 'onboarding_screen.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -28,17 +30,20 @@ class _SplashScreenState extends State<SplashScreen>
       duration: const Duration(milliseconds: 2200),
     )..forward();
     _controller.addStatusListener((status) {
-      if (status == AnimationStatus.completed) _goHome();
+      if (status == AnimationStatus.completed) _continueFromSplash();
     });
   }
 
-  Future<void> _goHome() async {
+  Future<void> _continueFromSplash() async {
     await Future.delayed(const Duration(milliseconds: 350));
     if (!mounted) return;
+    final next = AppSettings.instance.onboardingCompleted
+        ? const LoginScreen()
+        : const OnboardingScreen();
     Navigator.of(context).pushReplacement(
       PageRouteBuilder<void>(
         transitionDuration: const Duration(milliseconds: 550),
-        pageBuilder: (_, _, _) => const MainShell(),
+        pageBuilder: (_, _, _) => next,
         transitionsBuilder: (_, animation, _, child) =>
             FadeTransition(opacity: animation, child: child),
       ),
