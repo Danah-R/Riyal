@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../data/tracked_domain.dart';
+import '../l10n/strings.dart';
 import '../theme/app_theme.dart';
 import 'select_catalog_screen.dart';
 import 'select_charge_screen.dart';
@@ -47,7 +48,7 @@ class _AddTrackedItemSheet extends StatelessWidget {
               ),
               const SizedBox(height: 20),
               Text(
-                'Add a ${domain.itemNounSingular}',
+                Strings.addA(domain.itemNounSingular),
                 style: const TextStyle(
                   color: AppColors.textPrimary,
                   fontSize: 18,
@@ -55,15 +56,18 @@ class _AddTrackedItemSheet extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 4),
-              const Text(
-                'How would you like to add it?',
-                style: TextStyle(color: AppColors.textSecondary, fontSize: 13),
+              Text(
+                Strings.t('how_would_you_add'),
+                style: const TextStyle(
+                  color: AppColors.textSecondary,
+                  fontSize: 13,
+                ),
               ),
               const SizedBox(height: 18),
               _SourceOption(
                 icon: Icons.receipt_long_rounded,
-                title: 'From a previous transaction',
-                subtitle: 'Pick from your recent charges',
+                title: Strings.t('from_previous_transaction'),
+                subtitle: Strings.t('pick_from_recent_charges'),
                 onTap: () {
                   Navigator.of(context).pop();
                   Navigator.of(context).push(
@@ -76,7 +80,7 @@ class _AddTrackedItemSheet extends StatelessWidget {
               const SizedBox(height: 12),
               _SourceOption(
                 icon: Icons.add_circle_outline_rounded,
-                title: 'From scratch',
+                title: Strings.t('from_scratch'),
                 subtitle: domain.addFromScratchTitle,
                 onTap: () {
                   Navigator.of(context).pop();
@@ -148,7 +152,10 @@ class _SourceOption extends StatelessWidget {
                   const SizedBox(height: 2),
                   Text(
                     subtitle,
-                    style: const TextStyle(color: AppColors.textSecondary, fontSize: 12.5),
+                    style: const TextStyle(
+                      color: AppColors.textSecondary,
+                      fontSize: 12.5,
+                    ),
                   ),
                 ],
               ),

@@ -11,6 +11,6 @@ class UtilitiesBody extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return TrackedItemsScreen(title: 'Utilities', domain: utilitiesDomain);
+    return TrackedItemsScreen(domain: utilitiesDomain);
   }
 }

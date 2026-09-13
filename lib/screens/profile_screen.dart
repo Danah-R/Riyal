@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../data/profile_store.dart';
 import '../data/profile_validation.dart';
+import '../l10n/strings.dart';
 import '../widgets/account_section.dart';
 import '../theme/app_theme.dart';
 import '../widgets/coin_back_button.dart';
@@ -28,12 +29,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
     if (field == 'Joined on') {
       final date = DateTime.tryParse(value);
       return date == null
-          ? 'Not available'
+          ? Strings.t('not_available')
           : MaterialLocalizations.of(context).formatMediumDate(date);
     }
     return isProfileFieldComplete(field, value)
         ? value
-        : 'Add your ${field.toLowerCase()}';
+        : Strings.f('add_your_field', profileFieldLabel(field).toLowerCase());
   }
 
   @override
@@ -48,9 +49,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     } catch (_) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Could not load saved profile. Showing demo data.'),
-          ),
+          SnackBar(content: Text(Strings.t('profile_load_failed'))),
         );
       }
     }
@@ -74,16 +73,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
       await _store.save(field, result).timeout(const Duration(seconds: 5));
       if (mounted) {
         setState(() {});
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('$field updated')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              Strings.f('profile_field_updated', profileFieldLabel(field)),
+            ),
+          ),
+        );
       }
     } catch (_) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Could not save changes. Please try again.'),
-          ),
+          SnackBar(content: Text(Strings.t('profile_save_failed'))),
         );
       }
     } finally {
@@ -98,7 +99,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       backgroundColor: AppColors.background,
       foregroundColor: AppColors.textPrimary,
       leading: const CoinBackButton(),
-      title: const Text('Profile'),
+      title: Text(Strings.t('profile_title')),
     ),
     body: _loading
         ? const Center(child: CircularProgressIndicator(color: AppColors.gold))
@@ -131,7 +132,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             _store.values['Full name']!,
                           )
                           ? _store.values['Full name']!
-                          : 'Your profile',
+                          : Strings.t('your_profile'),
                       style: const TextStyle(
                         fontSize: 24,
                         color: AppColors.textPrimary,
@@ -139,9 +140,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       ),
                     ),
                     const SizedBox(height: 8),
-                    const Text(
-                      'Your personal details · Demo profile',
-                      style: TextStyle(color: AppColors.textSecondary),
+                    Text(
+                      Strings.t('your_personal_details'),
+                      style: const TextStyle(color: AppColors.textSecondary),
                     ),
                     const SizedBox(height: 28),
                     AccountSection(
@@ -150,8 +151,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         children: [
                           Text(
                             _missing.isEmpty
-                                ? 'Your details are complete'
-                                : 'Complete your profile',
+                                ? Strings.t('details_complete')
+                                : Strings.t('complete_your_profile'),
                             style: const TextStyle(
                               color: AppColors.textPrimary,
                               fontWeight: FontWeight.w600,
@@ -160,7 +161,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           ),
                           const SizedBox(height: 10),
                           Text(
-                            '${3 - _missing.length} of 3 details added',
+                            Strings.f(
+                              'details_added_count',
+                              '${3 - _missing.length}',
+                            ),
                             style: const TextStyle(
                               color: AppColors.textSecondary,
                             ),
@@ -183,7 +187,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                     ? null
                                     : () => _edit(_missing.first),
                                 child: Text(
-                                  'Add ${_missing.first.toLowerCase()}',
+                                  Strings.f(
+                                    'add_field',
+                                    profileFieldLabel(
+                                      _missing.first,
+                                    ).toLowerCase(),
+                                  ),
                                   style: const TextStyle(color: AppColors.gold),
                                 ),
                               ),
@@ -217,7 +226,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           ),
                           leading: Icon(entry.$2, color: AppColors.gold),
                           title: Text(
-                            entry.$1,
+                            profileFieldLabel(entry.$1),
                             style: const TextStyle(
                               color: AppColors.textSecondary,
                               fontSize: 12,
@@ -236,7 +245,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           trailing: entry.$1 == 'Joined on'
                               ? null
                               : IconButton(
-                                  tooltip: 'Edit ${entry.$1}',
+                                  tooltip: Strings.f(
+                                    'edit_field_tooltip',
+                                    profileFieldLabel(entry.$1),
+                                  ),
                                   onPressed: _saving
                                       ? null
                                       : () => _edit(entry.$1),
@@ -248,16 +260,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 ),
                         ),
                       ),
-                    const AccountSection(
+                    AccountSection(
                       child: Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Icon(Icons.shield_outlined, color: AppColors.gold),
-                          SizedBox(width: 12),
+                          const Icon(
+                            Icons.shield_outlined,
+                            color: AppColors.gold,
+                          ),
+                          const SizedBox(width: 12),
                           Expanded(
                             child: Text(
-                              'Your profile details are saved on this device. They are not verified account credentials in this demo.',
-                              style: TextStyle(
+                              Strings.t('profile_local_note'),
+                              style: const TextStyle(
                                 color: AppColors.textSecondary,
                                 height: 1.5,
                                 fontSize: 12,
@@ -278,9 +293,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         Icons.lock_outline,
                         color: AppColors.gold,
                       ),
-                      title: const Text(
-                        'Change password',
-                        style: TextStyle(color: AppColors.textPrimary),
+                      title: Text(
+                        Strings.t('change_password'),
+                        style: const TextStyle(color: AppColors.textPrimary),
                       ),
                       trailing: const Icon(
                         Icons.chevron_right,
@@ -319,7 +334,7 @@ class _EditProfileDialogState extends State<_EditProfileDialog> {
   @override
   Widget build(BuildContext context) => AlertDialog(
     backgroundColor: AppColors.surface,
-    title: Text('Edit ${widget.field}'),
+    title: Text(Strings.f('edit_field_title', profileFieldLabel(widget.field))),
     content: Form(
       key: _form,
       child: TextFormField(
@@ -331,7 +346,7 @@ class _EditProfileDialogState extends State<_EditProfileDialog> {
             ? TextInputType.phone
             : TextInputType.name,
         decoration: InputDecoration(
-          labelText: widget.field,
+          labelText: profileFieldLabel(widget.field),
           border: const OutlineInputBorder(),
         ),
         validator: (value) => validateProfileField(widget.field, value ?? ''),
@@ -340,7 +355,7 @@ class _EditProfileDialogState extends State<_EditProfileDialog> {
     actions: [
       TextButton(
         onPressed: () => Navigator.pop(context),
-        child: const Text('Cancel'),
+        child: Text(Strings.t('cancel')),
       ),
       TextButton(
         onPressed: () {
@@ -353,7 +368,7 @@ class _EditProfileDialogState extends State<_EditProfileDialog> {
             );
           }
         },
-        child: const Text('Save'),
+        child: Text(Strings.t('save')),
       ),
     ],
   );

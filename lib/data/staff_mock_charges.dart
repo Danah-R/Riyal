@@ -22,9 +22,5 @@ const List<MockCharge> staffMockCharges = [
     matchedIconColor: Color(0xFF6B7A3A),
     matchedCategory: StaffCategories.household,
   ),
-  MockCharge(
-    merchant: 'ATM WITHDRAWAL',
-    amount: 500,
-    daysAgo: 3,
-  ),
+  MockCharge(merchant: 'ATM WITHDRAWAL', amount: 500, daysAgo: 3),
 ];

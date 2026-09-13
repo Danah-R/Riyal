@@ -5,6 +5,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 
 import '../theme/app_theme.dart';
 import '../widgets/gold_coin_painter.dart';
+import '../l10n/strings.dart';
 import '../widgets/hero_tags.dart';
 import 'main_shell.dart';
 
@@ -174,9 +175,9 @@ class _SplashScreenState extends State<SplashScreen>
                     opacity: taglineT,
                     child: Transform.translate(
                       offset: Offset(0, (1 - taglineT) * 10),
-                      child: const Text(
-                        'Know where your money goes.',
-                        style: TextStyle(
+                      child: Text(
+                        Strings.t('splash_tagline'),
+                        style: const TextStyle(
                           color: AppColors.textSecondary,
                           fontSize: 13,
                         ),

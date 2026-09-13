@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import '../l10n/strings.dart';
 import '../theme/app_theme.dart';
 import 'main_shell.dart';
 import 'signup_screen.dart';
@@ -66,9 +67,9 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                       ),
                       const SizedBox(height: 10),
-                      const Text(
-                        'Your spending, in balance.',
-                        style: TextStyle(
+                      Text(
+                        Strings.t('brand_tagline'),
+                        style: const TextStyle(
                           color: AppColors.textSecondary,
                           fontSize: 13,
                         ),
@@ -132,9 +133,9 @@ class _LoginScreenState extends State<LoginScreen> {
                                                 mainAxisAlignment:
                                                     MainAxisAlignment.center,
                                                 children: [
-                                                  const Text(
-                                                    'Login',
-                                                    style: TextStyle(
+                                                  Text(
+                                                    Strings.t('login_heading'),
+                                                    style: const TextStyle(
                                                       fontFamily: 'Georgia',
                                                       fontSize: 36,
                                                       fontWeight:
@@ -144,16 +145,18 @@ class _LoginScreenState extends State<LoginScreen> {
                                                     ),
                                                   ),
                                                   const SizedBox(height: 8),
-                                                  const Text(
-                                                    'Sign in to your account',
-                                                    style: TextStyle(
+                                                  Text(
+                                                    Strings.t(
+                                                      'signin_subtitle',
+                                                    ),
+                                                    style: const TextStyle(
                                                       color: AppColors.staff,
                                                       fontSize: 14,
                                                     ),
                                                   ),
                                                   const SizedBox(height: 18),
                                                   _field(
-                                                    hint: 'Username',
+                                                    hint: Strings.t('username'),
                                                     icon: Icons
                                                         .person_outline_rounded,
                                                     autofillHints: const [
@@ -162,7 +165,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                                   ),
                                                   const SizedBox(height: 8),
                                                   _field(
-                                                    hint: 'Password',
+                                                    hint: Strings.t('password'),
                                                     icon: Icons
                                                         .lock_outline_rounded,
                                                     password: true,
@@ -224,9 +227,11 @@ class _LoginScreenState extends State<LoginScreen> {
                                                         shape:
                                                             const StadiumBorder(),
                                                       ),
-                                                      child: const Text(
-                                                        'SIGN IN',
-                                                        style: TextStyle(
+                                                      child: Text(
+                                                        Strings.t(
+                                                          'sign_in_button',
+                                                        ),
+                                                        style: const TextStyle(
                                                           fontSize: 16,
                                                           fontWeight:
                                                               FontWeight.w700,
@@ -257,24 +262,24 @@ class _LoginScreenState extends State<LoginScreen> {
                             context,
                           ).push(authCoinRoute(const SignupScreen()));
                         },
-                        child: const Text(
-                          "Don't have an account? Sign up",
-                          style: TextStyle(color: AppColors.gold),
+                        child: Text(
+                          Strings.t('no_account_signup'),
+                          style: const TextStyle(color: AppColors.gold),
                         ),
                       ),
                       const SizedBox(height: 32),
-                      const Row(
+                      Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Icon(
+                          const Icon(
                             Icons.shield_outlined,
                             size: 15,
                             color: AppColors.textSecondary,
                           ),
-                          SizedBox(width: 7),
+                          const SizedBox(width: 7),
                           Text(
-                            'Your finances stay on your device',
-                            style: TextStyle(
+                            Strings.t('finances_on_device'),
+                            style: const TextStyle(
                               color: AppColors.textSecondary,
                               fontSize: 12,
                             ),
@@ -308,7 +313,7 @@ class _LoginScreenState extends State<LoginScreen> {
         textInputAction: password ? TextInputAction.done : TextInputAction.next,
         onFieldSubmitted: password ? (_) => _signIn() : null,
         validator: (value) => value == null || value.trim().isEmpty
-            ? 'Enter your ${hint.toLowerCase()}'
+            ? Strings.f('enter_your_field', hint.toLowerCase())
             : null,
         style: const TextStyle(color: AppColors.surface, fontSize: 16),
         cursorColor: AppColors.goldDark,
@@ -320,7 +325,9 @@ class _LoginScreenState extends State<LoginScreen> {
           prefixIcon: Icon(icon, color: AppColors.staff, size: 22),
           suffixIcon: password
               ? IconButton(
-                  tooltip: _obscurePassword ? 'Show password' : 'Hide password',
+                  tooltip: _obscurePassword
+                      ? Strings.t('show_password')
+                      : Strings.t('hide_password'),
                   onPressed: () =>
                       setState(() => _obscurePassword = !_obscurePassword),
                   icon: Icon(

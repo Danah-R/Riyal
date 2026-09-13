@@ -29,7 +29,8 @@ class TrackedItem {
 
   int get renewsInDays => nextBillingDate.difference(DateTime.now()).inDays;
 
-  double get monthlyAmount => cycle == BillingCycle.monthly ? amount : amount / 12;
+  double get monthlyAmount =>
+      cycle == BillingCycle.monthly ? amount : amount / 12;
 }
 
 /// Holds the list of tracked items for one domain (Utilities, Staff, ...).

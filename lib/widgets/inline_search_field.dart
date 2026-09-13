@@ -30,7 +30,10 @@ class InlineSearchField extends StatelessWidget {
             decoration: InputDecoration(
               hintText: hintText,
               hintStyle: const TextStyle(color: AppColors.textSecondary),
-              prefixIcon: const Icon(Icons.search, color: AppColors.textSecondary),
+              prefixIcon: const Icon(
+                Icons.search,
+                color: AppColors.textSecondary,
+              ),
               filled: true,
               fillColor: AppColors.surface,
               contentPadding: const EdgeInsets.symmetric(vertical: 0),

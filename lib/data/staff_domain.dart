@@ -6,8 +6,8 @@ import 'tracked_domain.dart';
 
 final staffDomain = TrackedDomain(
   routeName: 'staff',
-  itemNounSingular: 'staff member',
-  addFromScratchTitle: 'Choose a role',
+  nounKey: 'staff_member',
+  analyticsCategoryKey: 'Staff',
   catalog: staffCatalog,
   categories: StaffCategories.values,
   store: StaffStore.instance,

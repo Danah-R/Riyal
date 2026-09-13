@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../data/tracked_category.dart';
+import '../l10n/strings.dart';
 import '../theme/app_theme.dart';
 
 class CategoryFilterBar extends StatelessWidget {
@@ -44,14 +45,18 @@ class CategoryFilterBar extends StatelessWidget {
                 Icon(
                   icon,
                   size: 15,
-                  color: isSelected ? const Color(0xFF1B1F16) : AppColors.textSecondary,
+                  color: isSelected
+                      ? const Color(0xFF1B1F16)
+                      : AppColors.textSecondary,
                 ),
                 const SizedBox(width: 6),
               ],
               Text(
                 label,
                 style: TextStyle(
-                  color: isSelected ? const Color(0xFF1B1F16) : AppColors.textSecondary,
+                  color: isSelected
+                      ? const Color(0xFF1B1F16)
+                      : AppColors.textSecondary,
                   fontSize: 13,
                   fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
                 ),
@@ -72,7 +77,7 @@ class CategoryFilterBar extends StatelessWidget {
           if (showAll) {
             if (i == 0) {
               return chip(
-                label: 'All',
+                label: Strings.t('category_all'),
                 icon: null,
                 isSelected: selected == null,
                 onTap: () => onChanged(null),

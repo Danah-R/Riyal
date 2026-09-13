@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../l10n/strings.dart';
 import '../screens/profile_screen.dart';
 import '../screens/settings_screen.dart';
 import '../screens/contact_us_screen.dart';
@@ -64,12 +65,12 @@ class ProfileMenuButton extends StatelessWidget {
                           children: [
                             Row(
                               children: [
-                                const Expanded(
+                                Expanded(
                                   child: Padding(
-                                    padding: EdgeInsets.only(left: 6),
+                                    padding: const EdgeInsets.only(left: 6),
                                     child: Text(
-                                      'Account',
-                                      style: TextStyle(
+                                      Strings.t('account'),
+                                      style: const TextStyle(
                                         color: AppColors.textPrimary,
                                         fontSize: 18,
                                         fontWeight: FontWeight.w600,
@@ -78,7 +79,7 @@ class ProfileMenuButton extends StatelessWidget {
                                   ),
                                 ),
                                 IconButton(
-                                  tooltip: 'Close',
+                                  tooltip: Strings.t('close'),
                                   onPressed: () => Navigator.pop(dialogContext),
                                   icon: const Icon(
                                     Icons.close,
@@ -113,7 +114,15 @@ class ProfileMenuButton extends StatelessWidget {
                                       color: AppColors.gold,
                                     ),
                                     title: Text(
-                                      entry.$1,
+                                      switch (entry.$1) {
+                                        'Profile' => Strings.t(
+                                          'profile_menu_item',
+                                        ),
+                                        'Settings' => Strings.t(
+                                          'settings_menu_item',
+                                        ),
+                                        _ => Strings.t('contact_us_menu_item'),
+                                      },
                                       style: const TextStyle(
                                         color: AppColors.textPrimary,
                                         fontWeight: FontWeight.w600,
@@ -140,7 +149,7 @@ class ProfileMenuButton extends StatelessWidget {
                                   Icons.logout_rounded,
                                   size: 20,
                                 ),
-                                label: const Text('Log out'),
+                                label: Text(Strings.t('log_out')),
                               ),
                             ),
                           ],
@@ -173,7 +182,7 @@ class ProfileMenuButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => IconButton(
-    tooltip: 'Account menu',
+    tooltip: Strings.t('account_menu'),
     padding: EdgeInsets.zero,
     onPressed: () => _open(context),
     icon: const Hero(tag: heroAppCoinTag, child: FlippingCoinIcon()),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../l10n/strings.dart';
 import '../theme/app_theme.dart';
 import 'select_app_screen.dart';
 import 'select_transaction_screen.dart';
@@ -43,24 +44,27 @@ class _AddSubscriptionSheet extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 20),
-              const Text(
-                'Add a subscription',
-                style: TextStyle(
+              Text(
+                Strings.t('add_a_subscription'),
+                style: const TextStyle(
                   color: AppColors.textPrimary,
                   fontSize: 18,
                   fontWeight: FontWeight.w600,
                 ),
               ),
               const SizedBox(height: 4),
-              const Text(
-                'How would you like to add it?',
-                style: TextStyle(color: AppColors.textSecondary, fontSize: 13),
+              Text(
+                Strings.t('how_would_you_add'),
+                style: const TextStyle(
+                  color: AppColors.textSecondary,
+                  fontSize: 13,
+                ),
               ),
               const SizedBox(height: 18),
               _SourceOption(
                 icon: Icons.receipt_long_rounded,
-                title: 'From a previous transaction',
-                subtitle: 'Pick from your recent charges',
+                title: Strings.t('from_previous_transaction'),
+                subtitle: Strings.t('pick_from_recent_charges'),
                 onTap: () {
                   Navigator.of(context).pop();
                   Navigator.of(context).push(
@@ -73,8 +77,8 @@ class _AddSubscriptionSheet extends StatelessWidget {
               const SizedBox(height: 12),
               _SourceOption(
                 icon: Icons.add_circle_outline_rounded,
-                title: 'From scratch',
-                subtitle: 'Choose an app and enter the details',
+                title: Strings.t('from_scratch'),
+                subtitle: Strings.t('choose_app_enter_details'),
                 onTap: () {
                   Navigator.of(context).pop();
                   Navigator.of(context).push(
@@ -145,7 +149,10 @@ class _SourceOption extends StatelessWidget {
                   const SizedBox(height: 2),
                   Text(
                     subtitle,
-                    style: const TextStyle(color: AppColors.textSecondary, fontSize: 12.5),
+                    style: const TextStyle(
+                      color: AppColors.textSecondary,
+                      fontSize: 12.5,
+                    ),
                   ),
                 ],
               ),

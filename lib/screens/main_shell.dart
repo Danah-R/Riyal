@@ -27,7 +27,7 @@ class _MainShellState extends State<MainShell> {
       body: IndexedStack(
         index: _index,
         children: [
-          HomeBody(onNavigateToTab: _goToTab),
+          const HomeBody(),
           const SubscriptionsBody(),
           const UtilitiesBody(),
           const StaffBody(),

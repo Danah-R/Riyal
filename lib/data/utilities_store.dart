@@ -14,7 +14,8 @@ class UtilitiesStore {
     return [
       TrackedItem(
         name: 'Saudi Electricity Company',
-        logoAsset: 'lib/assets/logos/1696007538-89-saudi-electricity-company.jpg',
+        logoAsset:
+            'lib/assets/logos/1696007538-89-saudi-electricity-company.jpg',
         amount: 150,
         cycle: BillingCycle.monthly,
         nextBillingDate: now.add(const Duration(days: 5)),

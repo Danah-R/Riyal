@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import '../data/notifications_store.dart';
+import '../l10n/strings.dart';
 import '../theme/app_theme.dart';
 import '../widgets/coin_back_button.dart';
 
@@ -11,13 +12,13 @@ class NotificationsScreen extends StatelessWidget {
     backgroundColor: AppColors.background,
     appBar: AppBar(
       leading: const CoinBackButton(),
-      title: const Text('Notifications'),
+      title: Text(Strings.t('notifications_title')),
       backgroundColor: AppColors.background,
     ),
     body: ValueListenableBuilder<List<PaymentNotice>>(
       valueListenable: NotificationsStore.instance.notices,
       builder: (context, notices, _) => notices.isEmpty
-          ? const Center(child: Text('No notifications yet'))
+          ? Center(child: Text(Strings.t('no_notifications_yet')))
           : ListView.separated(
               padding: const EdgeInsets.all(20),
               itemCount: notices.length,
@@ -159,8 +160,8 @@ Future<void> showNotificationsPreview(BuildContext context) async {
                                 Expanded(
                                   child: Text(
                                     expanded
-                                        ? 'All notifications'
-                                        : 'Notifications',
+                                        ? Strings.t('all_notifications')
+                                        : Strings.t('notifications_title'),
                                     style: const TextStyle(
                                       color: AppColors.textPrimary,
                                       fontSize: 18,
@@ -169,7 +170,7 @@ Future<void> showNotificationsPreview(BuildContext context) async {
                                   ),
                                 ),
                                 IconButton(
-                                  tooltip: 'Close',
+                                  tooltip: Strings.t('close'),
                                   onPressed: () => Navigator.pop(dialogContext),
                                   icon: const Icon(
                                     Icons.close,
@@ -181,9 +182,11 @@ Future<void> showNotificationsPreview(BuildContext context) async {
                           ),
                           Flexible(
                             child: notices.isEmpty
-                                ? const Padding(
-                                    padding: EdgeInsets.all(20),
-                                    child: Text('No notifications yet'),
+                                ? Padding(
+                                    padding: const EdgeInsets.all(20),
+                                    child: Text(
+                                      Strings.t('no_notifications_yet'),
+                                    ),
                                   )
                                 : ListView.separated(
                                     shrinkWrap: true,
@@ -214,7 +217,9 @@ Future<void> showNotificationsPreview(BuildContext context) async {
                                   onPressed: () =>
                                       setPopupState(() => expanded = !expanded),
                                   child: Text(
-                                    expanded ? 'Show less' : 'See all',
+                                    expanded
+                                        ? Strings.t('show_less')
+                                        : Strings.t('see_all'),
                                     style: const TextStyle(
                                       color: AppColors.gold,
                                     ),

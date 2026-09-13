@@ -3,6 +3,7 @@ import '../widgets/coin_back_button.dart';
 
 import '../data/tracked_category.dart';
 import '../data/tracked_domain.dart';
+import '../l10n/strings.dart';
 import '../theme/app_theme.dart';
 import '../widgets/category_filter_bar.dart';
 import '../widgets/logo_image.dart';
@@ -57,7 +58,7 @@ class _SelectCatalogScreenState extends State<SelectCatalogScreen> {
                 onChanged: (v) => setState(() => _query = v),
                 style: const TextStyle(color: AppColors.textPrimary),
                 decoration: InputDecoration(
-                  hintText: 'Search',
+                  hintText: Strings.t('search_generic'),
                   hintStyle: const TextStyle(color: AppColors.textSecondary),
                   prefixIcon: const Icon(
                     Icons.search,
@@ -81,10 +82,12 @@ class _SelectCatalogScreenState extends State<SelectCatalogScreen> {
               const SizedBox(height: 12),
               Expanded(
                 child: results.isEmpty
-                    ? const Center(
+                    ? Center(
                         child: Text(
-                          'No results found',
-                          style: TextStyle(color: AppColors.textSecondary),
+                          Strings.t('no_results_found'),
+                          style: const TextStyle(
+                            color: AppColors.textSecondary,
+                          ),
                         ),
                       )
                     : GridView.builder(

@@ -5,17 +5,29 @@ import 'tracked_category.dart';
 class SubscriptionCategories {
   SubscriptionCategories._();
 
-  static const entertainment = TrackedCategory('Entertainment', Icons.movie_outlined);
-  static const ai = TrackedCategory('AI', Icons.smart_toy_outlined);
-  static const productivity =
-      TrackedCategory('Productivity', Icons.work_outline_rounded);
-  static const cloudStorage = TrackedCategory('Cloud & Storage', Icons.cloud_outlined);
-  static const fitnessWellness =
-      TrackedCategory('Fitness & Wellness', Icons.fitness_center_rounded);
-  static const education = TrackedCategory('Education', Icons.school_outlined);
-  static const shoppingDelivery =
-      TrackedCategory('Shopping & Delivery', Icons.local_shipping_outlined);
-  static const other = TrackedCategory('Other', Icons.more_horiz_rounded);
+  static const entertainment = TrackedCategory(
+    'entertainment',
+    Icons.movie_outlined,
+  );
+  static const ai = TrackedCategory('ai', Icons.smart_toy_outlined);
+  static const productivity = TrackedCategory(
+    'productivity',
+    Icons.work_outline_rounded,
+  );
+  static const cloudStorage = TrackedCategory(
+    'cloud_storage',
+    Icons.cloud_outlined,
+  );
+  static const fitnessWellness = TrackedCategory(
+    'fitness_wellness',
+    Icons.fitness_center_rounded,
+  );
+  static const education = TrackedCategory('education', Icons.school_outlined);
+  static const shoppingDelivery = TrackedCategory(
+    'shopping_delivery',
+    Icons.local_shipping_outlined,
+  );
+  static const other = TrackedCategory('other', Icons.more_horiz_rounded);
 
   static const values = [
     entertainment,

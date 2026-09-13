@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import '../data/app_settings.dart';
 import '../data/notifications_store.dart';
+import '../l10n/app_locale.dart';
+import '../l10n/strings.dart';
 import '../theme/app_theme.dart';
 import '../widgets/account_section.dart';
 import '../widgets/coin_back_button.dart';
+import 'accounts_screen.dart';
 import 'profile_screen.dart';
 import 'contact_us_screen.dart';
 
@@ -16,6 +19,8 @@ class SettingsScreen extends StatefulWidget {
 class _SettingsScreenState extends State<SettingsScreen> {
   final _settings = AppSettings.instance;
   bool _saving = false;
+  bool _changingLanguage = false;
+
   Future<void> _save(bool enabled, int days) async {
     setState(() => _saving = true);
     try {
@@ -26,18 +31,34 @@ class _SettingsScreenState extends State<SettingsScreen> {
       if (mounted) {
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(const SnackBar(content: Text('Settings saved')));
+        ).showSnackBar(SnackBar(content: Text(Strings.t('settings_saved'))));
       }
-    } catch (_) {
+    } catch (error) {
+      debugPrint('Settings save failed: $error');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Could not save settings. Please try again.'),
-          ),
+          SnackBar(content: Text(Strings.t('settings_save_failed'))),
         );
       }
     } finally {
       if (mounted) setState(() => _saving = false);
+    }
+  }
+
+  Future<void> _setLanguage(String code) async {
+    if (_settings.languageCode == code) return;
+    setState(() => _changingLanguage = true);
+    try {
+      await AppLocale.set(Locale(code)).timeout(const Duration(seconds: 5));
+    } catch (error) {
+      debugPrint('Language change failed: $error');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(Strings.t('settings_save_failed'))),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _changingLanguage = false);
     }
   }
 
@@ -47,7 +68,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     appBar: AppBar(
       backgroundColor: AppColors.background,
       leading: const CoinBackButton(),
-      title: const Text('Settings'),
+      title: Text(Strings.t('settings_title')),
     ),
     body: SingleChildScrollView(
       padding: const EdgeInsets.fromLTRB(20, 12, 20, 32),
@@ -57,18 +78,18 @@ class _SettingsScreenState extends State<SettingsScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const AccountPageHeader(
+              AccountPageHeader(
                 icon: Icons.settings_outlined,
-                title: 'Make Riyal yours',
-                subtitle: 'A few preferences for your everyday payments.',
+                title: Strings.t('settings_header_title'),
+                subtitle: Strings.t('settings_header_subtitle'),
               ),
               AccountSection(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
-                      'PAYMENT REMINDERS',
-                      style: TextStyle(
+                    Text(
+                      Strings.t('payment_reminders_section'),
+                      style: const TextStyle(
                         color: AppColors.gold,
                         fontSize: 12,
                         fontWeight: FontWeight.w600,
@@ -79,16 +100,16 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     SwitchListTile.adaptive(
                       contentPadding: EdgeInsets.zero,
                       activeTrackColor: AppColors.gold,
-                      title: const Text(
-                        'Upcoming payments',
-                        style: TextStyle(
+                      title: Text(
+                        Strings.t('upcoming_payments'),
+                        style: const TextStyle(
                           color: AppColors.textPrimary,
                           fontWeight: FontWeight.w600,
                         ),
                       ),
-                      subtitle: const Text(
-                        'Renewals, utility bills and staff payments.',
-                        style: TextStyle(
+                      subtitle: Text(
+                        Strings.t('upcoming_payments_sub'),
+                        style: const TextStyle(
                           color: AppColors.textSecondary,
                           height: 1.5,
                         ),
@@ -99,9 +120,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           : (value) => _save(value, _settings.reminderDays),
                     ),
                     const Divider(color: AppColors.cardBorder, height: 28),
-                    const Text(
-                      'Remind me before payment',
-                      style: TextStyle(color: AppColors.textPrimary),
+                    Text(
+                      Strings.t('remind_before_payment'),
+                      style: const TextStyle(color: AppColors.textPrimary),
                     ),
                     const SizedBox(height: 12),
                     Wrap(
@@ -110,7 +131,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       children: [
                         for (final days in [1, 3, 5, 7])
                           ChoiceChip(
-                            label: Text('$days ${days == 1 ? 'day' : 'days'}'),
+                            label: Text(
+                              '$days ${days == 1 ? Strings.t('day_singular') : Strings.t('day_plural')}',
+                            ),
                             selected: _settings.reminderDays == days,
                             selectedColor: AppColors.gold,
                             labelStyle: TextStyle(
@@ -125,9 +148,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       ],
                     ),
                     const SizedBox(height: 16),
-                    const Text(
-                      'Applies to new reminders in your in-app inbox. Existing messages stay in your history. New-item notifications remain enabled.',
-                      style: TextStyle(
+                    Text(
+                      Strings.t('reminder_note'),
+                      style: const TextStyle(
                         color: AppColors.textSecondary,
                         fontSize: 12,
                         height: 1.6,
@@ -151,8 +174,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         Icons.person_outline,
                         color: AppColors.gold,
                       ),
-                      title: const Text('Personal details'),
-                      subtitle: const Text('Name, email and phone number'),
+                      title: Text(Strings.t('personal_details')),
+                      subtitle: Text(Strings.t('personal_details_sub')),
                       trailing: const Icon(
                         Icons.chevron_right,
                         color: AppColors.gold,
@@ -164,15 +187,34 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       ),
                     ),
                     const Divider(color: AppColors.cardBorder),
-                    const ListTile(
+                    ListTile(
                       contentPadding: EdgeInsets.zero,
-                      leading: Icon(
+                      leading: const Icon(
+                        Icons.account_balance_outlined,
+                        color: AppColors.gold,
+                      ),
+                      title: Text(Strings.t('accounts_title')),
+                      subtitle: Text(Strings.t('accounts_sub')),
+                      trailing: const Icon(
+                        Icons.chevron_right,
+                        color: AppColors.gold,
+                      ),
+                      onTap: () => Navigator.of(context).push(
+                        MaterialPageRoute<void>(
+                          builder: (_) => const AccountsScreen(),
+                        ),
+                      ),
+                    ),
+                    const Divider(color: AppColors.cardBorder),
+                    ListTile(
+                      contentPadding: EdgeInsets.zero,
+                      leading: const Icon(
                         Icons.payments_outlined,
                         color: AppColors.gold,
                       ),
-                      title: Text('Currency'),
-                      subtitle: Text('Saudi riyal'),
-                      trailing: Text(
+                      title: Text(Strings.t('currency')),
+                      subtitle: Text(Strings.t('currency_sub')),
+                      trailing: const Text(
                         'SAR',
                         style: TextStyle(
                           color: AppColors.gold,
@@ -181,44 +223,97 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       ),
                     ),
                     const Divider(color: AppColors.cardBorder),
-                    const ListTile(
+                    ListTile(
                       contentPadding: EdgeInsets.zero,
-                      leading: Icon(
+                      leading: const Icon(
                         Icons.dark_mode_outlined,
                         color: AppColors.gold,
                       ),
-                      title: Text('Appearance'),
-                      subtitle: Text('Riyal dark theme'),
-                      trailing: Icon(
+                      title: Text(Strings.t('appearance')),
+                      subtitle: Text(Strings.t('appearance_sub')),
+                      trailing: const Icon(
                         Icons.check_circle_outline,
                         color: AppColors.gold,
                       ),
                     ),
+                    const Divider(color: AppColors.cardBorder),
+                    ListTile(
+                      contentPadding: EdgeInsets.zero,
+                      leading: const Icon(
+                        Icons.language_outlined,
+                        color: AppColors.gold,
+                      ),
+                      title: Text(Strings.t('language')),
+                      subtitle: Text(Strings.t('language_sub')),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 4),
+                      child: Wrap(
+                        spacing: 8,
+                        runSpacing: 8,
+                        children: [
+                          ChoiceChip(
+                            label: Text(Strings.t('language_english')),
+                            selected: _settings.languageCode == 'en',
+                            selectedColor: AppColors.gold,
+                            labelStyle: TextStyle(
+                              color: _settings.languageCode == 'en'
+                                  ? AppColors.background
+                                  : AppColors.textSecondary,
+                            ),
+                            onSelected: _changingLanguage
+                                ? null
+                                : (_) => _setLanguage('en'),
+                          ),
+                          ChoiceChip(
+                            label: Text(Strings.t('language_arabic')),
+                            selected: _settings.languageCode == 'ar',
+                            selectedColor: AppColors.gold,
+                            labelStyle: TextStyle(
+                              color: _settings.languageCode == 'ar'
+                                  ? AppColors.background
+                                  : AppColors.textSecondary,
+                            ),
+                            onSelected: _changingLanguage
+                                ? null
+                                : (_) => _setLanguage('ar'),
+                          ),
+                        ],
+                      ),
+                    ),
+                    if (_changingLanguage)
+                      const Padding(
+                        padding: EdgeInsets.only(top: 4),
+                        child: LinearProgressIndicator(color: AppColors.gold),
+                      ),
                   ],
                 ),
               ),
               const SizedBox(height: 16),
-              const AccountSection(
+              AccountSection(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Row(
                       children: [
-                        Icon(Icons.shield_outlined, color: AppColors.gold),
-                        SizedBox(width: 10),
+                        const Icon(
+                          Icons.shield_outlined,
+                          color: AppColors.gold,
+                        ),
+                        const SizedBox(width: 10),
                         Text(
-                          'Your data, on your device',
-                          style: TextStyle(
+                          Strings.t('data_on_device_title'),
+                          style: const TextStyle(
                             color: AppColors.textPrimary,
                             fontWeight: FontWeight.w600,
                           ),
                         ),
                       ],
                     ),
-                    SizedBox(height: 12),
+                    const SizedBox(height: 12),
                     Text(
-                      'Profile edits, preferences and notification read status are saved locally. Payment data is currently a demo and resets when the app restarts. No bank account is connected.',
-                      style: TextStyle(
+                      Strings.t('data_on_device_body'),
+                      style: const TextStyle(
                         color: AppColors.textSecondary,
                         height: 1.6,
                       ),
@@ -234,8 +329,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     Icons.help_outline,
                     color: AppColors.gold,
                   ),
-                  title: const Text('Help & feedback'),
-                  subtitle: const Text('Quick answers and suggestions'),
+                  title: Text(Strings.t('help_feedback')),
+                  subtitle: Text(Strings.t('help_feedback_sub')),
                   trailing: const Icon(
                     Icons.chevron_right,
                     color: AppColors.gold,
@@ -248,10 +343,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 ),
               ),
               const SizedBox(height: 24),
-              const Center(
+              Center(
                 child: Text(
-                  'RIYAL · Student demo',
-                  style: TextStyle(
+                  Strings.t('settings_footer'),
+                  style: const TextStyle(
                     color: AppColors.textSecondary,
                     fontSize: 12,
                     letterSpacing: 1.5,

@@ -26,9 +26,5 @@ const List<MockCharge> utilityMockCharges = [
     matchedLogo: 'lib/assets/logos/saudi water comp.png',
     matchedCategory: UtilityCategories.water,
   ),
-  MockCharge(
-    merchant: 'PANDA HYPERMARKET',
-    amount: 96,
-    daysAgo: 2,
-  ),
+  MockCharge(merchant: 'PANDA HYPERMARKET', amount: 96, daysAgo: 2),
 ];

@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
+import '../l10n/strings.dart';
 import '../theme/app_theme.dart';
 import 'gold_coin_painter.dart';
 
@@ -42,7 +43,7 @@ class _CoinBackButtonState extends State<CoinBackButton>
 
   @override
   Widget build(BuildContext context) => IconButton(
-    tooltip: 'Back',
+    tooltip: Strings.t('back'),
     onPressed: _back,
     padding: const EdgeInsets.all(6),
     icon: AnimatedBuilder(
@@ -63,7 +64,9 @@ class _CoinBackButtonState extends State<CoinBackButton>
               child: Center(
                 child: Transform(
                   alignment: Alignment.center,
-                  transform: Matrix4.rotationY(math.cos(angle) < 0 ? math.pi : 0),
+                  transform: Matrix4.rotationY(
+                    math.cos(angle) < 0 ? math.pi : 0,
+                  ),
                   child: const Icon(
                     Icons.arrow_back_rounded,
                     color: AppColors.surface,

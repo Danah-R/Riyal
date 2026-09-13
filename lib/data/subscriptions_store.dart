@@ -1,18 +1,85 @@
 import 'package:flutter/foundation.dart';
 
+import 'lean_customer_store.dart';
 import 'subscription.dart';
 import 'subscription_category.dart';
+import 'supabase_config.dart';
+import 'tracked_category.dart';
 
+/// Backed by the Supabase `subscriptions` table (see
+/// supabase/migrations/0001_init.sql) instead of an in-memory list — a
+/// first run for a device seeds the same demo subscriptions the app
+/// always shipped with, then persists them so they're stable afterwards.
 class SubscriptionsStore {
-  SubscriptionsStore._() : subscriptions = ValueNotifier<List<Subscription>>(_seed());
+  SubscriptionsStore._();
 
   static final SubscriptionsStore instance = SubscriptionsStore._();
 
-  final ValueNotifier<List<Subscription>> subscriptions;
+  final ValueNotifier<List<Subscription>> subscriptions =
+      ValueNotifier<List<Subscription>>([]);
 
-  void add(Subscription subscription) {
-    subscriptions.value = [...subscriptions.value, subscription];
+  Future<void> load() async {
+    final deviceId = await LeanCustomerStore.instance.getOrCreateDeviceId();
+    final rows = await supabase
+        .from('subscriptions')
+        .select()
+        .eq('device_id', deviceId)
+        .order('created_at');
+
+    if (rows.isEmpty) {
+      final seeded = _seed();
+      for (final subscription in seeded) {
+        await _insert(deviceId, subscription);
+      }
+      subscriptions.value = seeded;
+      return;
+    }
+
+    subscriptions.value = rows.map(_fromRow).toList();
   }
+
+  /// Updates the in-memory list immediately (callers don't await this), and
+  /// persists in the background — a persistence failure shouldn't crash an
+  /// unrelated caller that fired this off without awaiting it.
+  Future<void> add(Subscription subscription) async {
+    subscriptions.value = [...subscriptions.value, subscription];
+    try {
+      final deviceId = await LeanCustomerStore.instance.getOrCreateDeviceId();
+      await _insert(deviceId, subscription);
+    } catch (error) {
+      debugPrint('Subscription persist failed: $error');
+    }
+  }
+
+  Future<void> _insert(String deviceId, Subscription subscription) {
+    return supabase.from('subscriptions').insert({
+      'device_id': deviceId,
+      'name': subscription.name,
+      'logo_asset': subscription.logoAsset,
+      'amount': subscription.amount,
+      'cycle': subscription.cycle.name,
+      'next_billing_date': subscription.nextBillingDate
+          .toIso8601String()
+          .split('T')
+          .first,
+      'category_key': subscription.category.key,
+    });
+  }
+
+  Subscription _fromRow(Map<String, dynamic> row) => Subscription(
+    name: row['name'] as String,
+    logoAsset: row['logo_asset'] as String?,
+    amount: (row['amount'] as num).toDouble(),
+    cycle: BillingCycle.values.byName(row['cycle'] as String),
+    nextBillingDate: DateTime.parse(row['next_billing_date'] as String),
+    category: _categoryFromKey(row['category_key'] as String),
+  );
+
+  TrackedCategory _categoryFromKey(String key) =>
+      SubscriptionCategories.values.firstWhere(
+        (c) => c.key == key,
+        orElse: () => SubscriptionCategories.other,
+      );
 
   static List<Subscription> _seed() {
     final now = DateTime.now();

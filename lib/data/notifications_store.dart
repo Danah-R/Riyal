@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import '../l10n/strings.dart';
 import 'subscriptions_store.dart';
 import 'utilities_store.dart';
 import 'staff_store.dart';
@@ -59,15 +60,16 @@ class NotificationsStore {
         ]),
       );
       final formattedDate = '${date.day}/${date.month}/${date.year}';
+      final categoryDisplay = Strings.categoryDisplay(category);
       if (_seen.add(identity)) {
         additions.add(
           PaymentNotice(
             id: 'added:$itemId',
             title: category == 'Subscriptions'
-                ? 'New subscription'
-                : 'New payment commitment',
+                ? Strings.t('notice_new_subscription')
+                : Strings.t('notice_new_commitment'),
             message:
-                '$name · $category\nSAR ${amount.toStringAsFixed(2)} · Next payment $formattedDate',
+                '$name · $categoryDisplay\nSAR ${amount.toStringAsFixed(2)} · Next payment $formattedDate',
             createdAt: seed
                 ? now.subtract(Duration(days: 7, seconds: _seen.length))
                 : now,
@@ -85,10 +87,10 @@ class NotificationsStore {
           PaymentNotice(
             id: 'reminder:$itemId:${itemId.contains('"demo"') ? 'seed' : date.toIso8601String()}',
             title: category == 'Subscriptions'
-                ? 'Subscription renewal reminder'
-                : 'Payment reminder',
+                ? Strings.t('notice_renewal_reminder')
+                : Strings.t('notice_payment_reminder'),
             message:
-                '$name · $category\nSAR ${amount.toStringAsFixed(2)} due $formattedDate\nReminder: $leadDays days before payment.',
+                '$name · $categoryDisplay\nSAR ${amount.toStringAsFixed(2)} due $formattedDate\n${Strings.reminderLeadNote(leadDays)}',
             createdAt: reminderDate,
             reminder: true,
           ),

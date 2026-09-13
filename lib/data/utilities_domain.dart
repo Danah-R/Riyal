@@ -6,8 +6,8 @@ import 'utility_mock_charges.dart';
 
 final utilitiesDomain = TrackedDomain(
   routeName: 'utilities',
-  itemNounSingular: 'utility bill',
-  addFromScratchTitle: 'Choose a provider',
+  nounKey: 'utility_bill',
+  analyticsCategoryKey: 'Utilities',
   catalog: utilityCatalog,
   categories: UtilityCategories.values,
   store: UtilitiesStore.instance,

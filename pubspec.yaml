@@ -9,8 +9,14 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  flutter_localizations:
+    sdk: flutter
   flutter_svg: ^2.2.1
   shared_preferences: ^2.5.5
+  flutter_dotenv: ^5.2.1
+  lean_sdk_flutter: ^3.0.17
+  http: ^1.2.2
+  supabase_flutter: ^2.8.0
 
 dev_dependencies:
   flutter_test:
@@ -22,3 +28,4 @@ flutter:
   assets:
     - assets/icons/
     - lib/assets/logos/
+    - .env

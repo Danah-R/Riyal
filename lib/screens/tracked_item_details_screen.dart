@@ -5,6 +5,7 @@ import '../data/subscription.dart' show BillingCycle;
 import '../data/tracked_category.dart';
 import '../data/tracked_domain.dart';
 import '../data/tracked_item.dart';
+import '../l10n/strings.dart';
 import '../theme/app_theme.dart';
 import '../widgets/category_filter_bar.dart';
 import '../widgets/logo_image.dart';
@@ -93,11 +94,11 @@ class _TrackedItemDetailsScreenState extends State<TrackedItemDetailsScreen> {
               Row(
                 children: [
                   const CoinBackButton(),
-                  const Expanded(
+                  Expanded(
                     child: Text(
-                      'Details',
+                      Strings.t('details'),
                       overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
+                      style: const TextStyle(
                         color: AppColors.textPrimary,
                         fontSize: 18,
                         fontWeight: FontWeight.w600,
@@ -132,9 +133,9 @@ class _TrackedItemDetailsScreenState extends State<TrackedItemDetailsScreen> {
                       ],
                     ),
                     const SizedBox(height: 28),
-                    const Text(
-                      'Amount (SAR)',
-                      style: TextStyle(
+                    Text(
+                      Strings.t('amount_sar'),
+                      style: const TextStyle(
                         color: AppColors.textSecondary,
                         fontSize: 13,
                       ),
@@ -163,9 +164,9 @@ class _TrackedItemDetailsScreenState extends State<TrackedItemDetailsScreen> {
                       ),
                     ),
                     const SizedBox(height: 22),
-                    const Text(
-                      'Billing cycle',
-                      style: TextStyle(
+                    Text(
+                      Strings.t('billing_cycle'),
+                      style: const TextStyle(
                         color: AppColors.textSecondary,
                         fontSize: 13,
                       ),
@@ -175,7 +176,7 @@ class _TrackedItemDetailsScreenState extends State<TrackedItemDetailsScreen> {
                       children: [
                         Expanded(
                           child: _CycleOption(
-                            label: 'Monthly',
+                            label: Strings.t('monthly'),
                             isSelected: _cycle == BillingCycle.monthly,
                             onTap: () =>
                                 setState(() => _cycle = BillingCycle.monthly),
@@ -184,7 +185,7 @@ class _TrackedItemDetailsScreenState extends State<TrackedItemDetailsScreen> {
                         const SizedBox(width: 12),
                         Expanded(
                           child: _CycleOption(
-                            label: 'Yearly',
+                            label: Strings.t('yearly'),
                             isSelected: _cycle == BillingCycle.yearly,
                             onTap: () =>
                                 setState(() => _cycle = BillingCycle.yearly),
@@ -193,9 +194,9 @@ class _TrackedItemDetailsScreenState extends State<TrackedItemDetailsScreen> {
                       ],
                     ),
                     const SizedBox(height: 22),
-                    const Text(
-                      'Category',
-                      style: TextStyle(
+                    Text(
+                      Strings.t('category_field'),
+                      style: const TextStyle(
                         color: AppColors.textSecondary,
                         fontSize: 13,
                       ),
@@ -209,9 +210,9 @@ class _TrackedItemDetailsScreenState extends State<TrackedItemDetailsScreen> {
                           setState(() => _category = c ?? _category),
                     ),
                     const SizedBox(height: 22),
-                    const Text(
-                      'Next billing date',
-                      style: TextStyle(
+                    Text(
+                      Strings.t('next_billing_date'),
+                      style: const TextStyle(
                         color: AppColors.textSecondary,
                         fontSize: 13,
                       ),
@@ -264,7 +265,7 @@ class _TrackedItemDetailsScreenState extends State<TrackedItemDetailsScreen> {
                     ),
                   ),
                   child: Text(
-                    'Add ${widget.domain.itemNounSingular}',
+                    Strings.addA(widget.domain.itemNounSingular),
                     style: const TextStyle(
                       fontSize: 15,
                       fontWeight: FontWeight.w600,

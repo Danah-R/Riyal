@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
+import '../l10n/strings.dart';
 import '../theme/app_theme.dart';
 import '../widgets/gold_coin_painter.dart';
 
@@ -29,7 +30,7 @@ class BottomNav extends StatelessWidget {
               Expanded(
                 child: NavItem(
                   icon: Icons.home_rounded,
-                  label: 'Home',
+                  label: Strings.t('nav_home'),
                   isActive: index == 0,
                   onTap: () => onTap(0),
                 ),
@@ -37,7 +38,7 @@ class BottomNav extends StatelessWidget {
               Expanded(
                 child: NavItem(
                   icon: Icons.subscriptions_outlined,
-                  label: 'Subscriptions',
+                  label: Strings.t('nav_subscriptions'),
                   isActive: index == 1,
                   onTap: () => onTap(1),
                 ),
@@ -46,7 +47,7 @@ class BottomNav extends StatelessWidget {
               Expanded(
                 child: NavItem(
                   icon: Icons.bolt_outlined,
-                  label: 'Utilities',
+                  label: Strings.t('nav_utilities'),
                   isActive: index == 2,
                   onTap: () => onTap(2),
                 ),
@@ -54,7 +55,7 @@ class BottomNav extends StatelessWidget {
               Expanded(
                 child: NavItem(
                   icon: Icons.groups_outlined,
-                  label: 'Staff',
+                  label: Strings.t('nav_staff'),
                   isActive: index == 3,
                   onTap: () => onTap(3),
                 ),

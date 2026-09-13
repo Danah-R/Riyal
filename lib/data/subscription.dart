@@ -22,5 +22,6 @@ class Subscription {
 
   int get renewsInDays => nextBillingDate.difference(DateTime.now()).inDays;
 
-  double get monthlyAmount => cycle == BillingCycle.monthly ? amount : amount / 12;
+  double get monthlyAmount =>
+      cycle == BillingCycle.monthly ? amount : amount / 12;
 }

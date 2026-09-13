@@ -4,6 +4,7 @@ import '../widgets/coin_back_button.dart';
 import '../data/subscription_catalog.dart';
 import '../data/subscription_category.dart';
 import '../data/tracked_category.dart';
+import '../l10n/strings.dart';
 import '../theme/app_theme.dart';
 import '../widgets/category_filter_bar.dart';
 import '../widgets/logo_image.dart';
@@ -38,11 +39,11 @@ class _SelectAppScreenState extends State<SelectAppScreen> {
               Row(
                 children: [
                   const CoinBackButton(),
-                  const Expanded(
+                  Expanded(
                     child: Text(
-                      'Choose an app',
+                      Strings.t('choose_an_app'),
                       overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
+                      style: const TextStyle(
                         color: AppColors.textPrimary,
                         fontSize: 18,
                         fontWeight: FontWeight.w600,
@@ -56,7 +57,7 @@ class _SelectAppScreenState extends State<SelectAppScreen> {
                 onChanged: (v) => setState(() => _query = v),
                 style: const TextStyle(color: AppColors.textPrimary),
                 decoration: InputDecoration(
-                  hintText: 'Search apps',
+                  hintText: Strings.t('search_apps'),
                   hintStyle: const TextStyle(color: AppColors.textSecondary),
                   prefixIcon: const Icon(
                     Icons.search,
@@ -80,10 +81,12 @@ class _SelectAppScreenState extends State<SelectAppScreen> {
               const SizedBox(height: 12),
               Expanded(
                 child: results.isEmpty
-                    ? const Center(
+                    ? Center(
                         child: Text(
-                          'No apps found',
-                          style: TextStyle(color: AppColors.textSecondary),
+                          Strings.t('no_apps_found'),
+                          style: const TextStyle(
+                            color: AppColors.textSecondary,
+                          ),
                         ),
                       )
                     : GridView.builder(

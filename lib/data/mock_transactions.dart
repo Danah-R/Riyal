@@ -50,7 +50,8 @@ const List<MockTransaction> recentTransactions = [
     amount: 20,
     daysAgo: 9,
     matchedName: 'Amazon Prime Video',
-    matchedLogo: 'lib/assets/logos/Amazon-Prime-Video-Logo-PNG-Cutout-thumb.webp',
+    matchedLogo:
+        'lib/assets/logos/Amazon-Prime-Video-Logo-PNG-Cutout-thumb.webp',
     matchedCategory: SubscriptionCategories.entertainment,
   ),
   MockTransaction(
@@ -61,9 +62,5 @@ const List<MockTransaction> recentTransactions = [
     matchedLogo: 'lib/assets/logos/stc.jpeg',
     matchedCategory: SubscriptionCategories.other,
   ),
-  MockTransaction(
-    merchant: 'CARREFOUR HYPERMARKET',
-    amount: 214,
-    daysAgo: 2,
-  ),
+  MockTransaction(merchant: 'CARREFOUR HYPERMARKET', amount: 214, daysAgo: 2),
 ];

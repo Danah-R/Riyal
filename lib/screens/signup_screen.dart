@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import '../l10n/strings.dart';
 import '../theme/app_theme.dart';
 import 'main_shell.dart';
 import '../widgets/gold_coin_painter.dart';
@@ -72,9 +73,9 @@ class _SignupScreenState extends State<SignupScreen> {
                         ),
                       ),
                       const SizedBox(height: 10),
-                      const Text(
-                        'Your spending, in balance.',
-                        style: TextStyle(
+                      Text(
+                        Strings.t('brand_tagline'),
+                        style: const TextStyle(
                           color: AppColors.textSecondary,
                           fontSize: 13,
                         ),
@@ -138,9 +139,9 @@ class _SignupScreenState extends State<SignupScreen> {
                                                 mainAxisAlignment:
                                                     MainAxisAlignment.center,
                                                 children: [
-                                                  const Text(
-                                                    'Sign up',
-                                                    style: TextStyle(
+                                                  Text(
+                                                    Strings.t('signup_heading'),
+                                                    style: const TextStyle(
                                                       fontFamily: 'Georgia',
                                                       fontSize: 36,
                                                       fontWeight:
@@ -150,16 +151,18 @@ class _SignupScreenState extends State<SignupScreen> {
                                                     ),
                                                   ),
                                                   const SizedBox(height: 8),
-                                                  const Text(
-                                                    'Create your Riyal account',
-                                                    style: TextStyle(
+                                                  Text(
+                                                    Strings.t(
+                                                      'create_account_subtitle',
+                                                    ),
+                                                    style: const TextStyle(
                                                       color: AppColors.staff,
                                                       fontSize: 14,
                                                     ),
                                                   ),
                                                   const SizedBox(height: 18),
                                                   _field(
-                                                    hint: 'Full name',
+                                                    fieldKey: 'full_name',
                                                     icon: Icons
                                                         .person_outline_rounded,
                                                     autofillHints: const [
@@ -168,7 +171,7 @@ class _SignupScreenState extends State<SignupScreen> {
                                                   ),
                                                   const SizedBox(height: 8),
                                                   _field(
-                                                    hint: 'Email',
+                                                    fieldKey: 'email',
                                                     icon: Icons.email_outlined,
                                                     autofillHints: const [
                                                       AutofillHints.email,
@@ -176,7 +179,7 @@ class _SignupScreenState extends State<SignupScreen> {
                                                   ),
                                                   const SizedBox(height: 8),
                                                   _field(
-                                                    hint: 'Password',
+                                                    fieldKey: 'password',
                                                     icon: Icons
                                                         .lock_outline_rounded,
                                                     password: true,
@@ -186,7 +189,8 @@ class _SignupScreenState extends State<SignupScreen> {
                                                   ),
                                                   const SizedBox(height: 8),
                                                   _field(
-                                                    hint: 'Confirm password',
+                                                    fieldKey:
+                                                        'confirm_password',
                                                     icon: Icons
                                                         .lock_outline_rounded,
                                                     password: true,
@@ -248,9 +252,11 @@ class _SignupScreenState extends State<SignupScreen> {
                                                         shape:
                                                             const StadiumBorder(),
                                                       ),
-                                                      child: const Text(
-                                                        'CREATE ACCOUNT',
-                                                        style: TextStyle(
+                                                      child: Text(
+                                                        Strings.t(
+                                                          'create_account_button',
+                                                        ),
+                                                        style: const TextStyle(
                                                           fontSize: 16,
                                                           fontWeight:
                                                               FontWeight.w700,
@@ -276,31 +282,31 @@ class _SignupScreenState extends State<SignupScreen> {
                       const SizedBox(height: 12),
                       TextButton(
                         onPressed: () => Navigator.of(context).pop(),
-                        child: const Text(
-                          'Already have an account? Sign in',
-                          style: TextStyle(color: AppColors.gold),
+                        child: Text(
+                          Strings.t('have_account_signin'),
+                          style: const TextStyle(color: AppColors.gold),
                         ),
                       ),
-                      const Text(
-                        'Demo only - No account is created',
-                        style: TextStyle(
+                      Text(
+                        Strings.t('demo_no_account'),
+                        style: const TextStyle(
                           color: AppColors.textSecondary,
                           fontSize: 11,
                         ),
                       ),
                       const SizedBox(height: 32),
-                      const Row(
+                      Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Icon(
+                          const Icon(
                             Icons.shield_outlined,
                             size: 15,
                             color: AppColors.textSecondary,
                           ),
-                          SizedBox(width: 7),
+                          const SizedBox(width: 7),
                           Text(
-                            'Your finances stay on your device',
-                            style: TextStyle(
+                            Strings.t('finances_on_device'),
+                            style: const TextStyle(
                               color: AppColors.textSecondary,
                               fontSize: 12,
                             ),
@@ -319,39 +325,43 @@ class _SignupScreenState extends State<SignupScreen> {
   }
 
   Widget _field({
-    required String hint,
+    required String fieldKey,
     required IconData icon,
     required List<String> autofillHints,
     bool password = false,
   }) {
+    final hint = Strings.t(fieldKey);
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 55),
       child: TextFormField(
-        controller: hint == 'Password' ? _passwordController : null,
-        keyboardType: hint == 'Email'
+        controller: fieldKey == 'password' ? _passwordController : null,
+        keyboardType: fieldKey == 'email'
             ? TextInputType.emailAddress
             : TextInputType.text,
         obscureText: password && _obscurePassword,
         autofillHints: autofillHints,
         autocorrect: false,
         enableSuggestions: !password,
-        textInputAction: hint == 'Confirm password'
+        textInputAction: fieldKey == 'confirm_password'
             ? TextInputAction.done
             : TextInputAction.next,
-        onFieldSubmitted: hint == 'Confirm password' ? (_) => _signUp() : null,
+        onFieldSubmitted: fieldKey == 'confirm_password'
+            ? (_) => _signUp()
+            : null,
         validator: (value) {
           if (value == null || value.trim().isEmpty) {
-            return 'Enter your ${hint.toLowerCase()}';
+            return Strings.f('enter_your_field', hint.toLowerCase());
           }
-          if (hint == 'Email' &&
+          if (fieldKey == 'email' &&
               !RegExp(r'^[^\s@]+@[^\s@]+\.[^\s@]+$').hasMatch(value.trim())) {
-            return 'Enter a valid email';
+            return Strings.t('valid_email_error');
           }
-          if (hint == 'Password' && value.length < 8) {
-            return 'Use at least 8 characters';
+          if (fieldKey == 'password' && value.length < 8) {
+            return Strings.t('password_length_error');
           }
-          if (hint == 'Confirm password' && value != _passwordController.text) {
-            return 'Passwords do not match';
+          if (fieldKey == 'confirm_password' &&
+              value != _passwordController.text) {
+            return Strings.t('passwords_no_match');
           }
           return null;
         },
@@ -365,7 +375,9 @@ class _SignupScreenState extends State<SignupScreen> {
           prefixIcon: Icon(icon, color: AppColors.staff, size: 22),
           suffixIcon: password
               ? IconButton(
-                  tooltip: _obscurePassword ? 'Show password' : 'Hide password',
+                  tooltip: _obscurePassword
+                      ? Strings.t('show_password')
+                      : Strings.t('hide_password'),
                   onPressed: () =>
                       setState(() => _obscurePassword = !_obscurePassword),
                   icon: Icon(

@@ -13,9 +13,9 @@ class CatalogEntry {
     this.icon,
     this.iconColor,
   }) : assert(
-          logoAsset != null || icon != null,
-          'CatalogEntry needs either a logoAsset or an icon',
-        );
+         logoAsset != null || icon != null,
+         'CatalogEntry needs either a logoAsset or an icon',
+       );
 
   final String name;
   final TrackedCategory category;

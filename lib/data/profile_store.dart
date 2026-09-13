@@ -1,6 +1,19 @@
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../l10n/strings.dart';
+
+/// English display label for a profile field key -> its localized text.
+/// The keys themselves ('Full name', 'Email', ...) stay English: they're
+/// used for persistence and equality checks throughout profile_screen.dart.
+String profileFieldLabel(String field) => switch (field) {
+  'Full name' => Strings.t('field_full_name'),
+  'Email' => Strings.t('field_email'),
+  'Phone number' => Strings.t('field_phone_number'),
+  'Joined on' => Strings.t('field_joined_on'),
+  _ => field,
+};
+
 class ProfileStore {
   static final instance = ProfileStore();
   SharedPreferencesAsync get _prefs => SharedPreferencesAsync();

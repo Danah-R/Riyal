@@ -11,6 +11,6 @@ class StaffBody extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return TrackedItemsScreen(title: 'Staff', domain: staffDomain);
+    return TrackedItemsScreen(domain: staffDomain);
   }
 }

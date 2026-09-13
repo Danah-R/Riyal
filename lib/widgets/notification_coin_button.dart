@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import '../data/notifications_store.dart';
+import '../l10n/strings.dart';
 import '../screens/notifications_screen.dart';
 import '../theme/app_theme.dart';
 import 'gold_coin_painter.dart';
@@ -43,13 +44,15 @@ class _NotificationCoinButtonState extends State<NotificationCoinButton>
 
   @override
   Widget build(BuildContext context) => IconButton(
-    tooltip: 'Notifications',
+    tooltip: Strings.t('notifications_title'),
     onPressed: () => showNotificationsPreview(context),
     padding: EdgeInsets.zero,
     icon: ValueListenableBuilder<bool>(
       valueListenable: NotificationsStore.instance.readState.hasUnread,
       builder: (context, unread, _) => Semantics(
-        label: unread ? 'Unread notifications' : 'Notifications',
+        label: unread
+            ? Strings.t('unread_notifications')
+            : Strings.t('notifications_title'),
         child: SizedBox(
           width: 44,
           height: 44,

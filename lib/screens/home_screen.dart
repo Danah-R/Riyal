@@ -3,78 +3,85 @@ import 'package:flutter/material.dart';
 import '../data/home_data.dart';
 import '../data/subscription.dart';
 import '../data/subscriptions_store.dart';
+import '../l10n/strings.dart';
 import '../theme/app_theme.dart';
 import '../widgets/profile_menu_button.dart';
 import '../widgets/notification_coin_button.dart';
 import '../widgets/logo_image.dart';
 import 'analytics_screen.dart';
 
-enum SpendingTab { subscriptions, utilities, staff }
+enum _HomeTab { overview, analytics }
 
 /// The Home tab's content. Lives inside [MainShell]'s [IndexedStack], so it
 /// has no Scaffold/bottom nav of its own — the shell provides those once for
-/// all tabs. Tapping a category pill switches the shell's active tab instead
-/// of pushing a new route.
+/// all tabs.
 class HomeBody extends StatefulWidget {
-  const HomeBody({super.key, required this.onNavigateToTab});
-
-  /// Called with the shell's tab index (1 = Subscriptions, 2 = Utilities,
-  /// 3 = Staff) when a category pill is tapped.
-  final ValueChanged<int> onNavigateToTab;
+  const HomeBody({super.key});
 
   @override
   State<HomeBody> createState() => _HomeBodyState();
 }
 
 class _HomeBodyState extends State<HomeBody> {
-  SpendingTab _tab = SpendingTab.subscriptions;
-
-  void _selectTab(SpendingTab tab) {
-    setState(() => _tab = tab);
-    final index = switch (tab) {
-      SpendingTab.subscriptions => 1,
-      SpendingTab.utilities => 2,
-      SpendingTab.staff => 3,
-    };
-    widget.onNavigateToTab(index);
-  }
+  _HomeTab _tab = _HomeTab.overview;
 
   @override
   Widget build(BuildContext context) {
     return SafeArea(
       bottom: false,
-      child: ListView(
-        padding: const EdgeInsets.fromLTRB(20, 8, 20, 130),
-        children: [
-          _TopBar(),
-          const SizedBox(height: 16),
-          _TabSelector(selected: _tab, onChanged: _selectTab),
-          const SizedBox(height: 16),
-          const _SpendingCard(),
-          const SizedBox(height: 28),
-          _SectionHeader(
-            title: 'Overview',
-            onSeeAll: () => Navigator.of(context).push(
-              MaterialPageRoute<void>(builder: (_) => const AnalyticsScreen()),
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(20, 8, 20, 0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _TopBar(),
+            const SizedBox(height: 16),
+            _HomeTabSelector(
+              selected: _tab,
+              onChanged: (t) => setState(() => _tab = t),
             ),
-          ),
-          const SizedBox(height: 14),
-          const _OverviewBar(),
-          const SizedBox(height: 16),
-          const _OverviewStats(),
-          const SizedBox(height: 28),
-          _SectionHeader(
-            title: 'Upcoming renewals',
-            onSeeAll: () => Navigator.of(context).push(
-              MaterialPageRoute<void>(
-                builder: (_) =>
-                    const AnalyticsScreen(category: 'Subscriptions'),
-              ),
+            const SizedBox(height: 16),
+            Expanded(
+              child: _tab == _HomeTab.overview
+                  ? ListView(
+                      padding: const EdgeInsets.only(bottom: 130),
+                      children: [
+                        const _SpendingCard(),
+                        const SizedBox(height: 28),
+                        _SectionHeader(
+                          title: Strings.t('overview'),
+                          onSeeAll: () => Navigator.of(context).push(
+                            MaterialPageRoute<void>(
+                              builder: (_) => const AnalyticsScreen(),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 14),
+                        const _OverviewBar(),
+                        const SizedBox(height: 16),
+                        const _OverviewStats(),
+                        const SizedBox(height: 28),
+                        _SectionHeader(
+                          title: Strings.t('upcoming_renewals'),
+                          onSeeAll: () => Navigator.of(context).push(
+                            MaterialPageRoute<void>(
+                              builder: (_) => const AnalyticsScreen(
+                                category: 'Subscriptions',
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 14),
+                        const _UpcomingRenewals(),
+                      ],
+                    )
+                  : const AnalyticsContent(
+                      horizontalPadding: 0,
+                      bottomPadding: 130,
+                    ),
             ),
-          ),
-          const SizedBox(height: 14),
-          const _UpcomingRenewals(),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -90,15 +97,15 @@ class _TopBar extends StatelessWidget {
   }
 }
 
-class _TabSelector extends StatelessWidget {
-  const _TabSelector({required this.selected, required this.onChanged});
+class _HomeTabSelector extends StatelessWidget {
+  const _HomeTabSelector({required this.selected, required this.onChanged});
 
-  final SpendingTab selected;
-  final ValueChanged<SpendingTab> onChanged;
+  final _HomeTab selected;
+  final ValueChanged<_HomeTab> onChanged;
 
   @override
   Widget build(BuildContext context) {
-    Widget tab(String label, SpendingTab value) {
+    Widget tab(String label, _HomeTab value) {
       final isSelected = selected == value;
       return GestureDetector(
         onTap: () => onChanged(value),
@@ -129,11 +136,9 @@ class _TabSelector extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          tab('Subscriptions', SpendingTab.subscriptions),
+          tab(Strings.t('overview'), _HomeTab.overview),
           const SizedBox(width: 6),
-          tab('Utilities', SpendingTab.utilities),
-          const SizedBox(width: 6),
-          tab('Staff', SpendingTab.staff),
+          tab(Strings.t('analytics_tab'), _HomeTab.analytics),
         ],
       ),
     );
@@ -158,9 +163,9 @@ class _SpendingCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            "This month's spending\non subscriptions",
-            style: TextStyle(
+          Text(
+            Strings.t('spending_heading'),
+            style: const TextStyle(
               color: AppColors.textSecondary,
               fontSize: 14,
               height: 1.3,
@@ -208,7 +213,10 @@ class _SpendingCard extends StatelessWidget {
             children: [
               Expanded(
                 child: Text(
-                  'of SAR ${subscriptionsBudget.toStringAsFixed(0)} budget',
+                  Strings.f(
+                    'of_sar_budget',
+                    subscriptionsBudget.toStringAsFixed(0),
+                  ),
                   overflow: TextOverflow.ellipsis,
                   style: const TextStyle(
                     color: AppColors.textSecondary,
@@ -218,7 +226,7 @@ class _SpendingCard extends StatelessWidget {
               ),
               const SizedBox(width: 8),
               Text(
-                'SAR ${left.toStringAsFixed(0)} left',
+                Strings.f('sar_left', left.toStringAsFixed(0)),
                 style: const TextStyle(
                   color: AppColors.textSecondary,
                   fontSize: 13,
@@ -256,9 +264,9 @@ class _SectionHeader extends StatelessWidget {
         const SizedBox(width: 8),
         GestureDetector(
           onTap: onSeeAll,
-          child: const Text(
-            'See all',
-            style: TextStyle(
+          child: Text(
+            Strings.t('see_all'),
+            style: const TextStyle(
               color: AppColors.gold,
               fontSize: 13,
               fontWeight: FontWeight.w500,
@@ -335,7 +343,7 @@ class _OverviewStats extends StatelessWidget {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      c.label,
+                      Strings.categoryDisplay(c.label),
                       style: const TextStyle(
                         color: AppColors.textSecondary,
                         fontSize: 12,
@@ -360,9 +368,12 @@ class _UpcomingRenewals extends StatelessWidget {
       valueListenable: SubscriptionsStore.instance.subscriptions,
       builder: (context, subs, _) {
         if (subs.isEmpty) {
-          return const Text(
-            'No subscriptions yet.',
-            style: TextStyle(color: AppColors.textSecondary, fontSize: 13),
+          return Text(
+            Strings.t('no_subscriptions_yet_short'),
+            style: const TextStyle(
+              color: AppColors.textSecondary,
+              fontSize: 13,
+            ),
           );
         }
         final upcoming = [...subs]
@@ -415,9 +426,7 @@ class _RenewalTile extends StatelessWidget {
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  s.renewsInDays <= 0
-                      ? 'Renews today'
-                      : 'Renews in ${s.renewsInDays} days',
+                  Strings.renewsIn(s.renewsInDays),
                   style: const TextStyle(
                     color: AppColors.textSecondary,
                     fontSize: 12.5,

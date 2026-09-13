@@ -4,6 +4,7 @@ import '../data/subscription.dart';
 import '../data/subscription_category.dart';
 import '../data/subscriptions_store.dart';
 import '../data/tracked_category.dart';
+import '../l10n/strings.dart';
 import '../theme/app_theme.dart';
 import '../widgets/category_filter_bar.dart';
 import '../widgets/circle_icon_button.dart';
@@ -48,7 +49,7 @@ class _SubscriptionsBodyState extends State<SubscriptionsBody> {
                 if (_searching)
                   InlineSearchField(
                     autofocus: true,
-                    hintText: 'Search subscriptions',
+                    hintText: Strings.t('search_hint_subscriptions'),
                     onChanged: (v) => setState(() => _query = v),
                     onClose: _stopSearching,
                   )
@@ -132,7 +133,9 @@ class _TopTabs extends StatelessWidget {
           child: Text(
             label,
             style: TextStyle(
-              color: isSelected ? const Color(0xFF1B1F16) : AppColors.textSecondary,
+              color: isSelected
+                  ? const Color(0xFF1B1F16)
+                  : AppColors.textSecondary,
               fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
               fontSize: 14,
             ),
@@ -147,9 +150,9 @@ class _TopTabs extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          tab('Subscriptions', _PageTab.subscriptions),
+          tab(Strings.t('nav_subscriptions'), _PageTab.subscriptions),
           const SizedBox(width: 6),
-          tab('Analytics', _PageTab.analytics),
+          tab(Strings.t('analytics_tab'), _PageTab.analytics),
         ],
       ),
     );
@@ -172,16 +175,23 @@ class _SubscriptionsList extends StatelessWidget {
             : allSubs.where((s) => s.category == category).toList();
         if (query.trim().isNotEmpty) {
           subs = subs
-              .where((s) => s.name.toLowerCase().contains(query.trim().toLowerCase()))
+              .where(
+                (s) =>
+                    s.name.toLowerCase().contains(query.trim().toLowerCase()),
+              )
               .toList();
         }
 
+        final subscriptionsNoun = Strings.t('nav_subscriptions').toLowerCase();
         if (allSubs.isEmpty) {
-          return const Center(
+          return Center(
             child: Text(
-              'No subscriptions yet.\nTap + to add one.',
+              Strings.emptyDomainMessage(subscriptionsNoun),
               textAlign: TextAlign.center,
-              style: TextStyle(color: AppColors.textSecondary, fontSize: 14),
+              style: const TextStyle(
+                color: AppColors.textSecondary,
+                fontSize: 14,
+              ),
             ),
           );
         }
@@ -189,10 +199,16 @@ class _SubscriptionsList extends StatelessWidget {
           return Center(
             child: Text(
               query.trim().isNotEmpty
-                  ? 'No subscriptions match "$query".'
-                  : 'No ${category!.label.toLowerCase()} subscriptions yet.',
+                  ? Strings.noMatchMessage(subscriptionsNoun, query)
+                  : Strings.noCategoryMessage(
+                      category!.label,
+                      subscriptionsNoun,
+                    ),
               textAlign: TextAlign.center,
-              style: const TextStyle(color: AppColors.textSecondary, fontSize: 14),
+              style: const TextStyle(
+                color: AppColors.textSecondary,
+                fontSize: 14,
+              ),
             ),
           );
         }
@@ -239,10 +255,11 @@ class _SubscriptionTile extends StatelessWidget {
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  s.renewsInDays <= 0
-                      ? 'Renews today'
-                      : 'Renews in ${s.renewsInDays} days',
-                  style: const TextStyle(color: AppColors.textSecondary, fontSize: 12.5),
+                  Strings.renewsIn(s.renewsInDays),
+                  style: const TextStyle(
+                    color: AppColors.textSecondary,
+                    fontSize: 12.5,
+                  ),
                 ),
               ],
             ),

@@ -1,0 +1,4 @@
+project_id = "riyal"
+
+[functions.lean]
+verify_jwt = false

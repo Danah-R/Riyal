@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../l10n/strings.dart';
 import '../theme/app_theme.dart';
 import '../widgets/coin_back_button.dart';
 
@@ -26,7 +27,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
     appBar: AppBar(
       backgroundColor: AppColors.background,
       leading: const CoinBackButton(),
-      title: const Text('Change password'),
+      title: Text(Strings.t('change_password')),
     ),
     body: SingleChildScrollView(
       padding: const EdgeInsets.all(24),
@@ -38,9 +39,12 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                const Text(
-                  'Demo form. Password changes will be available when account authentication is connected.',
-                  style: TextStyle(color: AppColors.textSecondary, height: 1.5),
+                Text(
+                  Strings.t('change_password_demo_note'),
+                  style: const TextStyle(
+                    color: AppColors.textSecondary,
+                    height: 1.5,
+                  ),
                 ),
                 const SizedBox(height: 24),
                 for (var i = 0; i < 3; i++)
@@ -53,9 +57,9 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                       autocorrect: false,
                       decoration: InputDecoration(
                         labelText: [
-                          'Current password',
-                          'New password',
-                          'Confirm new password',
+                          Strings.t('current_password'),
+                          Strings.t('new_password'),
+                          Strings.t('confirm_new_password'),
                         ][i],
                         filled: true,
                         fillColor: AppColors.surface,
@@ -64,8 +68,8 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                         ),
                         suffixIcon: IconButton(
                           tooltip: _hidden[i]
-                              ? 'Show password'
-                              : 'Hide password',
+                              ? Strings.t('show_password')
+                              : Strings.t('hide_password'),
                           onPressed: () =>
                               setState(() => _hidden[i] = !_hidden[i]),
                           icon: Icon(
@@ -78,16 +82,16 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                       ),
                       validator: (value) {
                         if (value == null || value.isEmpty) {
-                          return 'Enter a password';
+                          return Strings.t('enter_a_password');
                         }
                         if (i == 1 && value.length < 8) {
-                          return 'Use at least 8 characters';
+                          return Strings.t('password_length_error');
                         }
                         if (i == 1 && value == _controllers[0].text) {
-                          return 'Choose a different password';
+                          return Strings.t('choose_different_password');
                         }
                         if (i == 2 && value != _controllers[1].text) {
-                          return 'Passwords do not match';
+                          return Strings.t('passwords_no_match');
                         }
                         return null;
                       },
@@ -102,17 +106,15 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                   onPressed: () {
                     if (!_form.currentState!.validate()) return;
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text(
-                          'Demo validation passed. No password has been changed.',
-                        ),
+                      SnackBar(
+                        content: Text(Strings.t('password_changed_demo')),
                       ),
                     );
                     for (final c in _controllers) {
                       c.clear();
                     }
                   },
-                  child: const Text('Change password'),
+                  child: Text(Strings.t('change_password')),
                 ),
               ],
             ),

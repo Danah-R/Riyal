@@ -1,6 +1,8 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import '../data/analytics_data.dart';
+import '../l10n/app_locale.dart';
+import '../l10n/strings.dart';
 import '../theme/app_theme.dart';
 import '../widgets/coin_back_button.dart';
 
@@ -18,7 +20,13 @@ class AnalyticsScreen extends StatelessWidget {
         leading: const CoinBackButton(),
         backgroundColor: AppColors.background,
         foregroundColor: AppColors.textPrimary,
-        title: Text(category == null ? 'General analytics' : '$category analytics'),
+        title: Text(
+          category == null
+              ? Strings.t('analytics_general_title')
+              : (AppLocale.locale.value.languageCode == 'ar'
+                    ? 'تحليلات ${Strings.categoryDisplay(category!)}'
+                    : '${Strings.categoryDisplay(category!)} analytics'),
+        ),
       ),
       body: AnalyticsContent(category: category),
     );
@@ -68,20 +76,6 @@ class _AnalyticsContentState extends State<AnalyticsContent> {
   late String? _category = widget.category;
   String _period = 'Month';
   final DateTime _today = DateTime.now();
-  static const _months = [
-    'Jan',
-    'Feb',
-    'Mar',
-    'Apr',
-    'May',
-    'Jun',
-    'Jul',
-    'Aug',
-    'Sep',
-    'Oct',
-    'Nov',
-    'Dec',
-  ];
   static const _palette = [
     AppColors.subscriptions,
     AppColors.utilities,
@@ -93,6 +87,17 @@ class _AnalyticsContentState extends State<AnalyticsContent> {
 
   @override
   Widget build(BuildContext context) {
+    final ar = AppLocale.locale.value.languageCode == 'ar';
+    String periodDisplay(String p) => switch (p) {
+      'Week' => Strings.t('period_week'),
+      'Year' => Strings.t('period_year'),
+      _ => Strings.t('period_month'),
+    };
+    String periodAdjDisplay(String p) => switch (p) {
+      'Week' => Strings.t('period_adj_weekly'),
+      'Year' => Strings.t('period_adj_yearly'),
+      _ => Strings.t('period_adj_monthly'),
+    };
     final items =
         analyticsItems
             .where((i) => _category == null || i.category == _category)
@@ -140,13 +145,15 @@ class _AnalyticsContentState extends State<AnalyticsContent> {
         final date = _today.subtract(Duration(days: (5 - i) * 7));
         return '${date.day}/${date.month}';
       }
-      return _months[DateTime(_today.year, _today.month - 5 + i).month - 1];
+      return Strings.monthAbbrev(
+        DateTime(_today.year, _today.month - 5 + i).month,
+      );
     });
     final periodLabel = _period == 'Year'
         ? '${_today.year}'
         : _period == 'Week'
-        ? 'Week ending ${_today.day} ${_months[_today.month - 1]} ${_today.year}'
-        : '${_months[_today.month - 1]} ${_today.year}';
+        ? '${Strings.t('week_ending')} ${_today.day} ${Strings.monthAbbrev(_today.month)} ${_today.year}'
+        : '${Strings.monthAbbrev(_today.month)} ${_today.year}';
     return SingleChildScrollView(
       padding: EdgeInsets.fromLTRB(
         widget.horizontalPadding,
@@ -161,7 +168,7 @@ class _AnalyticsContentState extends State<AnalyticsContent> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                '$periodLabel / Sample data',
+                '$periodLabel / ${Strings.t('sample_data')}',
                 style: const TextStyle(color: AppColors.textSecondary),
               ),
               const SizedBox(height: 18),
@@ -177,7 +184,11 @@ class _AnalyticsContentState extends State<AnalyticsContent> {
                       'Staff',
                     ])
                       ChoiceChip(
-                        label: Text(category ?? 'General'),
+                        label: Text(
+                          category == null
+                              ? Strings.t('general')
+                              : Strings.categoryDisplay(category),
+                        ),
                         selected: _category == category,
                         selectedColor: AppColors.gold,
                         labelStyle: TextStyle(
@@ -197,7 +208,7 @@ class _AnalyticsContentState extends State<AnalyticsContent> {
                 children: [
                   for (final period in ['Week', 'Month', 'Year'])
                     ChoiceChip(
-                      label: Text(period),
+                      label: Text(periodDisplay(period)),
                       selected: _period == period,
                       selectedColor: AppColors.gold,
                       labelStyle: TextStyle(
@@ -211,9 +222,9 @@ class _AnalyticsContentState extends State<AnalyticsContent> {
               ),
               if (_period != 'Month') ...[
                 const SizedBox(height: 8),
-                const Text(
-                  'Illustrative estimates from the monthly demo data.',
-                  style: TextStyle(
+                Text(
+                  Strings.t('illustrative_estimates'),
+                  style: const TextStyle(
                     color: AppColors.textSecondary,
                     fontSize: 12,
                   ),
@@ -221,7 +232,9 @@ class _AnalyticsContentState extends State<AnalyticsContent> {
               ],
               const SizedBox(height: 22),
               _card(
-                'Total spend this $periodName',
+                ar
+                    ? 'إجمالي الإنفاق ${_period == 'Year' ? 'هذه السنة' : 'هذا ${periodDisplay(_period)}'}'
+                    : 'Total spend this $periodName',
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -239,11 +252,13 @@ class _AnalyticsContentState extends State<AnalyticsContent> {
                       runSpacing: 10,
                       children: [
                         Text(
-                          '${change >= 0 ? '+' : ''}${change.toStringAsFixed(1)}% vs. last $periodName',
+                          ar
+                              ? '${change >= 0 ? '+' : ''}${change.toStringAsFixed(1)}٪ عن آخر ${periodDisplay(_period)}'
+                              : '${change >= 0 ? '+' : ''}${change.toStringAsFixed(1)}% vs. last $periodName',
                           style: const TextStyle(color: AppColors.gold),
                         ),
                         Text(
-                          '${items.length} active items',
+                          '${items.length} ${Strings.t('active_items')}',
                           style: const TextStyle(
                             color: AppColors.textSecondary,
                           ),
@@ -255,17 +270,15 @@ class _AnalyticsContentState extends State<AnalyticsContent> {
               ),
               const SizedBox(height: 16),
               _card(
-                'Spend over time',
+                Strings.t('spend_over_time'),
                 Column(
                   children: [
                     Align(
                       alignment: Alignment.centerLeft,
                       child: Text(
-                        '${_period == 'Week'
-                            ? 'Weekly'
-                            : _period == 'Year'
-                            ? 'Yearly'
-                            : 'Monthly'} spend · SAR',
+                        ar
+                            ? 'الإنفاق ${periodAdjDisplay(_period)} · ريال'
+                            : '${periodAdjDisplay(_period)} spend · SAR',
                         style: TextStyle(
                           color: AppColors.textSecondary,
                           fontSize: 12,
@@ -297,7 +310,9 @@ class _AnalyticsContentState extends State<AnalyticsContent> {
               ),
               const SizedBox(height: 16),
               _card(
-                _category == null ? 'Category split' : 'Spending breakdown',
+                _category == null
+                    ? Strings.t('category_split')
+                    : Strings.t('spending_breakdown'),
                 LayoutBuilder(
                   builder: (context, constraints) {
                     final chart = SizedBox(
@@ -343,7 +358,13 @@ class _AnalyticsContentState extends State<AnalyticsContent> {
                                 const SizedBox(width: 10),
                                 Expanded(
                                   child: Text(
-                                    breakdown.keys.elementAt(i),
+                                    _category == null
+                                        ? Strings.categoryDisplay(
+                                            breakdown.keys.elementAt(i),
+                                          )
+                                        : Strings.groupDisplay(
+                                            breakdown.keys.elementAt(i),
+                                          ),
                                     style: const TextStyle(
                                       color: AppColors.textPrimary,
                                     ),
@@ -382,8 +403,8 @@ class _AnalyticsContentState extends State<AnalyticsContent> {
               const SizedBox(height: 16),
               _card(
                 _category == null
-                    ? 'Overall budget vs. actual'
-                    : 'Category budget vs. actual',
+                    ? Strings.t('overall_budget_vs_actual')
+                    : Strings.t('category_budget_vs_actual'),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -407,14 +428,16 @@ class _AnalyticsContentState extends State<AnalyticsContent> {
                     ),
                     const SizedBox(height: 12),
                     Text(
-                      '${(total / budget * 100).toStringAsFixed(0)}% used · ${_money((budget - total).abs())} ${total <= budget ? 'remaining' : 'over budget'}',
+                      ar
+                          ? '${(total / budget * 100).toStringAsFixed(0)}٪ مستخدَم · ${_money((budget - total).abs())} ${total <= budget ? Strings.t('remaining') : Strings.t('over_budget')}'
+                          : '${(total / budget * 100).toStringAsFixed(0)}% used · ${_money((budget - total).abs())} ${total <= budget ? Strings.t('remaining') : Strings.t('over_budget')}',
                       style: const TextStyle(color: AppColors.textSecondary),
                     ),
                     if (_category == null) ...[
                       const SizedBox(height: 8),
-                      const Text(
-                        'Combined budget, separate from category limits.',
-                        style: TextStyle(
+                      Text(
+                        Strings.t('combined_budget_note'),
+                        style: const TextStyle(
                           color: AppColors.textSecondary,
                           fontSize: 12,
                         ),
@@ -425,7 +448,9 @@ class _AnalyticsContentState extends State<AnalyticsContent> {
               ),
               const SizedBox(height: 16),
               _card(
-                'Highest-cost item${items.where((i) => i.amount == highest.amount).length > 1 ? 's · tied' : ''}',
+                items.where((i) => i.amount == highest.amount).length > 1
+                    ? Strings.t('highest_cost_items_tied')
+                    : Strings.t('highest_cost_item'),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -439,7 +464,8 @@ class _AnalyticsContentState extends State<AnalyticsContent> {
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      '${_money(highest.amount * factor)} / $periodName${items.where((i) => i.amount == highest.amount).length > 1 ? ' each' : ''}',
+                      '${_money(highest.amount * factor)} / ${periodDisplay(_period)}'
+                      '${items.where((i) => i.amount == highest.amount).length > 1 ? ' ${Strings.t('each')}' : ''}',
                       style: const TextStyle(color: AppColors.gold),
                     ),
                   ],
@@ -447,15 +473,12 @@ class _AnalyticsContentState extends State<AnalyticsContent> {
               ),
               const SizedBox(height: 16),
               _card(
-                'Upcoming renewals',
+                Strings.t('upcoming_renewals'),
                 Column(
                   children: [
                     for (var i = 0; i < items.length; i++) ...[
                       if (i > 0)
-                        const Divider(
-                          color: AppColors.cardBorder,
-                          height: 24,
-                        ),
+                        const Divider(color: AppColors.cardBorder, height: 24),
                       _renewal(items[i]),
                     ],
                   ],
@@ -501,7 +524,7 @@ class _AnalyticsContentState extends State<AnalyticsContent> {
               ),
               const SizedBox(height: 4),
               Text(
-                '${date.day} ${_months[date.month - 1]} · in ${item.days} days',
+                '${date.day} ${Strings.monthAbbrev(date.month)} · ${Strings.inDays(item.days)}',
                 style: const TextStyle(
                   color: AppColors.textSecondary,
                   fontSize: 12,

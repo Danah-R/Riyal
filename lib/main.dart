@@ -1,15 +1,35 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 
 import 'screens/splash_screen.dart';
 import 'theme/app_theme.dart';
 import 'data/app_settings.dart';
+import 'data/bank_accounts_store.dart';
+import 'data/subscriptions_store.dart';
+import 'data/supabase_config.dart';
+import 'l10n/app_locale.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   try {
+    await dotenv.load();
+  } catch (error) {
+    debugPrint('.env load failed: $error');
+  }
+  try {
     await AppSettings.instance.load().timeout(const Duration(seconds: 3));
   } catch (error) {
     debugPrint('Settings load failed: $error');
+  }
+  try {
+    await SupabaseConfig.initialize().timeout(const Duration(seconds: 5));
+    await Future.wait([
+      BankAccountsStore.instance.load(),
+      SubscriptionsStore.instance.load(),
+    ]).timeout(const Duration(seconds: 5));
+  } catch (error) {
+    debugPrint('Supabase init/load failed: $error');
   }
   runApp(const MainApp());
 }
@@ -19,11 +39,21 @@ class MainApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Riyal',
-      debugShowCheckedModeBanner: false,
-      theme: buildAppTheme(),
-      home: const SplashScreen(),
+    return ValueListenableBuilder<Locale>(
+      valueListenable: AppLocale.locale,
+      builder: (context, locale, _) => MaterialApp(
+        title: 'Riyal',
+        debugShowCheckedModeBanner: false,
+        theme: buildAppTheme(),
+        locale: locale,
+        supportedLocales: const [Locale('en'), Locale('ar')],
+        localizationsDelegates: const [
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+          GlobalCupertinoLocalizations.delegate,
+        ],
+        home: const SplashScreen(),
+      ),
     );
   }
 }
