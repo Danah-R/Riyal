@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../widgets/coin_back_button.dart';
 
 import '../data/subscription_catalog.dart';
 import '../data/subscription_category.dart';
@@ -36,11 +37,7 @@ class _SelectAppScreenState extends State<SelectAppScreen> {
             children: [
               Row(
                 children: [
-                  IconButton(
-                    onPressed: () => Navigator.of(context).pop(),
-                    icon: const Icon(Icons.arrow_back_rounded,
-                        color: AppColors.textPrimary),
-                  ),
+                  const CoinBackButton(),
                   const Expanded(
                     child: Text(
                       'Choose an app',
@@ -61,7 +58,10 @@ class _SelectAppScreenState extends State<SelectAppScreen> {
                 decoration: InputDecoration(
                   hintText: 'Search apps',
                   hintStyle: const TextStyle(color: AppColors.textSecondary),
-                  prefixIcon: const Icon(Icons.search, color: AppColors.textSecondary),
+                  prefixIcon: const Icon(
+                    Icons.search,
+                    color: AppColors.textSecondary,
+                  ),
                   filled: true,
                   fillColor: AppColors.surface,
                   contentPadding: const EdgeInsets.symmetric(vertical: 0),
@@ -88,12 +88,13 @@ class _SelectAppScreenState extends State<SelectAppScreen> {
                       )
                     : GridView.builder(
                         padding: const EdgeInsets.only(bottom: 24),
-                        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: 3,
-                          mainAxisSpacing: 16,
-                          crossAxisSpacing: 12,
-                          childAspectRatio: 0.78,
-                        ),
+                        gridDelegate:
+                            const SliverGridDelegateWithFixedCrossAxisCount(
+                              crossAxisCount: 3,
+                              mainAxisSpacing: 16,
+                              crossAxisSpacing: 12,
+                              childAspectRatio: 0.78,
+                            ),
                         itemCount: results.length,
                         itemBuilder: (context, i) {
                           final app = results[i];

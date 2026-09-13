@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../widgets/coin_back_button.dart';
 
 import '../data/tracked_domain.dart';
 import '../theme/app_theme.dart';
@@ -22,11 +23,7 @@ class SelectChargeScreen extends StatelessWidget {
             children: [
               Row(
                 children: [
-                  IconButton(
-                    onPressed: () => Navigator.of(context).pop(),
-                    icon: const Icon(Icons.arrow_back_rounded,
-                        color: AppColors.textPrimary),
-                  ),
+                  const CoinBackButton(),
                   const Expanded(
                     child: Text(
                       'Recent transactions',
@@ -45,7 +42,10 @@ class SelectChargeScreen extends StatelessWidget {
                 padding: EdgeInsets.only(left: 12, bottom: 12),
                 child: Text(
                   'Tap a charge to turn it into a tracked item',
-                  style: TextStyle(color: AppColors.textSecondary, fontSize: 13),
+                  style: TextStyle(
+                    color: AppColors.textSecondary,
+                    fontSize: 13,
+                  ),
                 ),
               ),
               Expanded(

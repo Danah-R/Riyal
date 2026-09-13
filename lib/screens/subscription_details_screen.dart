@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../widgets/coin_back_button.dart';
 
 import '../data/subscription.dart';
 import '../data/subscription_category.dart';
@@ -83,11 +84,7 @@ class _SubscriptionDetailsScreenState extends State<SubscriptionDetailsScreen> {
             children: [
               Row(
                 children: [
-                  IconButton(
-                    onPressed: () => Navigator.of(context).pop(),
-                    icon: const Icon(Icons.arrow_back_rounded,
-                        color: AppColors.textPrimary),
-                  ),
+                  const CoinBackButton(),
                   const Expanded(
                     child: Text(
                       'Subscription details',
@@ -124,17 +121,26 @@ class _SubscriptionDetailsScreenState extends State<SubscriptionDetailsScreen> {
                     const SizedBox(height: 28),
                     const Text(
                       'Amount (SAR)',
-                      style: TextStyle(color: AppColors.textSecondary, fontSize: 13),
+                      style: TextStyle(
+                        color: AppColors.textSecondary,
+                        fontSize: 13,
+                      ),
                     ),
                     const SizedBox(height: 8),
                     TextField(
                       controller: _amountController,
-                      keyboardType:
-                          const TextInputType.numberWithOptions(decimal: true),
-                      style: const TextStyle(color: AppColors.textPrimary, fontSize: 16),
+                      keyboardType: const TextInputType.numberWithOptions(
+                        decimal: true,
+                      ),
+                      style: const TextStyle(
+                        color: AppColors.textPrimary,
+                        fontSize: 16,
+                      ),
                       decoration: InputDecoration(
                         hintText: '0',
-                        hintStyle: const TextStyle(color: AppColors.textSecondary),
+                        hintStyle: const TextStyle(
+                          color: AppColors.textSecondary,
+                        ),
                         filled: true,
                         fillColor: AppColors.surface,
                         border: OutlineInputBorder(
@@ -146,7 +152,10 @@ class _SubscriptionDetailsScreenState extends State<SubscriptionDetailsScreen> {
                     const SizedBox(height: 22),
                     const Text(
                       'Billing cycle',
-                      style: TextStyle(color: AppColors.textSecondary, fontSize: 13),
+                      style: TextStyle(
+                        color: AppColors.textSecondary,
+                        fontSize: 13,
+                      ),
                     ),
                     const SizedBox(height: 8),
                     Row(
@@ -155,7 +164,8 @@ class _SubscriptionDetailsScreenState extends State<SubscriptionDetailsScreen> {
                           child: _CycleOption(
                             label: 'Monthly',
                             isSelected: _cycle == BillingCycle.monthly,
-                            onTap: () => setState(() => _cycle = BillingCycle.monthly),
+                            onTap: () =>
+                                setState(() => _cycle = BillingCycle.monthly),
                           ),
                         ),
                         const SizedBox(width: 12),
@@ -163,7 +173,8 @@ class _SubscriptionDetailsScreenState extends State<SubscriptionDetailsScreen> {
                           child: _CycleOption(
                             label: 'Yearly',
                             isSelected: _cycle == BillingCycle.yearly,
-                            onTap: () => setState(() => _cycle = BillingCycle.yearly),
+                            onTap: () =>
+                                setState(() => _cycle = BillingCycle.yearly),
                           ),
                         ),
                       ],
@@ -171,19 +182,26 @@ class _SubscriptionDetailsScreenState extends State<SubscriptionDetailsScreen> {
                     const SizedBox(height: 22),
                     const Text(
                       'Category',
-                      style: TextStyle(color: AppColors.textSecondary, fontSize: 13),
+                      style: TextStyle(
+                        color: AppColors.textSecondary,
+                        fontSize: 13,
+                      ),
                     ),
                     const SizedBox(height: 8),
                     CategoryFilterBar(
                       categories: SubscriptionCategories.values,
                       showAll: false,
                       selected: _category,
-                      onChanged: (c) => setState(() => _category = c ?? _category),
+                      onChanged: (c) =>
+                          setState(() => _category = c ?? _category),
                     ),
                     const SizedBox(height: 22),
                     const Text(
                       'Next billing date',
-                      style: TextStyle(color: AppColors.textSecondary, fontSize: 13),
+                      style: TextStyle(
+                        color: AppColors.textSecondary,
+                        fontSize: 13,
+                      ),
                     ),
                     const SizedBox(height: 8),
                     GestureDetector(
@@ -191,20 +209,27 @@ class _SubscriptionDetailsScreenState extends State<SubscriptionDetailsScreen> {
                       child: Container(
                         width: double.infinity,
                         padding: const EdgeInsets.symmetric(
-                            horizontal: 16, vertical: 16),
+                          horizontal: 16,
+                          vertical: 16,
+                        ),
                         decoration: BoxDecoration(
                           color: AppColors.surface,
                           borderRadius: BorderRadius.circular(16),
                         ),
                         child: Row(
                           children: [
-                            const Icon(Icons.calendar_today_rounded,
-                                color: AppColors.gold, size: 18),
+                            const Icon(
+                              Icons.calendar_today_rounded,
+                              color: AppColors.gold,
+                              size: 18,
+                            ),
                             const SizedBox(width: 12),
                             Text(
                               '${_nextBillingDate.year}-${_nextBillingDate.month.toString().padLeft(2, '0')}-${_nextBillingDate.day.toString().padLeft(2, '0')}',
                               style: const TextStyle(
-                                  color: AppColors.textPrimary, fontSize: 15),
+                                color: AppColors.textPrimary,
+                                fontSize: 15,
+                              ),
                             ),
                           ],
                         ),
@@ -265,7 +290,9 @@ class _CycleOption extends StatelessWidget {
         child: Text(
           label,
           style: TextStyle(
-            color: isSelected ? const Color(0xFF1B1F16) : AppColors.textSecondary,
+            color: isSelected
+                ? const Color(0xFF1B1F16)
+                : AppColors.textSecondary,
             fontWeight: FontWeight.w600,
             fontSize: 14,
           ),
