@@ -1,9 +1,9 @@
-import 'dart:convert';
+﻿import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class AppSettings {
   static final instance = AppSettings();
-  final _prefs = SharedPreferencesAsync();
+  SharedPreferencesAsync get _prefs => SharedPreferencesAsync();
   bool paymentReminders = true;
   int reminderDays = 5;
 
@@ -26,3 +26,4 @@ class AppSettings {
     reminderDays = days;
   }
 }
+

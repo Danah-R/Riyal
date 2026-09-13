@@ -30,7 +30,7 @@ class _ContactUsScreenState extends State<ContactUsScreen> {
           text: 'Riyal feedback\nTopic: $_topic\n\n${_message.text.trim()}',
         ),
       );
-      if (mounted)
+      if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text(
@@ -38,8 +38,9 @@ class _ContactUsScreenState extends State<ContactUsScreen> {
             ),
           ),
         );
+      }
     } catch (_) {
-      if (mounted)
+      if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text(
@@ -47,6 +48,7 @@ class _ContactUsScreenState extends State<ContactUsScreen> {
             ),
           ),
         );
+      }
     } finally {
       if (mounted) setState(() => _copying = false);
     }

@@ -1,4 +1,4 @@
-﻿import 'package:riyal/data/app_settings.dart';
+import 'package:riyal/data/app_settings.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:riyal/data/notifications_store.dart';
 import 'package:riyal/data/subscription.dart';
@@ -75,24 +75,50 @@ void main() {
       }
     },
   );
-  test('Reminder preferences affect new reminders but not new-item notices', () {
-    final settings = AppSettings.instance;
-    final inbox = NotificationsStore.instance;
-    final now = DateTime.now();
-    final due = DateTime(now.year, now.month, now.day + 3);
-    final before = inbox.notices.value.length;
-    settings.paymentReminders = false;
-    SubscriptionsStore.instance.add(Subscription(name: 'Settings test', logoAsset: null, amount: 30, cycle: BillingCycle.monthly, nextBillingDate: due));
-    expect(inbox.notices.value.length, before + 1);
-    settings.paymentReminders = true;
-    settings.reminderDays = 1;
-    inbox.refresh();
-    expect(inbox.notices.value.where((n) => n.reminder && n.message.contains('Settings test')), isEmpty);
-    settings.reminderDays = 3;
-    inbox.refresh();
-    expect(inbox.notices.value.where((n) => n.reminder && n.message.contains('Settings test')), hasLength(1));
-    inbox.refresh();
-    expect(inbox.notices.value.where((n) => n.reminder && n.message.contains('Settings test')), hasLength(1));
-    settings.reminderDays = 5;
-  });}
-
+  test(
+    'Reminder preferences affect new reminders but not new-item notices',
+    () {
+      final settings = AppSettings.instance;
+      final inbox = NotificationsStore.instance;
+      final now = DateTime.now();
+      final due = DateTime(now.year, now.month, now.day + 3);
+      final before = inbox.notices.value.length;
+      settings.paymentReminders = false;
+      SubscriptionsStore.instance.add(
+        Subscription(
+          name: 'Settings test',
+          logoAsset: null,
+          amount: 30,
+          cycle: BillingCycle.monthly,
+          nextBillingDate: due,
+        ),
+      );
+      expect(inbox.notices.value.length, before + 1);
+      settings.paymentReminders = true;
+      settings.reminderDays = 1;
+      inbox.refresh();
+      expect(
+        inbox.notices.value.where(
+          (n) => n.reminder && n.message.contains('Settings test'),
+        ),
+        isEmpty,
+      );
+      settings.reminderDays = 3;
+      inbox.refresh();
+      expect(
+        inbox.notices.value.where(
+          (n) => n.reminder && n.message.contains('Settings test'),
+        ),
+        hasLength(1),
+      );
+      inbox.refresh();
+      expect(
+        inbox.notices.value.where(
+          (n) => n.reminder && n.message.contains('Settings test'),
+        ),
+        hasLength(1),
+      );
+      settings.reminderDays = 5;
+    },
+  );
+}

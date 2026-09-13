@@ -9,7 +9,7 @@ Future<void> main() async {
   try {
     await AppSettings.instance.load().timeout(const Duration(seconds: 3));
   } catch (error) {
-    debugPrint('Settings load failed: ' + error.toString());
+    debugPrint('Settings load failed: $error');
   }
   runApp(const MainApp());
 }

@@ -23,17 +23,19 @@ class _SettingsScreenState extends State<SettingsScreen> {
           .save(enabled: enabled, days: days)
           .timeout(const Duration(seconds: 5));
       NotificationsStore.instance.refresh();
-      if (mounted)
+      if (mounted) {
         ScaffoldMessenger.of(
           context,
         ).showSnackBar(const SnackBar(content: Text('Settings saved')));
+      }
     } catch (_) {
-      if (mounted)
+      if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Could not save settings. Please try again.'),
           ),
         );
+      }
     } finally {
       if (mounted) setState(() => _saving = false);
     }
