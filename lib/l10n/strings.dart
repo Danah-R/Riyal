@@ -7,10 +7,12 @@ import 'app_locale.dart';
 /// the new table.
 ///
 /// Scope: all app chrome (labels, buttons, hints, empty states, errors)
-/// translates. Brand/product names (Netflix, STC, Zain, ...), bank-style
-/// merchant strings, and the "SAR" currency prefix stay as written — that
-/// matches how real banking/subscription apps render them even in Arabic
-/// locales, and translating a proper noun isn't really "translation".
+/// translates. Brand/product names (Netflix, STC, Zain, ...) and bank-style
+/// merchant strings stay as written — that matches how real banking/
+/// subscription apps render them even in Arabic locales, and translating a
+/// proper noun isn't really "translation". Amount displays use the "⃁"
+/// currency symbol instead of a locale-dependent word, so they read the
+/// same in both languages.
 ///
 /// A handful of sentences interpolate a dynamic word (a count, a category
 /// name, a period) where English and Arabic word order differ enough that
@@ -99,6 +101,13 @@ class Strings {
   static String monthAbbrev(int month1to12) =>
       (_isArabic ? _monthsAr : _monthsEn)[month1to12 - 1];
 
+  static const _weekdaysEn = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  static const _weekdaysAr = ['أحد', 'إثن', 'ثلا', 'أرب', 'خمي', 'جمع', 'سبت'];
+
+  /// [sundayIndex0to6] is 0-indexed starting from Sunday.
+  static String weekdayAbbrev(int sundayIndex0to6) =>
+      (_isArabic ? _weekdaysAr : _weekdaysEn)[sundayIndex0to6];
+
   /// Display text for the three top-level analytics/spending categories.
   /// The underlying value ('Subscriptions'/'Utilities'/'Staff') stays
   /// English wherever it's used as a lookup key or compared for equality —
@@ -181,9 +190,9 @@ class Strings {
 
     // Home
     'overview': 'Overview',
-    'spending_heading': "This month's spending\non subscriptions",
-    'of_sar_budget': 'of SAR %s budget',
-    'sar_left': 'SAR %s left',
+    'spending_heading': "This month's spending\non recurring payments",
+    'of_sar_budget': 'of ⃁%s budget',
+    'sar_left': '⃁%s left',
     'no_subscriptions_yet_short': 'No subscriptions yet.',
 
     // Category labels
@@ -274,7 +283,7 @@ class Strings {
     // Details / add-item forms
     'subscription_details': 'Subscription details',
     'details': 'Details',
-    'amount_sar': 'Amount (SAR)',
+    'amount_sar': 'Amount (⃁)',
     'billing_cycle': 'Billing cycle',
     'monthly': 'Monthly',
     'yearly': 'Yearly',
@@ -513,7 +522,7 @@ class Strings {
     'settings_save_failed': 'تعذر حفظ الإعدادات. حاول مرة أخرى.',
 
     'overview': 'نظرة عامة',
-    'spending_heading': 'إنفاق هذا الشهر\nعلى الاشتراكات',
+    'spending_heading': 'إنفاق هذا الشهر\nعلى المدفوعات المتكررة',
     'of_sar_budget': 'من ميزانية %s ريال',
     'sar_left': 'متبقٍ %s ريال',
     'no_subscriptions_yet_short': 'لا توجد اشتراكات بعد.',

@@ -266,7 +266,7 @@ class _SpendingCard extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    'SAR ${subscriptionsSpent.toStringAsFixed(0)}',
+                    '⃁${subscriptionsSpent.toStringAsFixed(0)}',
                     style: AppTypography.amount(
                       color: AppColors.textPrimary,
                       fontSize: 32,
@@ -422,7 +422,7 @@ class _OverviewStats extends StatelessWidget {
                         const SizedBox(width: 6),
                         Flexible(
                           child: Text(
-                            'SAR ${c.amount.toStringAsFixed(0)}',
+                            '⃁${c.amount.toStringAsFixed(0)}',
                             overflow: TextOverflow.ellipsis,
                             style: AppTypography.amount(
                               color: AppColors.textPrimary,
@@ -451,8 +451,65 @@ class _OverviewStats extends StatelessWidget {
   }
 }
 
-class _UpcomingRenewals extends StatelessWidget {
+class _UpcomingRenewals extends StatefulWidget {
   const _UpcomingRenewals();
+
+  @override
+  State<_UpcomingRenewals> createState() => _UpcomingRenewalsState();
+}
+
+class _UpcomingRenewalsState extends State<_UpcomingRenewals> {
+  final _pageController = PageController();
+  int _monthOffset = 0;
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
+  }
+
+  void _goToMonth(int offset) {
+    _pageController.animateToPage(
+      offset,
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.easeInOutCubic,
+    );
+  }
+
+  void _showDayRenewals(List<Subscription> daySubs, DateTime day) {
+    showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: AppColors.surface,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (_) => SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(20, 20, 20, 20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                '${day.day} ${Strings.monthAbbrev(day.month)} ${day.year}',
+                style: const TextStyle(
+                  color: AppColors.textPrimary,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              const SizedBox(height: 14),
+              for (final s in daySubs)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 12),
+                  child: _RenewalTile(subscription: s),
+                ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -468,20 +525,269 @@ class _UpcomingRenewals extends StatelessWidget {
             ),
           );
         }
-        final upcoming = [...subs]
-          ..sort((a, b) => a.renewsInDays.compareTo(b.renewsInDays));
-        return Column(
-          children: upcoming
-              .take(5)
-              .map(
-                (s) => Padding(
-                  padding: const EdgeInsets.only(bottom: 12),
-                  child: _RenewalTile(subscription: s),
-                ),
-              )
-              .toList(),
+        final now = DateTime.now();
+        final displayedMonth = DateTime(now.year, now.month + _monthOffset);
+        return Container(
+          padding: const EdgeInsets.all(12),
+          clipBehavior: Clip.antiAlias,
+          decoration: BoxDecoration(
+            color: AppColors.surface,
+            borderRadius: BorderRadius.circular(24),
+            border: Border.all(color: AppColors.cardBorder),
+          ),
+          child: Stack(
+            children: [
+              const CardLogoWatermark(corner: WatermarkCorner.bottomEnd),
+              Column(
+                children: [
+                  SizedBox(
+                    height: 26,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        _CalendarNavButton(
+                          icon: Icons.chevron_left_rounded,
+                          onTap: _monthOffset > 0
+                              ? () => _goToMonth(_monthOffset - 1)
+                              : null,
+                        ),
+                        Text(
+                          '${Strings.monthAbbrev(displayedMonth.month)} '
+                          '${displayedMonth.year}',
+                          style: const TextStyle(
+                            color: AppColors.textPrimary,
+                            fontSize: 13,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                        _CalendarNavButton(
+                          icon: Icons.chevron_right_rounded,
+                          onTap: () => _goToMonth(_monthOffset + 1),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  SizedBox(
+                    height: 230,
+                    child: PageView.builder(
+                      controller: _pageController,
+                      onPageChanged: (i) => setState(() => _monthOffset = i),
+                      itemBuilder: (context, index) => _MonthGrid(
+                        month: DateTime(now.year, now.month + index),
+                        subscriptions: subs,
+                        onDayTap: _showDayRenewals,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
         );
       },
+    );
+  }
+}
+
+class _MonthGrid extends StatelessWidget {
+  const _MonthGrid({
+    required this.month,
+    required this.subscriptions,
+    required this.onDayTap,
+  });
+
+  final DateTime month;
+  final List<Subscription> subscriptions;
+  final void Function(List<Subscription> daySubs, DateTime day) onDayTap;
+
+  List<Subscription> _subscriptionsOn(int day) => subscriptions
+      .where(
+        (s) =>
+            s.nextBillingDate.year == month.year &&
+            s.nextBillingDate.month == month.month &&
+            s.nextBillingDate.day == day,
+      )
+      .toList();
+
+  @override
+  Widget build(BuildContext context) {
+    final daysInMonth = DateTime(month.year, month.month + 1, 0).day;
+    // DateTime.weekday: Monday=1..Sunday=7. Calendar starts on Sunday, so
+    // Sunday needs 0 leading blanks, Monday 1, ... Saturday 6.
+    final leading = DateTime(month.year, month.month, 1).weekday % 7;
+    final totalCells = leading + daysInMonth;
+    final rows = (totalCells / 7).ceil();
+    final today = DateTime.now();
+
+    return Column(
+      children: [
+        Row(
+          children: [
+            for (var w = 0; w < 7; w++)
+              Expanded(
+                child: Center(
+                  child: Text(
+                    Strings.weekdayAbbrev(w),
+                    style: const TextStyle(
+                      color: AppColors.textSecondary,
+                      fontSize: 10,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ),
+          ],
+        ),
+        const SizedBox(height: 2),
+        for (var r = 0; r < rows; r++)
+          Expanded(
+            child: Row(
+              children: [
+                for (var c = 0; c < 7; c++)
+                  Expanded(
+                    child: Builder(
+                      builder: (context) {
+                        final dayNum = r * 7 + c - leading + 1;
+                        if (dayNum < 1 || dayNum > daysInMonth) {
+                          return const SizedBox.shrink();
+                        }
+                        final daySubs = _subscriptionsOn(dayNum);
+                        final isToday =
+                            today.year == month.year &&
+                            today.month == month.month &&
+                            today.day == dayNum;
+                        return GestureDetector(
+                          onTap: daySubs.isEmpty
+                              ? null
+                              : () => onDayTap(
+                                  daySubs,
+                                  DateTime(month.year, month.month, dayNum),
+                                ),
+                          child: Container(
+                            margin: const EdgeInsets.symmetric(
+                              horizontal: 1,
+                              vertical: 1,
+                            ),
+                            decoration: BoxDecoration(
+                              color: isToday
+                                  ? AppColors.gold.withValues(alpha: 0.15)
+                                  : Colors.transparent,
+                              borderRadius: BorderRadius.circular(8),
+                              border: isToday
+                                  ? Border.all(color: AppColors.gold)
+                                  : null,
+                            ),
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text(
+                                  '$dayNum',
+                                  style: TextStyle(
+                                    color: isToday
+                                        ? AppColors.gold
+                                        : AppColors.textPrimary,
+                                    fontSize: 10,
+                                    fontWeight: isToday
+                                        ? FontWeight.w700
+                                        : FontWeight.w500,
+                                  ),
+                                ),
+                                if (daySubs.isNotEmpty) ...[
+                                  const SizedBox(height: 1),
+                                  _DayLogos(subscriptions: daySubs),
+                                ],
+                              ],
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+              ],
+            ),
+          ),
+      ],
+    );
+  }
+}
+
+/// Up to 2 overlapping circular logos for a calendar day, plus a "+N"
+/// circle if more subscriptions renew that same day.
+class _DayLogos extends StatelessWidget {
+  const _DayLogos({required this.subscriptions});
+
+  final List<Subscription> subscriptions;
+
+  static const _logoSize = 20.0;
+  static const _overlap = 13.0;
+
+  @override
+  Widget build(BuildContext context) {
+    final shown = subscriptions.take(2).toList();
+    final overflow = subscriptions.length - shown.length;
+    final width =
+        _logoSize + _overlap * (shown.length - 1 + (overflow > 0 ? 1 : 0));
+
+    return SizedBox(
+      height: _logoSize,
+      width: width,
+      child: Stack(
+        children: [
+          for (var i = 0; i < shown.length; i++)
+            Positioned(
+              left: i * _overlap,
+              child: LogoImage(
+                assetPath: shown[i].logoAsset,
+                size: _logoSize,
+                radius: _logoSize / 2,
+              ),
+            ),
+          if (overflow > 0)
+            Positioned(
+              left: shown.length * _overlap,
+              child: Container(
+                width: _logoSize,
+                height: _logoSize,
+                decoration: const BoxDecoration(
+                  color: AppColors.trackBackground,
+                  shape: BoxShape.circle,
+                ),
+                alignment: Alignment.center,
+                child: Text(
+                  '+$overflow',
+                  style: const TextStyle(
+                    color: AppColors.textPrimary,
+                    fontSize: 8,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+class _CalendarNavButton extends StatelessWidget {
+  const _CalendarNavButton({required this.icon, required this.onTap});
+
+  final IconData icon;
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final enabled = onTap != null;
+    return GestureDetector(
+      onTap: onTap,
+      child: Icon(
+        icon,
+        size: 22,
+        color: enabled
+            ? AppColors.gold
+            : AppColors.textSecondary.withValues(alpha: 0.3),
+      ),
     );
   }
 }
@@ -528,7 +834,7 @@ class _RenewalTile extends StatelessWidget {
             ),
           ),
           Text(
-            'SAR ${s.amount.toStringAsFixed(0)}',
+            '⃁${s.amount.toStringAsFixed(0)}',
             style: AppTypography.amount(
               color: AppColors.textPrimary,
               fontSize: 14,

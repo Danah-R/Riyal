@@ -113,7 +113,7 @@ class SelectTransactionScreen extends StatelessWidget {
                                   ),
                                 ),
                                 Text(
-                                  'SAR ${tx.amount.toStringAsFixed(0)}',
+                                  '⃁${tx.amount.toStringAsFixed(0)}',
                                   style: AppTypography.amount(
                                     color: AppColors.textPrimary,
                                     fontSize: 14,

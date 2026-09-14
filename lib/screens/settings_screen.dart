@@ -292,7 +292,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       title: Text(Strings.t('currency')),
                       subtitle: Text(Strings.t('currency_sub')),
                       trailing: const Text(
-                        'SAR',
+                        '⃁',
                         style: TextStyle(
                           color: AppColors.gold,
                           fontWeight: FontWeight.w600,

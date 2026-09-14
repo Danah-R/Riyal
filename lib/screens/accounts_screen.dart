@@ -2,10 +2,15 @@ import 'package:flutter/material.dart';
 
 import '../data/bank_transaction_matcher.dart';
 import '../data/recurring_detection.dart';
+import '../data/staff_categories.dart';
+import '../data/staff_domain.dart';
 import '../data/subscription.dart';
 import '../data/subscriptions_store.dart';
+import '../data/tracked_item.dart';
 import '../data/user_bank_account.dart';
 import '../data/user_bank_accounts_store.dart';
+import '../data/utilities_domain.dart';
+import '../data/utility_categories.dart';
 import '../l10n/strings.dart';
 import '../theme/app_theme.dart';
 import '../widgets/coin_back_button.dart';
@@ -51,15 +56,38 @@ class _AccountsScreenState extends State<AccountsScreen> {
   }
 
   void _addSuggestion(DetectedSubscription suggestion) {
-    SubscriptionsStore.instance.add(
-      Subscription(
-        name: suggestion.merchantName,
-        logoAsset: null,
-        amount: suggestion.amount,
-        cycle: suggestion.cycle,
-        nextBillingDate: suggestion.suggestedNextBillingDate,
-      ),
-    );
+    switch (suggestion.category) {
+      case 'utility':
+        utilitiesDomain.store.add(
+          TrackedItem(
+            name: suggestion.merchantName,
+            amount: suggestion.amount,
+            cycle: suggestion.cycle,
+            nextBillingDate: suggestion.suggestedNextBillingDate,
+            category: UtilityCategories.other,
+          ),
+        );
+      case 'person':
+        staffDomain.store.add(
+          TrackedItem(
+            name: suggestion.merchantName,
+            amount: suggestion.amount,
+            cycle: suggestion.cycle,
+            nextBillingDate: suggestion.suggestedNextBillingDate,
+            category: StaffCategories.other,
+          ),
+        );
+      default:
+        SubscriptionsStore.instance.add(
+          Subscription(
+            name: suggestion.merchantName,
+            logoAsset: null,
+            amount: suggestion.amount,
+            cycle: suggestion.cycle,
+            nextBillingDate: suggestion.suggestedNextBillingDate,
+          ),
+        );
+    }
     _suggestions.value = _suggestions.value
         .where((s) => s != suggestion)
         .toList();
@@ -346,7 +374,7 @@ class _SuggestionTile extends StatelessWidget {
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  'SAR ${suggestion.amount.toStringAsFixed(0)} · '
+                  '⃁${suggestion.amount.toStringAsFixed(0)} · '
                   '${Strings.f('occurrences_count', '${suggestion.occurrences}')}',
                   style: const TextStyle(
                     color: AppColors.textSecondary,

@@ -244,7 +244,7 @@ ${actionable.isEmpty ? 'No action recommended; current commitments appear suitab
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          'SAR ${item.monthlyAmount.toStringAsFixed(0)} / ${t('شهر', 'month')}',
+                          '⃁${item.monthlyAmount.toStringAsFixed(0)} / ${t('شهر', 'month')}',
                           style: const TextStyle(
                             color: AppColors.textSecondary,
                           ),
@@ -390,7 +390,7 @@ ${actionable.isEmpty ? 'No action recommended; current commitments appear suitab
                   ),
                   children: [
                     TextSpan(
-                      text: 'SAR ${monthlySaving.toStringAsFixed(0)}',
+                      text: '⃁${monthlySaving.toStringAsFixed(0)}',
                       style: TextStyle(
                         fontFamily: AppTypography.amountFontFamily,
                       ),
@@ -404,8 +404,7 @@ ${actionable.isEmpty ? 'No action recommended; current commitments appear suitab
                   style: const TextStyle(color: AppColors.textSecondary),
                   children: [
                     TextSpan(
-                      text:
-                          'SAR ${(monthlySaving * 12).toStringAsFixed(0)}',
+                      text: '⃁${(monthlySaving * 12).toStringAsFixed(0)}',
                       style: TextStyle(
                         fontFamily: AppTypography.amountFontFamily,
                       ),
@@ -729,16 +728,16 @@ class _RecommendationCard extends StatelessWidget {
     };
     final body = switch (type) {
       RecommendationType.cancel => t(
-        'إجاباتك تشير إلى أن ${recommendation.item.name} لم يعد مستخدمًا أو مطلوبًا. إلغاؤه قد يوفر SAR ${recommendation.monthlySaving.toStringAsFixed(0)} شهريًا.',
-        'Your answers suggest ${recommendation.item.name} is no longer used or needed. Cancelling could save SAR ${recommendation.monthlySaving.toStringAsFixed(0)} monthly.',
+        'إجاباتك تشير إلى أن ${recommendation.item.name} لم يعد مستخدمًا أو مطلوبًا. إلغاؤه قد يوفر ⃁${recommendation.monthlySaving.toStringAsFixed(0)} شهريًا.',
+        'Your answers suggest ${recommendation.item.name} is no longer used or needed. Cancelling could save ⃁${recommendation.monthlySaving.toStringAsFixed(0)} monthly.',
       ),
       RecommendationType.pause => t(
-        'قد يكون إيقاف ${recommendation.item.name} مؤقتًا مناسبًا. التوفير المحتمل أثناء الإيقاف SAR ${recommendation.monthlySaving.toStringAsFixed(0)} شهريًا.',
-        'Pausing ${recommendation.item.name} may fit your current needs and could save SAR ${recommendation.monthlySaving.toStringAsFixed(0)} per paused month.',
+        'قد يكون إيقاف ${recommendation.item.name} مؤقتًا مناسبًا. التوفير المحتمل أثناء الإيقاف ⃁${recommendation.monthlySaving.toStringAsFixed(0)} شهريًا.',
+        'Pausing ${recommendation.item.name} may fit your current needs and could save ⃁${recommendation.monthlySaving.toStringAsFixed(0)} per paused month.',
       ),
       RecommendationType.annualPlan => t(
-        'استخدامك مستمر وتتوقع البقاء سنة. قارن السعر السنوي مع SAR ${(recommendation.item.monthlyAmount * 12).toStringAsFixed(0)}، وهي تكلفة 12 دفعة شهرية.',
-        'Your use is consistent and you expect to stay for a year. Compare the annual price with SAR ${(recommendation.item.monthlyAmount * 12).toStringAsFixed(0)}, the cost of 12 monthly payments.',
+        'استخدامك مستمر وتتوقع البقاء سنة. قارن السعر السنوي مع ⃁${(recommendation.item.monthlyAmount * 12).toStringAsFixed(0)}، وهي تكلفة 12 دفعة شهرية.',
+        'Your use is consistent and you expect to stay for a year. Compare the annual price with ⃁${(recommendation.item.monthlyAmount * 12).toStringAsFixed(0)}, the cost of 12 monthly payments.',
       ),
       RecommendationType.reviewPlan => t(
         'إجاباتك تستحق مراجعة الباقة أو البدائل قبل موعد الدفع القادم.',

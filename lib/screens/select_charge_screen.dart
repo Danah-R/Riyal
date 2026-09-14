@@ -124,7 +124,7 @@ class SelectChargeScreen extends StatelessWidget {
                                   ),
                                 ),
                                 Text(
-                                  'SAR ${charge.amount.toStringAsFixed(0)}',
+                                  '⃁${charge.amount.toStringAsFixed(0)}',
                                   style: AppTypography.amount(
                                     color: AppColors.textPrimary,
                                     fontSize: 14,

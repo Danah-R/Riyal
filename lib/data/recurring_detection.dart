@@ -11,6 +11,7 @@ class DetectedSubscription {
     required this.cycle,
     required this.lastDate,
     required this.occurrences,
+    required this.category,
   });
 
   final String merchantName;
@@ -18,6 +19,12 @@ class DetectedSubscription {
   final BillingCycle cycle;
   final DateTime lastDate;
   final int occurrences;
+
+  /// One of 'subscription', 'utility', 'person', 'other' — which domain
+  /// this recurring charge should be added to (see
+  /// lib/screens/accounts_screen.dart's `_addSuggestion`), not just a
+  /// blanket "subscription".
+  final String category;
 
   /// Naive next-due estimate from the last seen charge — good enough as a
   /// starting point for a suggested subscription; the user can adjust it.
@@ -93,6 +100,7 @@ class RecurringDetectionEngine {
           cycle: cycle,
           lastDate: sorted.last.transactionDate,
           occurrences: sorted.length,
+          category: sorted.first.category,
         ),
       );
     }

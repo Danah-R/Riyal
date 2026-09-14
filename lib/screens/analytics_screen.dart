@@ -85,7 +85,7 @@ class _AnalyticsContentState extends State<AnalyticsContent> {
     AppColors.textSecondary,
     AppColors.goldDark,
   ];
-  String _money(double amount) => 'SAR ${amount.toStringAsFixed(0)}';
+  String _money(double amount) => '⃁${amount.toStringAsFixed(0)}';
 
   @override
   Widget build(BuildContext context) {
@@ -281,7 +281,7 @@ class _AnalyticsContentState extends State<AnalyticsContent> {
                       child: Text(
                         ar
                             ? 'الإنفاق ${periodAdjDisplay(_period)} · ريال'
-                            : '${periodAdjDisplay(_period)} spend · SAR',
+                            : '${periodAdjDisplay(_period)} spend · ⃁',
                         style: TextStyle(
                           color: AppColors.textSecondary,
                           fontSize: 12,

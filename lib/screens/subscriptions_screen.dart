@@ -266,7 +266,7 @@ class _SubscriptionTile extends StatelessWidget {
             ),
           ),
           Text(
-            'SAR ${s.amount.toStringAsFixed(0)}',
+            '⃁${s.amount.toStringAsFixed(0)}',
             style: AppTypography.amount(
               color: AppColors.textPrimary,
               fontSize: 14,
