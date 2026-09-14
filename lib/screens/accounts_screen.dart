@@ -94,6 +94,13 @@ class _AccountsScreenState extends State<AccountsScreen> {
       );
       if (response == null) return; // backed out of the connect screen
 
+      debugPrint(
+        'Lean connect response: status=${response.status} '
+        'message=${response.message} exitPoint=${response.exitPoint} '
+        'secondaryStatus=${response.secondaryStatus} '
+        'lastApiResponse=${response.lastApiResponse}',
+      );
+
       if (response.status.toUpperCase() != 'SUCCESS') {
         _showMessage(
           response.status.toUpperCase() == 'CANCELLED'
@@ -106,8 +113,10 @@ class _AccountsScreenState extends State<AccountsScreen> {
       await _resolveAndStoreAccount(deviceId);
       await _refreshSuggestions();
     } on LeanServiceException catch (error) {
+      debugPrint('Lean add-account failed (service): $error');
       _showMessage(error.message);
-    } catch (_) {
+    } catch (error, stackTrace) {
+      debugPrint('Lean add-account failed (unexpected): $error\n$stackTrace');
       _showMessage(Strings.t('lean_connect_failed'));
     } finally {
       if (mounted) setState(() => _connecting = false);
@@ -122,29 +131,41 @@ class _AccountsScreenState extends State<AccountsScreen> {
   /// succeeds we just re-read `bank_accounts` for the canonical row.
   Future<void> _resolveAndStoreAccount(String deviceId) async {
     String? entityId;
-    for (var attempt = 0; attempt < 5 && entityId == null; attempt++) {
-      if (attempt > 0) await Future.delayed(const Duration(seconds: 2));
+    for (var attempt = 0; attempt < 8 && entityId == null; attempt++) {
+      if (attempt > 0) await Future.delayed(const Duration(seconds: 3));
       entityId = await LeanService.instance.latestEntityId(deviceId);
+      debugPrint('latestEntityId attempt $attempt -> $entityId');
     }
     if (entityId == null) {
       _showMessage(Strings.t('lean_entity_not_found'));
       return;
     }
 
-    for (var attempt = 0; attempt < 5; attempt++) {
-      if (attempt > 0) await Future.delayed(const Duration(seconds: 2));
+    var accountFetched = false;
+    for (var attempt = 0; attempt < 8; attempt++) {
+      if (attempt > 0) await Future.delayed(const Duration(seconds: 3));
       try {
-        await LeanService.instance.fetchAccounts(
+        final result = await LeanService.instance.fetchAccounts(
           entityId: entityId,
           deviceId: deviceId,
         );
+        debugPrint('fetchAccounts attempt $attempt -> $result');
+        accountFetched = true;
         break;
-      } catch (_) {
-        // keep retrying — data isn't ready yet
+      } catch (error) {
+        debugPrint('fetchAccounts attempt $attempt threw: $error');
       }
     }
 
+    if (!accountFetched) {
+      _showMessage(Strings.t('lean_entity_not_found'));
+      return;
+    }
+
     await BankAccountsStore.instance.load();
+    debugPrint(
+      'BankAccountsStore after load: ${BankAccountsStore.instance.accounts.value}',
+    );
   }
 
   void _addSuggestion(DetectedSubscription suggestion) {

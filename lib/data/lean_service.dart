@@ -9,7 +9,11 @@ class LeanService {
   LeanService._();
   static final instance = LeanService._();
 
-  Future<Map<String, dynamic>> _invoke(
+  /// Raw response body, untyped — Lean's endpoints don't consistently
+  /// return a JSON object (e.g. the entities list comes back as a bare
+  /// JSON array), so callers decide how to interpret the shape themselves
+  /// rather than this helper forcing a cast that can throw.
+  Future<dynamic> _invokeRaw(
     String route, {
     HttpMethod method = HttpMethod.post,
     Map<String, dynamic>? body,
@@ -22,7 +26,7 @@ class LeanService {
         body: body,
         queryParameters: query?.map((k, v) => MapEntry(k, v.toString())),
       );
-      return response.data as Map<String, dynamic>;
+      return response.data;
     } on FunctionException catch (e) {
       final details = e.details;
       final message = details is Map && details['error'] != null
@@ -30,6 +34,16 @@ class LeanService {
           : 'Request failed (${e.status})';
       throw LeanServiceException(message);
     }
+  }
+
+  Future<Map<String, dynamic>> _invoke(
+    String route, {
+    HttpMethod method = HttpMethod.post,
+    Map<String, dynamic>? body,
+    Map<String, dynamic>? query,
+  }) async {
+    final data = await _invokeRaw(route, method: method, body: body, query: query);
+    return data as Map<String, dynamic>;
   }
 
   Future<String> createCustomer(String deviceId) async {
@@ -48,18 +62,25 @@ class LeanService {
   /// The Flutter SDK's connect callback doesn't include an entity_id, so we
   /// look up the device's connected entities after a successful connect.
   /// Returns the most recently created entity id, or null if none yet.
+  ///
+  /// Lean's "entities for a customer" endpoint returns a bare JSON array
+  /// directly (confirmed by a live 502 stack trace during testing — an
+  /// earlier version of this method assumed an `{entities: [...]}` /
+  /// `{payload: {...}}` wrapper and crashed on the cast). Handle both the
+  /// bare-array shape and a wrapped one defensively.
   Future<String?> latestEntityId(String deviceId) async {
-    final body = await _invoke(
+    final data = await _invokeRaw(
       '/entities',
       method: HttpMethod.get,
       query: {'deviceId': deviceId},
     );
-    final entities = (body['entities'] ?? body['payload']) as Object?;
-    final list = entities is List
-        ? entities
-        : (entities is Map && entities['entities'] is List
-              ? entities['entities'] as List
-              : const []);
+
+    final list = switch (data) {
+      List() => data,
+      Map() when data['entities'] is List => data['entities'] as List,
+      Map() when data['payload'] is List => data['payload'] as List,
+      _ => const [],
+    };
     if (list.isEmpty) return null;
     final last = list.last;
     if (last is Map<String, dynamic>) {
@@ -69,11 +90,13 @@ class LeanService {
   }
 
   /// Also causes the Edge Function to upsert the account into the
-  /// `bank_accounts` table.
-  Future<Map<String, dynamic>> fetchAccounts({
+  /// `bank_accounts` table. Return shape isn't relied on by callers (the
+  /// app re-reads `bank_accounts` from Supabase afterwards), so this stays
+  /// untyped rather than risking the same bad-cast crash as [latestEntityId].
+  Future<dynamic> fetchAccounts({
     required String entityId,
     required String deviceId,
-  }) => _invoke(
+  }) => _invokeRaw(
     '/accounts',
     method: HttpMethod.get,
     query: {'entityId': entityId, 'deviceId': deviceId},
@@ -84,7 +107,7 @@ class LeanService {
   Future<dynamic> fetchTransactions({
     required String entityId,
     required String deviceId,
-  }) => _invoke(
+  }) => _invokeRaw(
     '/transactions',
     method: HttpMethod.get,
     query: {'entityId': entityId, 'deviceId': deviceId},

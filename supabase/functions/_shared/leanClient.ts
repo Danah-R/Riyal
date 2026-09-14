@@ -2,7 +2,7 @@
 // this only ever runs inside the Supabase Edge Function, never shipped to
 // the Flutter app. See https://docs.leantech.me/v2.0-KSA/docs/authentication.
 
-const AUTH_BASE_URL = Deno.env.get('LEAN_AUTH_BASE_URL') ?? 'https://auth.sa.leantech.me';
+const AUTH_BASE_URL = Deno.env.get('LEAN_AUTH_BASE_URL') ?? 'https://auth.sandbox.sa.leantech.me';
 const API_BASE_URL = Deno.env.get('LEAN_API_BASE_URL') ?? 'https://sandbox.sa.leantech.me';
 
 function requireEnv(name: string): string {

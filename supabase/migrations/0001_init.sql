@@ -48,7 +48,10 @@ create table if not exists bank_transactions (
 
 create table if not exists subscriptions (
   id uuid primary key default gen_random_uuid(),
-  device_id text not null references lean_customers (device_id) on delete cascade,
+  -- No FK to lean_customers: subscriptions are seeded for every device on
+  -- first launch and can be added manually from the catalog, regardless of
+  -- whether that device has ever connected a bank account.
+  device_id text not null,
   name text not null,
   logo_asset text,
   amount numeric not null,
