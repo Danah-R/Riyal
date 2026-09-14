@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import '../data/app_settings.dart';
 import '../l10n/app_locale.dart';
 import '../theme/app_theme.dart';
+import '../theme/app_typography.dart';
 import '../widgets/gold_coin_painter.dart';
 import 'login_screen.dart';
 
@@ -165,9 +166,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         padding: const EdgeInsets.fromLTRB(20, 10, 12, 0),
         child: Row(
           children: [
-            const Text(
+            Text(
               'R I Y A L',
-              style: TextStyle(
+              style: AppTypography.wordmark(
                 color: AppColors.gold,
                 fontSize: 16,
                 fontWeight: FontWeight.w700,

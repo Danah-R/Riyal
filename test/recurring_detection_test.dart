@@ -1,15 +1,16 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:riyal/data/bank_transaction.dart';
+import 'package:riyal/data/mock_bank_transaction.dart';
 import 'package:riyal/data/recurring_detection.dart';
 import 'package:riyal/data/subscription.dart';
 
-BankTransaction _tx(String description, double amount, DateTime date) =>
-    BankTransaction(
-      id: '$description-${date.toIso8601String()}',
-      entityId: 'entity-1',
-      description: description,
+MockBankTransactionRow _tx(String merchantName, double amount, DateTime date) =>
+    MockBankTransactionRow(
+      id: '$merchantName-${date.toIso8601String()}',
+      bankId: 'bank-1',
+      merchantName: merchantName,
       amount: amount,
-      date: date,
+      transactionDate: date,
+      category: 'other',
     );
 
 void main() {

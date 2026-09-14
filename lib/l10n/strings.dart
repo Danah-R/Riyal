@@ -319,6 +319,7 @@ class Strings {
     'login_heading': 'Login',
     'signin_subtitle': 'Sign in to your account',
     'username': 'Username',
+    'email': 'Email',
     'password': 'Password',
     'sign_in_button': 'SIGN IN',
     'no_account_signup': "Don't have an account? Sign up",
@@ -336,6 +337,10 @@ class Strings {
     'valid_email_error': 'Enter a valid email',
     'password_length_error': 'Use at least 8 characters',
     'passwords_no_match': 'Passwords do not match',
+    'sign_in_generic_error': 'Could not sign in. Please try again.',
+    'sign_up_generic_error': 'Could not create your account. Please try again.',
+    'check_email_to_confirm':
+        'Check your email to confirm your account, then sign in.',
 
     // Splash
     'splash_tagline': 'Know where your money goes.',
@@ -407,27 +412,36 @@ class Strings {
     'contact_us_menu_item': 'Contact us',
     'log_out': 'Log out',
 
-    // Bank accounts (Lean)
+    // Bank accounts (mocked — see supabase/migrations/0003_mock_banking.sql)
     'accounts_title': 'Bank accounts',
     'accounts_sub': 'Connect and manage your bank accounts',
     'add_account': 'Add account',
     'no_accounts_yet': 'No bank accounts connected yet.\nTap + to connect one.',
-    'account_status_connected': 'Connected',
-    'account_status_syncing': 'Syncing…',
-    'account_status_error': 'Connection issue',
-    'last_synced': 'Last synced %s',
-    'never_synced': 'Not synced yet',
     'disconnect': 'Disconnect',
     'connected_bank': 'Connected bank',
-    'lean_connect_failed': 'Could not connect your bank. Please try again.',
-    'lean_cancelled': 'Connection cancelled.',
-    'lean_entity_not_found':
-        'Connected, but no account data yet. Pull to refresh in a moment.',
     'suggested_subscriptions': 'Suggested from your bank',
     'suggested_subscriptions_sub':
         'Recurring charges we spotted in your transactions.',
     'add_suggestion': 'Add',
     'occurrences_count': '%s charges seen',
+
+    // Mock bank connect flow
+    'connect_bank_title': 'Connect a bank',
+    'connect_bank_forced_title': 'Connect your first bank',
+    'connect_bank_forced_subtitle':
+        'Connect at least one bank account to continue to Riyal.',
+    'choose_your_bank': 'Choose your bank',
+    'mock_bank_disclaimer':
+        'Simulated bank connection for this demo — no real bank is '
+        'contacted, and any login works.',
+    'bank_login_username_hint': 'National ID / Username',
+    'bank_login_button': 'Log in',
+    'connecting_to_bank': 'Connecting to %s…',
+    'bank_connected_title': 'Bank connected!',
+    'bank_connected_body': '%s has been linked to your Riyal account.',
+    'bank_connect_failed': 'Could not connect. Please try again.',
+    'continue_button': 'Continue',
+    'done_button': 'Done',
 
     // Notification-generated text
     'notice_new_subscription': 'New subscription',
@@ -627,6 +641,7 @@ class Strings {
     'login_heading': 'تسجيل الدخول',
     'signin_subtitle': 'سجّل الدخول إلى حسابك',
     'username': 'اسم المستخدم',
+    'email': 'البريد الإلكتروني',
     'password': 'كلمة المرور',
     'sign_in_button': 'تسجيل الدخول',
     'no_account_signup': 'ليس لديك حساب؟ أنشئ حسابًا',
@@ -644,6 +659,10 @@ class Strings {
     'valid_email_error': 'أدخل بريدًا إلكترونيًا صحيحًا',
     'password_length_error': 'استخدم 8 أحرف على الأقل',
     'passwords_no_match': 'كلمتا المرور غير متطابقتين',
+    'sign_in_generic_error': 'تعذر تسجيل الدخول. حاول مرة أخرى.',
+    'sign_up_generic_error': 'تعذر إنشاء حسابك. حاول مرة أخرى.',
+    'check_email_to_confirm':
+        'تحقق من بريدك الإلكتروني لتأكيد حسابك، ثم سجّل الدخول.',
 
     'splash_tagline': 'اعرف إلى أين يذهب مالك.',
 
@@ -713,21 +732,30 @@ class Strings {
     'accounts_sub': 'اربط حساباتك البنكية وأدرها',
     'add_account': 'إضافة حساب',
     'no_accounts_yet': 'لا توجد حسابات بنكية متصلة بعد.\nاضغط + لربط حساب.',
-    'account_status_connected': 'متصل',
-    'account_status_syncing': 'جارٍ المزامنة…',
-    'account_status_error': 'مشكلة في الاتصال',
-    'last_synced': 'آخر مزامنة %s',
-    'never_synced': 'لم تتم المزامنة بعد',
     'disconnect': 'قطع الاتصال',
     'connected_bank': 'بنك متصل',
-    'lean_connect_failed': 'تعذر ربط حسابك البنكي. حاول مرة أخرى.',
-    'lean_cancelled': 'تم إلغاء الربط.',
-    'lean_entity_not_found':
-        'تم الربط، ولكن لا توجد بيانات بعد. حدّث الصفحة بعد قليل.',
     'suggested_subscriptions': 'مقترحة من حسابك البنكي',
     'suggested_subscriptions_sub': 'مدفوعات متكررة رصدناها في معاملاتك.',
     'add_suggestion': 'إضافة',
     'occurrences_count': 'شوهدت %s مرات',
+
+    // Mock bank connect flow
+    'connect_bank_title': 'ربط حساب بنكي',
+    'connect_bank_forced_title': 'اربط أول حساب بنكي لك',
+    'connect_bank_forced_subtitle':
+        'اربط حساباً بنكياً واحداً على الأقل للمتابعة إلى ريال.',
+    'choose_your_bank': 'اختر بنكك',
+    'mock_bank_disclaimer':
+        'اتصال بنكي وهمي لأغراض هذا العرض التوضيحي — لا يتم الاتصال بأي بنك '
+        'حقيقي، وأي بيانات دخول تعمل.',
+    'bank_login_username_hint': 'رقم الهوية / اسم المستخدم',
+    'bank_login_button': 'تسجيل الدخول',
+    'connecting_to_bank': 'جارٍ الاتصال بـ %s…',
+    'bank_connected_title': 'تم ربط الحساب البنكي!',
+    'bank_connected_body': 'تم ربط %s بحسابك في ريال.',
+    'bank_connect_failed': 'تعذر الربط. حاول مرة أخرى.',
+    'continue_button': 'متابعة',
+    'done_button': 'تم',
 
     'notice_new_subscription': 'اشتراك جديد',
     'notice_new_commitment': 'التزام دفع جديد',

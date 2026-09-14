@@ -3,7 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import '../l10n/strings.dart';
 import '../theme/app_theme.dart';
-import 'main_shell.dart';
+import '../theme/app_typography.dart';
+import 'connect_bank_screen.dart';
 import '../widgets/gold_coin_painter.dart';
 import '../widgets/auth_coin_flip.dart';
 
@@ -17,19 +18,47 @@ class SignupScreen extends StatefulWidget {
 class _SignupScreenState extends State<SignupScreen> {
   final _formKey = GlobalKey<FormState>();
   bool _obscurePassword = true;
+  bool _signingUp = false;
+  final _fullNameController = TextEditingController();
+  final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+  final _confirmPasswordController = TextEditingController();
+
   @override
   void dispose() {
+    _fullNameController.dispose();
+    _emailController.dispose();
     _passwordController.dispose();
+    _confirmPasswordController.dispose();
     super.dispose();
   }
 
-  void _signUp() {
+  // Real Supabase Auth (email/password) is wired up in AuthStore but not
+  // called here for now — email confirmation was blocking testing. See
+  // lib/data/auth_store.dart to re-enable it later.
+  Future<void> _signUp() async {
     if (!_formKey.currentState!.validate()) return;
-    Navigator.of(context).pushAndRemoveUntil(
-      MaterialPageRoute<void>(builder: (_) => const MainShell()),
-      (_) => false,
-    );
+    setState(() => _signingUp = true);
+    try {
+      // A brand-new account can't have a connected bank yet.
+      Navigator.of(context).pushAndRemoveUntil(
+        MaterialPageRoute<void>(
+          builder: (_) => const ConnectBankScreen(forced: true),
+        ),
+        (_) => false,
+      );
+    } catch (error) {
+      _showMessage(Strings.t('sign_up_generic_error'));
+    } finally {
+      if (mounted) setState(() => _signingUp = false);
+    }
+  }
+
+  void _showMessage(String message) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(message)));
   }
 
   @override
@@ -63,9 +92,9 @@ class _SignupScreenState extends State<SignupScreen> {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const Text(
+                      Text(
                         'R I Y A L',
-                        style: TextStyle(
+                        style: AppTypography.wordmark(
                           color: AppColors.gold,
                           fontSize: 16,
                           fontWeight: FontWeight.w600,
@@ -141,8 +170,7 @@ class _SignupScreenState extends State<SignupScreen> {
                                                 children: [
                                                   Text(
                                                     Strings.t('signup_heading'),
-                                                    style: const TextStyle(
-                                                      fontFamily: 'Georgia',
+                                                    style: AppTypography.wordmark(
                                                       fontSize: 36,
                                                       fontWeight:
                                                           FontWeight.w700,
@@ -237,7 +265,9 @@ class _SignupScreenState extends State<SignupScreen> {
                                                       ],
                                                     ),
                                                     child: FilledButton(
-                                                      onPressed: _signUp,
+                                                      onPressed: _signingUp
+                                                          ? null
+                                                          : _signUp,
                                                       style: FilledButton.styleFrom(
                                                         backgroundColor:
                                                             AppColors.surface,
@@ -252,17 +282,30 @@ class _SignupScreenState extends State<SignupScreen> {
                                                         shape:
                                                             const StadiumBorder(),
                                                       ),
-                                                      child: Text(
-                                                        Strings.t(
-                                                          'create_account_button',
-                                                        ),
-                                                        style: const TextStyle(
-                                                          fontSize: 16,
-                                                          fontWeight:
-                                                              FontWeight.w700,
-                                                          letterSpacing: 1.4,
-                                                        ),
-                                                      ),
+                                                      child: _signingUp
+                                                          ? const SizedBox(
+                                                              width: 18,
+                                                              height: 18,
+                                                              child: CircularProgressIndicator(
+                                                                strokeWidth: 2,
+                                                                color: Color(
+                                                                  0xFFFFF0C2,
+                                                                ),
+                                                              ),
+                                                            )
+                                                          : Text(
+                                                              Strings.t(
+                                                                'create_account_button',
+                                                              ),
+                                                              style: const TextStyle(
+                                                                fontSize: 16,
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .w700,
+                                                                letterSpacing:
+                                                                    1.4,
+                                                              ),
+                                                            ),
                                                     ),
                                                   ),
                                                 ],
@@ -334,7 +377,13 @@ class _SignupScreenState extends State<SignupScreen> {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 55),
       child: TextFormField(
-        controller: fieldKey == 'password' ? _passwordController : null,
+        controller: switch (fieldKey) {
+          'full_name' => _fullNameController,
+          'email' => _emailController,
+          'password' => _passwordController,
+          'confirm_password' => _confirmPasswordController,
+          _ => null,
+        },
         keyboardType: fieldKey == 'email'
             ? TextInputType.emailAddress
             : TextInputType.text,

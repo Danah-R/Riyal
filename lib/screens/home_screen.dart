@@ -6,6 +6,7 @@ import '../data/subscription.dart';
 import '../data/subscriptions_store.dart';
 import '../l10n/strings.dart';
 import '../theme/app_theme.dart';
+import '../theme/app_typography.dart';
 import '../widgets/profile_menu_button.dart';
 import '../widgets/notification_coin_button.dart';
 import '../widgets/logo_image.dart';
@@ -255,7 +256,7 @@ class _SpendingCard extends StatelessWidget {
             children: [
               Text(
                 'SAR ${subscriptionsSpent.toStringAsFixed(0)}',
-                style: const TextStyle(
+                style: AppTypography.amount(
                   color: AppColors.textPrimary,
                   fontSize: 32,
                   fontWeight: FontWeight.w600,
@@ -410,7 +411,7 @@ class _OverviewStats extends StatelessWidget {
                           child: Text(
                             'SAR ${c.amount.toStringAsFixed(0)}',
                             overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(
+                            style: AppTypography.amount(
                               color: AppColors.textPrimary,
                               fontSize: 14,
                               fontWeight: FontWeight.w600,
@@ -515,7 +516,7 @@ class _RenewalTile extends StatelessWidget {
           ),
           Text(
             'SAR ${s.amount.toStringAsFixed(0)}',
-            style: const TextStyle(
+            style: AppTypography.amount(
               color: AppColors.textPrimary,
               fontSize: 14,
               fontWeight: FontWeight.w600,

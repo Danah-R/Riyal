@@ -5,6 +5,7 @@ import '../data/tracked_domain.dart';
 import '../data/tracked_item.dart';
 import '../l10n/strings.dart';
 import '../theme/app_theme.dart';
+import '../theme/app_typography.dart';
 import '../widgets/category_filter_bar.dart';
 import '../widgets/circle_icon_button.dart';
 import '../widgets/inline_search_field.dart';
@@ -286,7 +287,7 @@ class _TrackedItemTile extends StatelessWidget {
           ),
           Text(
             'SAR ${s.amount.toStringAsFixed(0)}',
-            style: const TextStyle(
+            style: AppTypography.amount(
               color: AppColors.textPrimary,
               fontSize: 14,
               fontWeight: FontWeight.w600,

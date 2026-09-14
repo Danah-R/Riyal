@@ -1,72 +1,60 @@
 # Riyal on Supabase
 
-Replaces the earlier local Express backend. Postgres holds accounts,
-transactions, and subscriptions; one Edge Function holds the Lean Client
-Secret and does the OAuth exchange + data fetches (writing results into
-Postgres along the way).
-
-**I could not run any of this from the environment that built it** — no
-`supabase` CLI, `deno`, or `node` was available there. This is written
-carefully against Lean's documented API and Supabase's standard Edge
-Function conventions, but treat the first real run as the actual test.
+Postgres holds everything: subscriptions, the mock bank catalog, each
+user's connected mock banks, and the canned transaction history behind
+them. There's no external banking integration and no Edge Function — bank
+connections are entirely simulated for this student project, and every
+table is read/written directly from the Flutter app via `supabase_flutter`.
 
 ## Setup
 
+Since there's no `supabase` CLI available in this environment, apply the
+migrations by hand: open your project's SQL editor at
+`https://supabase.com/dashboard/project/<your-project-ref>/sql/new` and run
+`supabase/migrations/0001_init.sql`, `0002_subscriptions_no_customer_fk.sql`,
+and `0003_mock_banking.sql`, in that order (0001/0002 only apply if this is
+a fresh project that never had them — an existing project that already
+went through the old Lean setup only needs 0003).
+
+If you do have the CLI available elsewhere:
+
 ```bash
-# from the repo root
 supabase login
-supabase link --project-ref <your-project-ref>   # after creating the project in the dashboard
-supabase db push                                  # applies supabase/migrations/0001_init.sql
-supabase secrets set LEAN_CLIENT_ID=... LEAN_CLIENT_SECRET=...
-supabase functions deploy lean --no-verify-jwt
+supabase link --project-ref <your-project-ref>
+supabase db push
 ```
 
-`--no-verify-jwt` because this app has no real Supabase Auth sign-in yet —
-see the note at the top of `migrations/0001_init.sql` about what that means
-for the (currently permissive) row-level security policies.
+## Auth
 
-## Local dev
-
-```bash
-supabase start                    # local Postgres + functions runtime
-cp supabase/functions/.env.example supabase/functions/.env   # fill in real values
-supabase functions serve lean --env-file supabase/functions/.env
-```
+The app requires a real Supabase Auth account (email/password) to reach
+Home — see `lib/data/auth_store.dart`. In the dashboard, **Authentication →
+Providers → Email**, you can toggle "Confirm email" off for faster manual
+testing; with it on, a new sign-up needs to click the confirmation link
+before `signInWithPassword` will succeed.
 
 ## Pointing the Flutter app at it
 
-Add to the app's `.env` (not `supabase/functions/.env` — that one's for the
-function):
+Add to the app's `.env` (gitignored):
 
 ```
 SUPABASE_URL=https://<your-project-ref>.supabase.co
 SUPABASE_ANON_KEY=<your anon/public key, from Project Settings -> API>
 ```
 
-The anon key is meant to be public-ish (it only grants what your RLS
-policies allow) — safe to keep in the app's `.env`, unlike the Lean Client
-Secret or the Supabase *service role* key (never put the service role key
-in the Flutter app; it bypasses RLS entirely and only belongs in the Edge
-Function, where Supabase injects it automatically as
-`SUPABASE_SERVICE_ROLE_KEY`).
+The anon key is meant to be public-ish — it only grants what the
+row-level-security policies below allow.
 
 ## Tables
 
-- `lean_customers` — maps this device's locally-generated id to the Lean
-  `customer_id` created for it.
-- `bank_accounts` — one row per connected entity, updated whenever the
-  `accounts` route is called.
-- `bank_transactions` — upserted (by `lean_transaction_id`) whenever the
-  `transactions` route is called.
-- `subscriptions` — read/written directly by the Flutter app via
-  `supabase_flutter` (no secret involved, so no Edge Function needed for
-  this one).
-
-## Endpoints (Edge Function `lean`)
-
-- `POST /customer` `{ deviceId }` → `{ customerId }` (creates once, reuses after)
-- `POST /connect-token` `{ customerId }` → `{ accessToken }`
-- `GET /entities?deviceId=...`
-- `GET /accounts?entityId=...&deviceId=...` (also upserts into `bank_accounts`)
-- `GET /transactions?entityId=...&deviceId=...` (also upserts into `bank_transactions`)
-- `GET /balance?entityId=...` (passthrough, not persisted — no balances table was requested)
+- `subscriptions` — read/written directly by the app, keyed by a
+  locally-generated device id (`lib/data/device_id_store.dart`) rather than
+  the signed-in user, since subscriptions/utilities/staff entries aren't
+  part of the bank-connection flow and predate real auth.
+- `mock_banks` — a fixed catalog of 5 fake banks (name, brand color).
+  Publicly readable.
+- `user_bank_accounts` — one row per bank a signed-in user has "connected"
+  via the mock connect flow (`lib/screens/connect_bank_screen.dart`).
+  Scoped by `auth.uid()`.
+- `mock_transactions` — a canned transaction history per bank, seeded once
+  by `0003_mock_banking.sql`. Publicly readable; the app filters it by the
+  banks a user has connected.

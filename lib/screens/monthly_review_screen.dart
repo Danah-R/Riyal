@@ -6,6 +6,7 @@ import '../l10n/app_locale.dart';
 import '../services/gemini_api.dart';
 import '../services/riyal_bot_config.dart';
 import '../theme/app_theme.dart';
+import '../theme/app_typography.dart';
 import '../widgets/coin_back_button.dart';
 import '../widgets/gold_coin_painter.dart';
 
@@ -380,17 +381,38 @@ ${actionable.isEmpty ? 'No action recommended; current commitments appear suitab
                 style: const TextStyle(color: AppColors.textSecondary),
               ),
               const SizedBox(height: 8),
-              Text(
-                'SAR ${monthlySaving.toStringAsFixed(0)} / ${t('شهر', 'month')}',
-                style: const TextStyle(
-                  color: AppColors.gold,
-                  fontSize: 30,
-                  fontWeight: FontWeight.w700,
+              Text.rich(
+                TextSpan(
+                  style: const TextStyle(
+                    color: AppColors.gold,
+                    fontSize: 30,
+                    fontWeight: FontWeight.w700,
+                  ),
+                  children: [
+                    TextSpan(
+                      text: 'SAR ${monthlySaving.toStringAsFixed(0)}',
+                      style: TextStyle(
+                        fontFamily: AppTypography.amountFontFamily,
+                      ),
+                    ),
+                    TextSpan(text: ' / ${t('شهر', 'month')}'),
+                  ],
                 ),
               ),
-              Text(
-                'SAR ${(monthlySaving * 12).toStringAsFixed(0)} / ${t('سنة', 'year')}',
-                style: const TextStyle(color: AppColors.textSecondary),
+              Text.rich(
+                TextSpan(
+                  style: const TextStyle(color: AppColors.textSecondary),
+                  children: [
+                    TextSpan(
+                      text:
+                          'SAR ${(monthlySaving * 12).toStringAsFixed(0)}',
+                      style: TextStyle(
+                        fontFamily: AppTypography.amountFontFamily,
+                      ),
+                    ),
+                    TextSpan(text: ' / ${t('سنة', 'year')}'),
+                  ],
+                ),
               ),
             ],
           ),

@@ -16,6 +16,7 @@ class TrackedDomain {
     required this.categories,
     required this.store,
     required this.mockCharges,
+    required this.mockTransactionCategory,
   });
 
   /// Used to pop the add-flow back to this domain's root screen, and to
@@ -35,6 +36,11 @@ class TrackedDomain {
   final List<TrackedCategory> categories;
   final TrackedItemsStore store;
   final List<MockCharge> mockCharges;
+
+  /// Which `mock_transactions.category` value ('utility' or 'person')
+  /// feeds this domain's "add from a previous transaction" picker — see
+  /// lib/data/bank_transaction_matcher.dart.
+  final String mockTransactionCategory;
 
   /// e.g. "Utilities" / "المرافق" — the tab/page title.
   String get displayTitle => Strings.t('nav_$routeName');

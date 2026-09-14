@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'app_typography.dart';
+
 class AppColors {
   AppColors._();
 
@@ -17,19 +19,27 @@ class AppColors {
   static const staff = Color(0xFF4B4630);
 }
 
-ThemeData buildAppTheme() {
+/// Builds the app theme for the given language — body/UI text renders in
+/// Inter for English or IBM Plex Sans Arabic for Arabic (see
+/// [AppTypography]), so this should be rebuilt whenever the app's locale
+/// changes rather than built once at startup.
+ThemeData buildAppTheme({String languageCode = 'en'}) {
+  const baseTextTheme = TextTheme(
+    bodyMedium: TextStyle(color: AppColors.textPrimary),
+  );
+  final textTheme = AppTypography.textTheme(languageCode, baseTextTheme)
+      .apply(bodyColor: AppColors.textPrimary, displayColor: AppColors.textPrimary);
+
   return ThemeData(
     useMaterial3: true,
     scaffoldBackgroundColor: AppColors.background,
     brightness: Brightness.dark,
-    fontFamily: 'Roboto',
+    fontFamily: textTheme.bodyMedium?.fontFamily,
     colorScheme: ColorScheme.fromSeed(
       seedColor: const Color.fromARGB(255, 215, 184, 61),
       brightness: Brightness.dark,
       surface: AppColors.surface,
     ),
-    textTheme: const TextTheme(
-      bodyMedium: TextStyle(color: AppColors.textPrimary),
-    ),
+    textTheme: textTheme,
   );
 }

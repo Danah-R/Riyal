@@ -1,4 +1,4 @@
-import 'bank_transaction.dart';
+import 'mock_bank_transaction.dart';
 import 'subscription.dart';
 
 /// A recurring-payment candidate found in a connected bank account's
@@ -37,18 +37,21 @@ class RecurringDetectionEngine {
   /// otherwise-fixed subscription charges.
   static const _amountTolerance = 0.05;
 
-  static List<DetectedSubscription> detect(List<BankTransaction> transactions) {
-    final groups = <String, List<BankTransaction>>{};
+  static List<DetectedSubscription> detect(
+    List<MockBankTransactionRow> transactions,
+  ) {
+    final groups = <String, List<MockBankTransactionRow>>{};
     for (final transaction in transactions) {
       groups
-          .putIfAbsent(_normalizeMerchant(transaction.description), () => [])
+          .putIfAbsent(_normalizeMerchant(transaction.merchantName), () => [])
           .add(transaction);
     }
 
     final results = <DetectedSubscription>[];
     for (final group in groups.values) {
       if (group.length < 2) continue;
-      final sorted = [...group]..sort((a, b) => a.date.compareTo(b.date));
+      final sorted = [...group]
+        ..sort((a, b) => a.transactionDate.compareTo(b.transactionDate));
 
       final avgAmount =
           sorted.map((t) => t.amount).reduce((a, b) => a + b) / sorted.length;
@@ -60,7 +63,9 @@ class RecurringDetectionEngine {
 
       final intervals = <int>[
         for (var i = 1; i < sorted.length; i++)
-          sorted[i].date.difference(sorted[i - 1].date).inDays,
+          sorted[i].transactionDate
+              .difference(sorted[i - 1].transactionDate)
+              .inDays,
       ];
       final avgInterval = intervals.reduce((a, b) => a + b) / intervals.length;
 
@@ -69,10 +74,10 @@ class RecurringDetectionEngine {
 
       results.add(
         DetectedSubscription(
-          merchantName: _displayName(sorted.last.description),
+          merchantName: _displayName(sorted.last.merchantName),
           amount: avgAmount,
           cycle: cycle,
-          lastDate: sorted.last.date,
+          lastDate: sorted.last.transactionDate,
           occurrences: sorted.length,
         ),
       );

@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import '../data/auth_store.dart';
+import '../data/user_bank_accounts_store.dart';
 import '../l10n/strings.dart';
 import '../screens/profile_screen.dart';
 import '../screens/settings_screen.dart';
@@ -166,6 +168,9 @@ class ProfileMenuButton extends StatelessWidget {
     );
     if (!context.mounted || action == null) return;
     if (action == 'logout') {
+      await AuthStore.instance.signOut();
+      UserBankAccountsStore.instance.clear();
+      if (!context.mounted) return;
       Navigator.of(context).pushAndRemoveUntil(
         MaterialPageRoute<void>(builder: (_) => const LoginScreen()),
         (_) => false,

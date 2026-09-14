@@ -5,7 +5,13 @@ import '../theme/app_theme.dart';
 import 'gold_coin_painter.dart';
 
 class CoinBackButton extends StatefulWidget {
-  const CoinBackButton({super.key});
+  const CoinBackButton({super.key, this.onPressed});
+
+  /// Overrides the default `Navigator.maybePop()` — for flows where "back"
+  /// means stepping back through in-screen state instead of popping a
+  /// route (e.g. the mock bank connect flow's internal steps).
+  final VoidCallback? onPressed;
+
   @override
   State<CoinBackButton> createState() => _CoinBackButtonState();
 }
@@ -34,7 +40,11 @@ class _CoinBackButtonState extends State<CoinBackButton>
       }
     }
     if (!mounted) return;
-    await Navigator.of(context).maybePop();
+    if (widget.onPressed != null) {
+      widget.onPressed!();
+    } else {
+      await Navigator.of(context).maybePop();
+    }
     if (mounted) {
       _controller.reset();
       _busy = false;

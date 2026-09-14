@@ -1,8 +1,11 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import '../data/user_bank_accounts_store.dart';
 import '../l10n/strings.dart';
 import '../theme/app_theme.dart';
+import '../theme/app_typography.dart';
+import 'connect_bank_screen.dart';
 import 'main_shell.dart';
 import 'signup_screen.dart';
 import '../widgets/gold_coin_painter.dart';
@@ -17,13 +20,55 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
+  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
   bool _obscurePassword = true;
+  bool _signingIn = false;
 
-  void _signIn() {
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
+
+  // Real Supabase Auth (email/password) is wired up in AuthStore but not
+  // called here for now — email confirmation was blocking testing, so
+  // this signs in "for real" only in the sense of the device-scoped gate
+  // below. See lib/data/auth_store.dart to re-enable it later.
+  Future<void> _signIn() async {
     if (!_formKey.currentState!.validate()) return;
-    Navigator.of(context).pushReplacement(
-      MaterialPageRoute<void>(builder: (_) => const MainShell()),
-    );
+    setState(() => _signingIn = true);
+    try {
+      final hasAccount = await UserBankAccountsStore.instance.hasAnyAccount();
+      if (!mounted) return;
+      if (hasAccount) {
+        await UserBankAccountsStore.instance.load();
+        if (!mounted) return;
+        Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute<void>(builder: (_) => const MainShell()),
+          (_) => false,
+        );
+      } else {
+        Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute<void>(
+            builder: (_) => const ConnectBankScreen(forced: true),
+          ),
+          (_) => false,
+        );
+      }
+    } catch (error) {
+      _showMessage(Strings.t('sign_in_generic_error'));
+    } finally {
+      if (mounted) setState(() => _signingIn = false);
+    }
+  }
+
+  void _showMessage(String message) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(message)));
   }
 
   @override
@@ -57,9 +102,9 @@ class _LoginScreenState extends State<LoginScreen> {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const Text(
+                      Text(
                         'R I Y A L',
-                        style: TextStyle(
+                        style: AppTypography.wordmark(
                           color: AppColors.gold,
                           fontSize: 16,
                           fontWeight: FontWeight.w600,
@@ -135,8 +180,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                                 children: [
                                                   Text(
                                                     Strings.t('login_heading'),
-                                                    style: const TextStyle(
-                                                      fontFamily: 'Georgia',
+                                                    style: AppTypography.wordmark(
                                                       fontSize: 36,
                                                       fontWeight:
                                                           FontWeight.w700,
@@ -156,15 +200,19 @@ class _LoginScreenState extends State<LoginScreen> {
                                                   ),
                                                   const SizedBox(height: 18),
                                                   _field(
-                                                    hint: Strings.t('username'),
+                                                    controller:
+                                                        _emailController,
+                                                    hint: Strings.t('email'),
                                                     icon: Icons
-                                                        .person_outline_rounded,
+                                                        .email_outlined,
                                                     autofillHints: const [
-                                                      AutofillHints.username,
+                                                      AutofillHints.email,
                                                     ],
                                                   ),
                                                   const SizedBox(height: 8),
                                                   _field(
+                                                    controller:
+                                                        _passwordController,
                                                     hint: Strings.t('password'),
                                                     icon: Icons
                                                         .lock_outline_rounded,
@@ -212,7 +260,9 @@ class _LoginScreenState extends State<LoginScreen> {
                                                       ],
                                                     ),
                                                     child: FilledButton(
-                                                      onPressed: _signIn,
+                                                      onPressed: _signingIn
+                                                          ? null
+                                                          : _signIn,
                                                       style: FilledButton.styleFrom(
                                                         backgroundColor:
                                                             AppColors.surface,
@@ -227,17 +277,30 @@ class _LoginScreenState extends State<LoginScreen> {
                                                         shape:
                                                             const StadiumBorder(),
                                                       ),
-                                                      child: Text(
-                                                        Strings.t(
-                                                          'sign_in_button',
-                                                        ),
-                                                        style: const TextStyle(
-                                                          fontSize: 16,
-                                                          fontWeight:
-                                                              FontWeight.w700,
-                                                          letterSpacing: 1.4,
-                                                        ),
-                                                      ),
+                                                      child: _signingIn
+                                                          ? const SizedBox(
+                                                              width: 18,
+                                                              height: 18,
+                                                              child: CircularProgressIndicator(
+                                                                strokeWidth: 2,
+                                                                color: Color(
+                                                                  0xFFFFF0C2,
+                                                                ),
+                                                              ),
+                                                            )
+                                                          : Text(
+                                                              Strings.t(
+                                                                'sign_in_button',
+                                                              ),
+                                                              style: const TextStyle(
+                                                                fontSize: 16,
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .w700,
+                                                                letterSpacing:
+                                                                    1.4,
+                                                              ),
+                                                            ),
                                                     ),
                                                   ),
                                                 ],
@@ -298,6 +361,7 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   Widget _field({
+    required TextEditingController controller,
     required String hint,
     required IconData icon,
     required List<String> autofillHints,
@@ -306,15 +370,24 @@ class _LoginScreenState extends State<LoginScreen> {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 55),
       child: TextFormField(
+        controller: controller,
+        keyboardType: password ? TextInputType.text : TextInputType.emailAddress,
         obscureText: password && _obscurePassword,
         autofillHints: autofillHints,
         autocorrect: false,
         enableSuggestions: !password,
         textInputAction: password ? TextInputAction.done : TextInputAction.next,
         onFieldSubmitted: password ? (_) => _signIn() : null,
-        validator: (value) => value == null || value.trim().isEmpty
-            ? Strings.f('enter_your_field', hint.toLowerCase())
-            : null,
+        validator: (value) {
+          if (value == null || value.trim().isEmpty) {
+            return Strings.f('enter_your_field', hint.toLowerCase());
+          }
+          if (!password &&
+              !RegExp(r'^[^\s@]+@[^\s@]+\.[^\s@]+$').hasMatch(value.trim())) {
+            return Strings.t('valid_email_error');
+          }
+          return null;
+        },
         style: const TextStyle(color: AppColors.surface, fontSize: 16),
         cursorColor: AppColors.goldDark,
         decoration: InputDecoration(

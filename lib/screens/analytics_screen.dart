@@ -4,6 +4,7 @@ import '../data/analytics_data.dart';
 import '../l10n/app_locale.dart';
 import '../l10n/strings.dart';
 import '../theme/app_theme.dart';
+import '../theme/app_typography.dart';
 import '../widgets/coin_back_button.dart';
 
 /// Full-page analytics, reached from Home ("See all" / the chevron on the
@@ -240,7 +241,7 @@ class _AnalyticsContentState extends State<AnalyticsContent> {
                   children: [
                     Text(
                       _money(total),
-                      style: const TextStyle(
+                      style: AppTypography.amount(
                         fontSize: 36,
                         fontWeight: FontWeight.w600,
                         color: AppColors.textPrimary,
@@ -410,7 +411,7 @@ class _AnalyticsContentState extends State<AnalyticsContent> {
                   children: [
                     Text(
                       '${_money(total)} / ${_money(budget)}',
-                      style: const TextStyle(
+                      style: AppTypography.amount(
                         color: AppColors.textPrimary,
                         fontSize: 20,
                         fontWeight: FontWeight.w600,
@@ -536,7 +537,7 @@ class _AnalyticsContentState extends State<AnalyticsContent> {
         const SizedBox(width: 8),
         Text(
           _money(item.amount),
-          style: const TextStyle(
+          style: AppTypography.amount(
             color: AppColors.gold,
             fontWeight: FontWeight.w600,
           ),

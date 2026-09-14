@@ -12,4 +12,5 @@ final utilitiesDomain = TrackedDomain(
   categories: UtilityCategories.values,
   store: UtilitiesStore.instance,
   mockCharges: utilityMockCharges,
+  mockTransactionCategory: 'utility',
 );

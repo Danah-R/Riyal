@@ -1,9 +1,8 @@
-import 'dart:math' as math;
-
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 import '../theme/app_theme.dart';
+import '../theme/app_typography.dart';
 import '../widgets/gold_coin_painter.dart';
 import '../l10n/strings.dart';
 import '../widgets/hero_tags.dart';
@@ -84,19 +83,6 @@ class _SplashScreenState extends State<SplashScreen>
               ).transform(t.clamp(0, 1));
               final tiltAngle = (1 - coinSettle) * -0.5;
 
-              final orbitFadeIn = Interval(
-                0.12,
-                0.34,
-                curve: Curves.easeOut,
-              ).transform(t.clamp(0, 1));
-              final orbitFadeOut = Interval(
-                0.5,
-                0.68,
-                curve: Curves.easeIn,
-              ).transform(t.clamp(0, 1));
-              final orbitOpacity = orbitFadeIn * (1 - orbitFadeOut);
-              final orbitRotation = t * math.pi * 0.7;
-
               final titleT = Interval(
                 0.5,
                 0.72,
@@ -111,52 +97,36 @@ class _SplashScreenState extends State<SplashScreen>
               return Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  SizedBox(
-                    width: 220,
-                    height: 220,
-                    child: Stack(
+                  Opacity(
+                    opacity: coinFade,
+                    child: Transform(
                       alignment: Alignment.center,
-                      children: [
-                        Opacity(
-                          opacity: orbitOpacity,
-                          child: CustomPaint(
-                            size: const Size(220, 220),
-                            painter: _OrbitPainter(rotation: orbitRotation),
-                          ),
-                        ),
-                        Opacity(
-                          opacity: coinFade,
-                          child: Transform(
-                            alignment: Alignment.center,
-                            transform: Matrix4.identity()
-                              ..setEntry(3, 2, 0.0025)
-                              ..rotateY(tiltAngle),
-                            child: Transform.scale(
-                              scale: coinScale,
-                              child: Hero(
-                                tag: heroAppCoinTag,
-                                child: SizedBox(
-                                  width: 132,
-                                  height: 132,
-                                  child: CustomPaint(
-                                    painter: const NavCoinPainter(),
-                                    child: Center(
-                                      child: SvgPicture.asset(
-                                        'assets/icons/saudi_riyal.svg',
-                                        width: 132 * 0.4,
-                                        colorFilter: const ColorFilter.mode(
-                                          AppColors.surface,
-                                          BlendMode.srcIn,
-                                        ),
-                                      ),
-                                    ),
+                      transform: Matrix4.identity()
+                        ..setEntry(3, 2, 0.0025)
+                        ..rotateY(tiltAngle),
+                      child: Transform.scale(
+                        scale: coinScale,
+                        child: Hero(
+                          tag: heroAppCoinTag,
+                          child: SizedBox(
+                            width: 132,
+                            height: 132,
+                            child: CustomPaint(
+                              painter: const NavCoinPainter(),
+                              child: Center(
+                                child: SvgPicture.asset(
+                                  'assets/icons/saudi_riyal.svg',
+                                  width: 132 * 0.4,
+                                  colorFilter: const ColorFilter.mode(
+                                    AppColors.surface,
+                                    BlendMode.srcIn,
                                   ),
                                 ),
                               ),
                             ),
                           ),
                         ),
-                      ],
+                      ),
                     ),
                   ),
                   const SizedBox(height: 28),
@@ -164,9 +134,9 @@ class _SplashScreenState extends State<SplashScreen>
                     opacity: titleT,
                     child: Transform.translate(
                       offset: Offset(0, (1 - titleT) * 12),
-                      child: const Text(
+                      child: Text(
                         'R I Y A L',
-                        style: TextStyle(
+                        style: AppTypography.wordmark(
                           color: AppColors.gold,
                           fontSize: 20,
                           fontWeight: FontWeight.w600,
@@ -197,46 +167,4 @@ class _SplashScreenState extends State<SplashScreen>
       ),
     );
   }
-}
-
-/// Faint, slowly-rotating orbit rings with a single marker dot each —
-/// evokes recurring payments cycling around the coin without ever reading
-/// as decoration-heavy.
-class _OrbitPainter extends CustomPainter {
-  const _OrbitPainter({required this.rotation});
-
-  final double rotation;
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final center = size.center(Offset.zero);
-    final rings = [
-      (radius: size.shortestSide * 0.36, alpha: 0.22, spin: 1.0),
-      (radius: size.shortestSide * 0.47, alpha: 0.14, spin: -0.7),
-    ];
-
-    for (final ring in rings) {
-      canvas.drawCircle(
-        center,
-        ring.radius,
-        Paint()
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = 1.1
-          ..color = AppColors.gold.withValues(alpha: ring.alpha),
-      );
-
-      final angle = rotation * ring.spin;
-      final markerCenter =
-          center + Offset(math.cos(angle), math.sin(angle)) * ring.radius;
-      canvas.drawCircle(
-        markerCenter,
-        2.6,
-        Paint()..color = AppColors.gold.withValues(alpha: ring.alpha * 3.2),
-      );
-    }
-  }
-
-  @override
-  bool shouldRepaint(covariant _OrbitPainter oldDelegate) =>
-      oldDelegate.rotation != rotation;
 }

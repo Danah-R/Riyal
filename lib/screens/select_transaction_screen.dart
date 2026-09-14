@@ -5,6 +5,7 @@ import '../data/bank_transaction_matcher.dart';
 import '../data/mock_transactions.dart';
 import '../l10n/strings.dart';
 import '../theme/app_theme.dart';
+import '../theme/app_typography.dart';
 import '../widgets/logo_image.dart';
 import 'subscription_details_screen.dart';
 
@@ -113,7 +114,7 @@ class SelectTransactionScreen extends StatelessWidget {
                                 ),
                                 Text(
                                   'SAR ${tx.amount.toStringAsFixed(0)}',
-                                  style: const TextStyle(
+                                  style: AppTypography.amount(
                                     color: AppColors.textPrimary,
                                     fontSize: 14,
                                     fontWeight: FontWeight.w600,

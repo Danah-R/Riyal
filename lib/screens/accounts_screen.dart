@@ -1,22 +1,19 @@
 import 'package:flutter/material.dart';
-import 'package:lean_sdk_flutter/lean_sdk_flutter.dart';
 
-import '../data/bank_account.dart';
-import '../data/bank_accounts_store.dart';
-import '../data/bank_transaction.dart';
-import '../data/lean_customer_store.dart';
-import '../data/lean_service.dart';
+import '../data/bank_transaction_matcher.dart';
 import '../data/recurring_detection.dart';
 import '../data/subscription.dart';
 import '../data/subscriptions_store.dart';
+import '../data/user_bank_account.dart';
+import '../data/user_bank_accounts_store.dart';
 import '../l10n/strings.dart';
 import '../theme/app_theme.dart';
 import '../widgets/coin_back_button.dart';
 import '../widgets/logo_image.dart';
-import 'lean_connect_screen.dart';
+import 'connect_bank_screen.dart';
 
-/// Real bank accounts connected via Lean — replaces what used to be a
-/// hardcoded mock list. Reachable from Settings.
+/// Connected mock bank accounts — replaces what used to be Lean-backed.
+/// Reachable from Settings.
 class AccountsScreen extends StatefulWidget {
   const AccountsScreen({super.key});
 
@@ -25,7 +22,6 @@ class AccountsScreen extends StatefulWidget {
 }
 
 class _AccountsScreenState extends State<AccountsScreen> {
-  bool _connecting = false;
   final _suggestions = ValueNotifier<List<DetectedSubscription>>([]);
 
   @override
@@ -41,131 +37,17 @@ class _AccountsScreenState extends State<AccountsScreen> {
   }
 
   Future<void> _refreshSuggestions() async {
-    final accounts = BankAccountsStore.instance.accounts.value;
-    if (accounts.isEmpty) return;
-    final deviceId = await LeanCustomerStore.instance.getOrCreateDeviceId();
-    final transactions = <BankTransaction>[];
-    for (final account in accounts) {
-      try {
-        final json = await LeanService.instance.fetchTransactions(
-          entityId: account.entityId,
-          deviceId: deviceId,
-        );
-        transactions.addAll(
-          BankTransaction.fromLeanJson(entityId: account.entityId, json: json),
-        );
-      } catch (_) {
-        // Data may not be ready yet for a just-connected account; the user
-        // can pull to refresh later. Not fatal to the rest of the screen.
-      }
-    }
+    final transactions = await loadAllConnectedTransactions();
     if (mounted) {
       _suggestions.value = RecurringDetectionEngine.detect(transactions);
     }
   }
 
-  void _showMessage(String message) {
-    if (!mounted) return;
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(SnackBar(content: Text(message)));
-  }
-
   Future<void> _addAccount() async {
-    setState(() => _connecting = true);
-    try {
-      final deviceId = await LeanCustomerStore.instance.getOrCreateDeviceId();
-      // Idempotent server-side: the Edge Function reuses the existing Lean
-      // customer for this device (via the `lean_customers` table) instead
-      // of creating a new one every time.
-      final customerId = await LeanService.instance.createCustomer(deviceId);
-      final accessToken = await LeanService.instance.getConnectToken(
-        customerId,
-      );
-      if (!mounted) return;
-
-      final response = await Navigator.of(context).push<LeanResponse>(
-        MaterialPageRoute<LeanResponse>(
-          builder: (_) => LeanConnectScreen(
-            customerId: customerId,
-            accessToken: accessToken,
-          ),
-        ),
-      );
-      if (response == null) return; // backed out of the connect screen
-
-      debugPrint(
-        'Lean connect response: status=${response.status} '
-        'message=${response.message} exitPoint=${response.exitPoint} '
-        'secondaryStatus=${response.secondaryStatus} '
-        'lastApiResponse=${response.lastApiResponse}',
-      );
-
-      if (response.status.toUpperCase() != 'SUCCESS') {
-        _showMessage(
-          response.status.toUpperCase() == 'CANCELLED'
-              ? Strings.t('lean_cancelled')
-              : (response.message ?? Strings.t('lean_connect_failed')),
-        );
-        return;
-      }
-
-      await _resolveAndStoreAccount(deviceId);
-      await _refreshSuggestions();
-    } on LeanServiceException catch (error) {
-      debugPrint('Lean add-account failed (service): $error');
-      _showMessage(error.message);
-    } catch (error, stackTrace) {
-      debugPrint('Lean add-account failed (unexpected): $error\n$stackTrace');
-      _showMessage(Strings.t('lean_connect_failed'));
-    } finally {
-      if (mounted) setState(() => _connecting = false);
-    }
-  }
-
-  /// The connect widget's callback doesn't carry an entity_id, and Lean's
-  /// data may take a moment to become available after a sandbox login
-  /// finishes — poll both lookups a few times with backoff rather than
-  /// failing immediately. The Edge Function upserts the account into
-  /// Supabase as a side effect of the accounts fetch, so once that
-  /// succeeds we just re-read `bank_accounts` for the canonical row.
-  Future<void> _resolveAndStoreAccount(String deviceId) async {
-    String? entityId;
-    for (var attempt = 0; attempt < 8 && entityId == null; attempt++) {
-      if (attempt > 0) await Future.delayed(const Duration(seconds: 3));
-      entityId = await LeanService.instance.latestEntityId(deviceId);
-      debugPrint('latestEntityId attempt $attempt -> $entityId');
-    }
-    if (entityId == null) {
-      _showMessage(Strings.t('lean_entity_not_found'));
-      return;
-    }
-
-    var accountFetched = false;
-    for (var attempt = 0; attempt < 8; attempt++) {
-      if (attempt > 0) await Future.delayed(const Duration(seconds: 3));
-      try {
-        final result = await LeanService.instance.fetchAccounts(
-          entityId: entityId,
-          deviceId: deviceId,
-        );
-        debugPrint('fetchAccounts attempt $attempt -> $result');
-        accountFetched = true;
-        break;
-      } catch (error) {
-        debugPrint('fetchAccounts attempt $attempt threw: $error');
-      }
-    }
-
-    if (!accountFetched) {
-      _showMessage(Strings.t('lean_entity_not_found'));
-      return;
-    }
-
-    await BankAccountsStore.instance.load();
-    debugPrint(
-      'BankAccountsStore after load: ${BankAccountsStore.instance.accounts.value}',
+    await Navigator.of(context).push<void>(
+      MaterialPageRoute<void>(builder: (_) => const ConnectBankScreen()),
     );
+    await _refreshSuggestions();
   }
 
   void _addSuggestion(DetectedSubscription suggestion) {
@@ -183,7 +65,7 @@ class _AccountsScreenState extends State<AccountsScreen> {
         .toList();
   }
 
-  void _openAccountDetails(BankAccount account) {
+  void _openAccountDetails(UserBankAccount account) {
     showModalBottomSheet<void>(
       context: context,
       backgroundColor: AppColors.surface,
@@ -225,21 +107,6 @@ class _AccountsScreenState extends State<AccountsScreen> {
                   ),
                 ],
               ),
-              const SizedBox(height: 18),
-              _StatusRow(status: account.status),
-              const SizedBox(height: 6),
-              Text(
-                account.lastSyncedAt != null
-                    ? Strings.f(
-                        'last_synced',
-                        _formatTimestamp(account.lastSyncedAt!),
-                      )
-                    : Strings.t('never_synced'),
-                style: const TextStyle(
-                  color: AppColors.textSecondary,
-                  fontSize: 13,
-                ),
-              ),
               const SizedBox(height: 20),
               SizedBox(
                 width: double.infinity,
@@ -249,7 +116,8 @@ class _AccountsScreenState extends State<AccountsScreen> {
                   ),
                   onPressed: () async {
                     Navigator.pop(sheetContext);
-                    await BankAccountsStore.instance.remove(account.entityId);
+                    await UserBankAccountsStore.instance.remove(account.id);
+                    await _refreshSuggestions();
                   },
                   icon: const Icon(Icons.link_off_rounded, size: 20),
                   label: Text(Strings.t('disconnect')),
@@ -261,9 +129,6 @@ class _AccountsScreenState extends State<AccountsScreen> {
       ),
     );
   }
-
-  String _formatTimestamp(DateTime time) =>
-      '${time.day}/${time.month}/${time.year}';
 
   @override
   Widget build(BuildContext context) {
@@ -279,8 +144,8 @@ class _AccountsScreenState extends State<AccountsScreen> {
         child: Column(
           children: [
             Expanded(
-              child: ValueListenableBuilder<List<BankAccount>>(
-                valueListenable: BankAccountsStore.instance.accounts,
+              child: ValueListenableBuilder<List<UserBankAccount>>(
+                valueListenable: UserBankAccountsStore.instance.accounts,
                 builder: (context, accounts, _) => ListView(
                   padding: const EdgeInsets.fromLTRB(20, 12, 20, 12),
                   children: [
@@ -355,7 +220,7 @@ class _AccountsScreenState extends State<AccountsScreen> {
               child: SizedBox(
                 width: double.infinity,
                 child: ElevatedButton.icon(
-                  onPressed: _connecting ? null : _addAccount,
+                  onPressed: _addAccount,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.gold,
                     foregroundColor: const Color(0xFF1B1F16),
@@ -364,16 +229,7 @@ class _AccountsScreenState extends State<AccountsScreen> {
                       borderRadius: BorderRadius.circular(16),
                     ),
                   ),
-                  icon: _connecting
-                      ? const SizedBox(
-                          width: 18,
-                          height: 18,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            color: Color(0xFF1B1F16),
-                          ),
-                        )
-                      : const Icon(Icons.add_rounded),
+                  icon: const Icon(Icons.add_rounded),
                   label: Text(
                     Strings.t('add_account'),
                     style: const TextStyle(
@@ -394,7 +250,7 @@ class _AccountsScreenState extends State<AccountsScreen> {
 class _AccountTile extends StatelessWidget {
   const _AccountTile({required this.account, required this.onTap});
 
-  final BankAccount account;
+  final UserBankAccount account;
   final VoidCallback onTap;
 
   @override
@@ -409,7 +265,20 @@ class _AccountTile extends StatelessWidget {
         ),
         child: Row(
           children: [
-            const LogoImage(icon: Icons.account_balance_rounded, size: 44),
+            Container(
+              width: 44,
+              height: 44,
+              decoration: BoxDecoration(
+                color: account.bankPrimaryColor,
+                shape: BoxShape.circle,
+              ),
+              alignment: Alignment.center,
+              child: const Icon(
+                Icons.account_balance_rounded,
+                color: Colors.white,
+                size: 22,
+              ),
+            ),
             const SizedBox(width: 14),
             Expanded(
               child: Column(
@@ -434,43 +303,14 @@ class _AccountTile extends StatelessWidget {
                 ],
               ),
             ),
-            _StatusRow(status: account.status),
+            const Icon(
+              Icons.check_circle_rounded,
+              color: AppColors.subscriptions,
+              size: 20,
+            ),
           ],
         ),
       ),
-    );
-  }
-}
-
-class _StatusRow extends StatelessWidget {
-  const _StatusRow({required this.status});
-
-  final BankAccountStatus status;
-
-  @override
-  Widget build(BuildContext context) {
-    final (color, key) = switch (status) {
-      BankAccountStatus.connected => (
-        AppColors.subscriptions,
-        'account_status_connected',
-      ),
-      BankAccountStatus.syncing => (AppColors.gold, 'account_status_syncing'),
-      BankAccountStatus.error => (
-        const Color(0xFFEF4444),
-        'account_status_error',
-      ),
-    };
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Container(
-          width: 8,
-          height: 8,
-          decoration: BoxDecoration(color: color, shape: BoxShape.circle),
-        ),
-        const SizedBox(width: 6),
-        Text(Strings.t(key), style: TextStyle(color: color, fontSize: 12.5)),
-      ],
     );
   }
 }

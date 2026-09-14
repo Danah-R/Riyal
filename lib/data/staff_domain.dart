@@ -12,4 +12,5 @@ final staffDomain = TrackedDomain(
   categories: StaffCategories.values,
   store: StaffStore.instance,
   mockCharges: staffMockCharges,
+  mockTransactionCategory: 'person',
 );

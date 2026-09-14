@@ -6,9 +6,9 @@ import 'screens/splash_screen.dart';
 import 'theme/app_theme.dart';
 import 'data/app_settings.dart';
 import 'data/monthly_review.dart';
-import 'data/bank_accounts_store.dart';
 import 'data/subscriptions_store.dart';
 import 'data/supabase_config.dart';
+import 'data/user_bank_accounts_store.dart';
 import 'l10n/app_locale.dart';
 
 Future<void> main() async {
@@ -32,10 +32,12 @@ Future<void> main() async {
   }
   try {
     await SupabaseConfig.initialize().timeout(const Duration(seconds: 5));
-    await Future.wait([
-      BankAccountsStore.instance.load(),
-      SubscriptionsStore.instance.load(),
-    ]).timeout(const Duration(seconds: 5));
+    await SubscriptionsStore.instance.load().timeout(
+      const Duration(seconds: 5),
+    );
+    await UserBankAccountsStore.instance.load().timeout(
+      const Duration(seconds: 5),
+    );
   } catch (error) {
     debugPrint('Supabase init/load failed: $error');
   }
@@ -52,7 +54,7 @@ class MainApp extends StatelessWidget {
       builder: (context, locale, _) => MaterialApp(
         title: 'Riyal',
         debugShowCheckedModeBanner: false,
-        theme: buildAppTheme(),
+        theme: buildAppTheme(languageCode: locale.languageCode),
         locale: locale,
         supportedLocales: const [Locale('en'), Locale('ar')],
         localizationsDelegates: const [

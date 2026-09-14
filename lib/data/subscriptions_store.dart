@@ -1,6 +1,6 @@
 import 'package:flutter/foundation.dart';
 
-import 'lean_customer_store.dart';
+import 'device_id_store.dart';
 import 'subscription.dart';
 import 'subscription_category.dart';
 import 'supabase_config.dart';
@@ -19,7 +19,7 @@ class SubscriptionsStore {
       ValueNotifier<List<Subscription>>([]);
 
   Future<void> load() async {
-    final deviceId = await LeanCustomerStore.instance.getOrCreateDeviceId();
+    final deviceId = await DeviceIdStore.instance.getOrCreateDeviceId();
     final rows = await supabase
         .from('subscriptions')
         .select()
@@ -44,7 +44,7 @@ class SubscriptionsStore {
   Future<void> add(Subscription subscription) async {
     subscriptions.value = [...subscriptions.value, subscription];
     try {
-      final deviceId = await LeanCustomerStore.instance.getOrCreateDeviceId();
+      final deviceId = await DeviceIdStore.instance.getOrCreateDeviceId();
       await _insert(deviceId, subscription);
     } catch (error) {
       debugPrint('Subscription persist failed: $error');
