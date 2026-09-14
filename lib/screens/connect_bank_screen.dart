@@ -412,7 +412,10 @@ class _BankLoginStep extends StatelessWidget {
             if (showError) ...[
               Text(
                 Strings.t('bank_connect_failed'),
-                style: const TextStyle(color: Color(0xFFEF4444), fontSize: 13),
+                style: const TextStyle(
+                  color: AppColors.statusCancelled,
+                  fontSize: 13,
+                ),
               ),
               const SizedBox(height: 12),
             ],
@@ -558,13 +561,13 @@ class _SuccessStep extends StatelessWidget {
               width: 88,
               height: 88,
               decoration: BoxDecoration(
-                color: AppColors.subscriptions.withValues(alpha: 0.15),
+                color: AppColors.statusActive.withValues(alpha: 0.15),
                 shape: BoxShape.circle,
               ),
               alignment: Alignment.center,
               child: const Icon(
                 Icons.check_rounded,
-                color: AppColors.subscriptions,
+                color: AppColors.statusActive,
                 size: 48,
               ),
             ),

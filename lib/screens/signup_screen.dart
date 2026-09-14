@@ -184,7 +184,7 @@ class _SignupScreenState extends State<SignupScreen> {
                                                       'create_account_subtitle',
                                                     ),
                                                     style: const TextStyle(
-                                                      color: AppColors.staff,
+                                                      color: AppColors.coinMuted,
                                                       fontSize: 14,
                                                     ),
                                                   ),
@@ -338,23 +338,30 @@ class _SignupScreenState extends State<SignupScreen> {
                         ),
                       ),
                       const SizedBox(height: 32),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          const Icon(
-                            Icons.shield_outlined,
-                            size: 15,
-                            color: AppColors.textSecondary,
-                          ),
-                          const SizedBox(width: 7),
-                          Text(
-                            Strings.t('finances_on_device'),
-                            style: const TextStyle(
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            const Icon(
+                              Icons.shield_outlined,
+                              size: 15,
                               color: AppColors.textSecondary,
-                              fontSize: 12,
                             ),
-                          ),
-                        ],
+                            const SizedBox(width: 7),
+                            Flexible(
+                              child: Text(
+                                Strings.t('finances_on_device'),
+                                textAlign: TextAlign.center,
+                                style: const TextStyle(
+                                  color: AppColors.textSecondary,
+                                  fontSize: 12,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ],
                   ),
@@ -420,8 +427,8 @@ class _SignupScreenState extends State<SignupScreen> {
           isDense: true,
           errorStyle: const TextStyle(fontSize: 10),
           hintText: hint,
-          hintStyle: const TextStyle(color: AppColors.staff),
-          prefixIcon: Icon(icon, color: AppColors.staff, size: 22),
+          hintStyle: const TextStyle(color: AppColors.coinMuted),
+          prefixIcon: Icon(icon, color: AppColors.coinMuted, size: 22),
           suffixIcon: password
               ? IconButton(
                   tooltip: _obscurePassword
@@ -433,7 +440,7 @@ class _SignupScreenState extends State<SignupScreen> {
                     _obscurePassword
                         ? Icons.visibility_outlined
                         : Icons.visibility_off_outlined,
-                    color: AppColors.staff,
+                    color: AppColors.coinMuted,
                     size: 20,
                   ),
                 )

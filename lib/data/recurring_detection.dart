@@ -28,14 +28,25 @@ class DetectedSubscription {
 
 /// Groups bank transactions by merchant, and flags groups whose amount and
 /// timing look like a recurring subscription (as opposed to one-off
-/// purchases from the same merchant).
+/// purchases from the same merchant). A group is only "confirmed" as
+/// recurring once it's been seen at least [_minOccurrences] times — one or
+/// two charges from the same merchant isn't enough signal.
 class RecurringDetectionEngine {
   RecurringDetectionEngine._();
+
+  /// A merchant needs at least this many charges before it's confirmed as
+  /// recurring rather than a coincidence.
+  static const _minOccurrences = 3;
 
   /// Amounts within this fraction of the group average still count as
   /// "the same" — banks occasionally show tiny FX/rounding variance on
   /// otherwise-fixed subscription charges.
   static const _amountTolerance = 0.05;
+
+  /// Utility bills genuinely fluctuate month to month (usage-based), so
+  /// they get a much looser amount tolerance than a fixed-price
+  /// subscription or a flat person-to-person payment.
+  static const _utilityAmountTolerance = 0.4;
 
   static List<DetectedSubscription> detect(
     List<MockBankTransactionRow> transactions,
@@ -49,15 +60,18 @@ class RecurringDetectionEngine {
 
     final results = <DetectedSubscription>[];
     for (final group in groups.values) {
-      if (group.length < 2) continue;
+      if (group.length < _minOccurrences) continue;
       final sorted = [...group]
         ..sort((a, b) => a.transactionDate.compareTo(b.transactionDate));
 
       final avgAmount =
           sorted.map((t) => t.amount).reduce((a, b) => a + b) / sorted.length;
       if (avgAmount <= 0) continue;
+      final tolerance = sorted.first.category == 'utility'
+          ? _utilityAmountTolerance
+          : _amountTolerance;
       final amountsConsistent = sorted.every(
-        (t) => (t.amount - avgAmount).abs() / avgAmount <= _amountTolerance,
+        (t) => (t.amount - avgAmount).abs() / avgAmount <= tolerance,
       );
       if (!amountsConsistent) continue;
 

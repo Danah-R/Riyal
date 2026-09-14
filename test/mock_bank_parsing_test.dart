@@ -23,7 +23,7 @@ void main() {
   });
 
   group('MockBankTransactionRow.fromRow', () {
-    test('parses a mock_transactions row', () {
+    test('parses a mock_transactions row, including its logo asset', () {
       final row = MockBankTransactionRow.fromRow({
         'id': 'tx-1',
         'bank_id': 'bank-1',
@@ -31,6 +31,7 @@ void main() {
         'amount': 45,
         'transaction_date': '2026-01-15',
         'category': 'subscription',
+        'logo_asset': 'lib/assets/logos/Netflix_icon.svg',
       });
 
       expect(row.id, 'tx-1');
@@ -39,6 +40,21 @@ void main() {
       expect(row.amount, 45);
       expect(row.transactionDate, DateTime(2026, 1, 15));
       expect(row.category, 'subscription');
+      expect(row.logoAsset, 'lib/assets/logos/Netflix_icon.svg');
+    });
+
+    test('leaves logoAsset null for a merchant with no bundled asset', () {
+      final row = MockBankTransactionRow.fromRow({
+        'id': 'tx-2',
+        'bank_id': 'bank-1',
+        'merchant_name': 'CAREEM RIDE',
+        'amount': 32,
+        'transaction_date': '2026-01-15',
+        'category': 'other',
+        'logo_asset': null,
+      });
+
+      expect(row.logoAsset, isNull);
     });
   });
 

@@ -2,21 +2,48 @@ import 'package:flutter/material.dart';
 
 import 'app_typography.dart';
 
+/// Colors match the Riyal App Design (Claude Design project), converted
+/// from their source OKLCH values to sRGB. Dark forest-green surfaces with
+/// a warm gold accent.
 class AppColors {
   AppColors._();
 
-  static const background = Color(0xFF0B0F0C);
-  static const surface = Color(0xFF141914);
-  static const cardBorder = Color(0xFF3A4A3A);
-  static const gold = Color.fromARGB(255, 183, 158, 60);
+  // Surfaces — darkest to lightest: elevated/nav sits below the page
+  // background on purpose (a grounded nav bar), cards sit above it.
+  static const background = Color(0xFF031108);
+  static const surface = Color(0xFF0A1B11);
+  static const surfaceElevated = Color(0xFF020C05);
+
+  // Borders/dividers — alpha baked in, matching the source design's
+  // translucent oklch() values.
+  static const cardBorder = Color(0x9918281E);
+  static const dividerStrong = Color(0x8027382C);
+
+  static const gold = Color(0xFFCBA960);
   static const goldDark = Color(0xFF9C7C3D);
-  static const textPrimary = Color(0xFFF5F3EC);
-  static const textSecondary = Color(0xFFAAB2A6);
+
+  static const textPrimary = Color(0xFFF7F1E9);
+  static const textSecondary = Color(0xFF9B998B);
+  static const textTertiary = Color(0xFF747265);
+
   static const trackBackground = Color(0xFF23281F);
 
-  static const subscriptions = Color(0xFF6FBF9A);
-  static const utilities = Color(0xFF8FA85E);
-  static const staff = Color(0xFF4B4630);
+  /// Muted text/icon tone for content sitting on the light gold/cream
+  /// auth coin (login/signup) — the coin is the one bright surface in an
+  /// otherwise dark theme, so it needs its own dark-on-light tone rather
+  /// than any of the (light-on-dark) text or category colors above.
+  static const coinMuted = Color(0xFF4B4630);
+
+  // Category accents.
+  static const subscriptions = Color(0xFFCBA960);
+  static const utilities = Color(0xFF2CB3B3);
+  static const staff = Color(0xFFBD7D60);
+
+  // Subscription/tracked-item status accents.
+  static const statusActive = Color(0xFF6CC581);
+  static const statusTrial = Color(0xFFD8B260);
+  static const statusCancelled = Color(0xFFE2726B);
+  static const statusPaused = Color(0xFF908F89);
 }
 
 /// Builds the app theme for the given language — body/UI text renders in
@@ -36,7 +63,7 @@ ThemeData buildAppTheme({String languageCode = 'en'}) {
     brightness: Brightness.dark,
     fontFamily: textTheme.bodyMedium?.fontFamily,
     colorScheme: ColorScheme.fromSeed(
-      seedColor: const Color.fromARGB(255, 215, 184, 61),
+      seedColor: AppColors.gold,
       brightness: Brightness.dark,
       surface: AppColors.surface,
     ),

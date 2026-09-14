@@ -143,7 +143,7 @@ class ProfileMenuButton extends StatelessWidget {
                             Center(
                               child: TextButton.icon(
                                 style: TextButton.styleFrom(
-                                  foregroundColor: const Color(0xFFEF4444),
+                                  foregroundColor: AppColors.statusCancelled,
                                 ),
                                 onPressed: () =>
                                     Navigator.pop(dialogContext, 'logout'),

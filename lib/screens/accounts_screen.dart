@@ -112,7 +112,7 @@ class _AccountsScreenState extends State<AccountsScreen> {
                 width: double.infinity,
                 child: TextButton.icon(
                   style: TextButton.styleFrom(
-                    foregroundColor: const Color(0xFFEF4444),
+                    foregroundColor: AppColors.statusCancelled,
                   ),
                   onPressed: () async {
                     Navigator.pop(sheetContext);
@@ -305,7 +305,7 @@ class _AccountTile extends StatelessWidget {
             ),
             const Icon(
               Icons.check_circle_rounded,
-              color: AppColors.subscriptions,
+              color: AppColors.statusActive,
               size: 20,
             ),
           ],

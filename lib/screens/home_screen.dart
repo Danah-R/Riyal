@@ -10,6 +10,7 @@ import '../theme/app_typography.dart';
 import '../widgets/profile_menu_button.dart';
 import '../widgets/notification_coin_button.dart';
 import '../widgets/logo_image.dart';
+import '../widgets/card_logo_watermark.dart';
 import 'analytics_screen.dart';
 import 'monthly_review_screen.dart';
 
@@ -107,6 +108,7 @@ class _MonthlyReviewCard extends StatelessWidget {
         ),
         child: Container(
           padding: const EdgeInsets.all(16),
+          clipBehavior: Clip.antiAlias,
           decoration: BoxDecoration(
             color: AppColors.surface,
             borderRadius: BorderRadius.circular(20),
@@ -114,50 +116,55 @@ class _MonthlyReviewCard extends StatelessWidget {
               color: completed ? AppColors.cardBorder : AppColors.goldDark,
             ),
           ),
-          child: Row(
+          child: Stack(
             children: [
-              Container(
-                width: 44,
-                height: 44,
-                decoration: const BoxDecoration(
-                  color: AppColors.trackBackground,
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(
-                  completed
-                      ? Icons.check_circle_outline
-                      : Icons.assignment_outlined,
-                  color: AppColors.gold,
-                ),
-              ),
-              const SizedBox(width: 13),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      completed
-                          ? Strings.t('monthly_review_completed')
-                          : Strings.t('monthly_review_card_title'),
-                      style: const TextStyle(
-                        color: AppColors.textPrimary,
-                        fontWeight: FontWeight.w700,
-                      ),
+              const CardLogoWatermark(corner: WatermarkCorner.bottomEnd),
+              Row(
+                children: [
+                  Container(
+                    width: 44,
+                    height: 44,
+                    decoration: const BoxDecoration(
+                      color: AppColors.trackBackground,
+                      shape: BoxShape.circle,
                     ),
-                    const SizedBox(height: 4),
-                    Text(
+                    child: Icon(
                       completed
-                          ? Strings.t('monthly_review_completed_sub')
-                          : Strings.t('monthly_review_card_sub'),
-                      style: const TextStyle(
-                        color: AppColors.textSecondary,
-                        fontSize: 12.5,
-                      ),
+                          ? Icons.check_circle_outline
+                          : Icons.assignment_outlined,
+                      color: AppColors.gold,
                     ),
-                  ],
-                ),
+                  ),
+                  const SizedBox(width: 13),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          completed
+                              ? Strings.t('monthly_review_completed')
+                              : Strings.t('monthly_review_card_title'),
+                          style: const TextStyle(
+                            color: AppColors.textPrimary,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          completed
+                              ? Strings.t('monthly_review_completed_sub')
+                              : Strings.t('monthly_review_card_sub'),
+                          style: const TextStyle(
+                            color: AppColors.textSecondary,
+                            fontSize: 12.5,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const Icon(Icons.chevron_right, color: AppColors.gold),
+                ],
               ),
-              const Icon(Icons.chevron_right, color: AppColors.gold),
             ],
           ),
         ),
@@ -234,82 +241,88 @@ class _SpendingCard extends StatelessWidget {
 
     return Container(
       padding: const EdgeInsets.all(20),
+      clipBehavior: Clip.antiAlias,
       decoration: BoxDecoration(
         color: AppColors.surface,
         borderRadius: BorderRadius.circular(24),
         border: Border.all(color: AppColors.cardBorder),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      child: Stack(
         children: [
-          Text(
-            Strings.t('spending_heading'),
-            style: const TextStyle(
-              color: AppColors.textSecondary,
-              fontSize: 14,
-              height: 1.3,
-            ),
-          ),
-          const SizedBox(height: 12),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          const CardLogoWatermark(corner: WatermarkCorner.topEnd),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'SAR ${subscriptionsSpent.toStringAsFixed(0)}',
-                style: AppTypography.amount(
-                  color: AppColors.textPrimary,
-                  fontSize: 32,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-              GestureDetector(
-                onTap: () => Navigator.of(context).push(
-                  MaterialPageRoute<void>(
-                    builder: (_) =>
-                        const AnalyticsScreen(category: 'Subscriptions'),
-                  ),
-                ),
-                child: const Icon(
-                  Icons.chevron_right,
-                  color: AppColors.gold,
-                  size: 26,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 14),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(8),
-            child: LinearProgressIndicator(
-              value: progress,
-              minHeight: 8,
-              backgroundColor: AppColors.trackBackground,
-              valueColor: const AlwaysStoppedAnimation(AppColors.gold),
-            ),
-          ),
-          const SizedBox(height: 10),
-          Row(
-            children: [
-              Expanded(
-                child: Text(
-                  Strings.f(
-                    'of_sar_budget',
-                    subscriptionsBudget.toStringAsFixed(0),
-                  ),
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                    color: AppColors.textSecondary,
-                    fontSize: 13,
-                  ),
-                ),
-              ),
-              const SizedBox(width: 8),
-              Text(
-                Strings.f('sar_left', left.toStringAsFixed(0)),
+                Strings.t('spending_heading'),
                 style: const TextStyle(
                   color: AppColors.textSecondary,
-                  fontSize: 13,
+                  fontSize: 14,
+                  height: 1.3,
                 ),
+              ),
+              const SizedBox(height: 12),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'SAR ${subscriptionsSpent.toStringAsFixed(0)}',
+                    style: AppTypography.amount(
+                      color: AppColors.textPrimary,
+                      fontSize: 32,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  GestureDetector(
+                    onTap: () => Navigator.of(context).push(
+                      MaterialPageRoute<void>(
+                        builder: (_) =>
+                            const AnalyticsScreen(category: 'Subscriptions'),
+                      ),
+                    ),
+                    child: const Icon(
+                      Icons.chevron_right,
+                      color: AppColors.gold,
+                      size: 26,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 14),
+              ClipRRect(
+                borderRadius: BorderRadius.circular(8),
+                child: LinearProgressIndicator(
+                  value: progress,
+                  minHeight: 8,
+                  backgroundColor: AppColors.trackBackground,
+                  valueColor: const AlwaysStoppedAnimation(AppColors.gold),
+                ),
+              ),
+              const SizedBox(height: 10),
+              Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      Strings.f(
+                        'of_sar_budget',
+                        subscriptionsBudget.toStringAsFixed(0),
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        color: AppColors.textSecondary,
+                        fontSize: 13,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    Strings.f('sar_left', left.toStringAsFixed(0)),
+                    style: const TextStyle(
+                      color: AppColors.textSecondary,
+                      fontSize: 13,
+                    ),
+                  ),
+                ],
               ),
             ],
           ),

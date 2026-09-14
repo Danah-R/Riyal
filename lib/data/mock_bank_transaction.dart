@@ -10,6 +10,7 @@ class MockBankTransactionRow {
     required this.amount,
     required this.transactionDate,
     required this.category,
+    this.logoAsset,
   });
 
   final String id;
@@ -21,6 +22,13 @@ class MockBankTransactionRow {
   /// One of 'subscription', 'utility', 'person', 'other'.
   final String category;
 
+  /// Set directly in Supabase (see
+  /// supabase/migrations/0005_transaction_logos.sql) for merchants with a
+  /// real bundled logo asset; null for everything else, in which case
+  /// callers fall back to matching [merchantName] against a Dart-side
+  /// catalog instead — see lib/data/bank_transaction_matcher.dart.
+  final String? logoAsset;
+
   factory MockBankTransactionRow.fromRow(Map<String, dynamic> row) =>
       MockBankTransactionRow(
         id: row['id'] as String,
@@ -29,5 +37,6 @@ class MockBankTransactionRow {
         amount: (row['amount'] as num).toDouble(),
         transactionDate: DateTime.parse(row['transaction_date'] as String),
         category: row['category'] as String,
+        logoAsset: row['logo_asset'] as String?,
       );
 }

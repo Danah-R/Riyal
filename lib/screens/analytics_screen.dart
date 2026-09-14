@@ -5,6 +5,7 @@ import '../l10n/app_locale.dart';
 import '../l10n/strings.dart';
 import '../theme/app_theme.dart';
 import '../theme/app_typography.dart';
+import '../widgets/card_logo_watermark.dart';
 import '../widgets/coin_back_button.dart';
 
 /// Full-page analytics, reached from Home ("See all" / the chevron on the
@@ -268,6 +269,7 @@ class _AnalyticsContentState extends State<AnalyticsContent> {
                     ),
                   ],
                 ),
+                watermark: WatermarkCorner.topEnd,
               ),
               const SizedBox(height: 16),
               _card(
@@ -471,6 +473,7 @@ class _AnalyticsContentState extends State<AnalyticsContent> {
                     ),
                   ],
                 ),
+                watermark: WatermarkCorner.topEnd,
               ),
               const SizedBox(height: 16),
               _card(
@@ -546,23 +549,36 @@ class _AnalyticsContentState extends State<AnalyticsContent> {
     );
   }
 
-  Widget _card(String title, Widget content) => Container(
+  Widget _card(
+    String title,
+    Widget content, {
+    WatermarkCorner watermark = WatermarkCorner.bottomEnd,
+  }) => Container(
     width: double.infinity,
     padding: const EdgeInsets.all(20),
+    clipBehavior: Clip.antiAlias,
     decoration: BoxDecoration(
       color: AppColors.surface,
       borderRadius: BorderRadius.circular(24),
       border: Border.all(color: AppColors.cardBorder),
     ),
-    child: Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+    child: Stack(
       children: [
-        Text(
-          title,
-          style: const TextStyle(color: AppColors.textSecondary, fontSize: 15),
+        CardLogoWatermark(corner: watermark),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              title,
+              style: const TextStyle(
+                color: AppColors.textSecondary,
+                fontSize: 15,
+              ),
+            ),
+            const SizedBox(height: 16),
+            content,
+          ],
         ),
-        const SizedBox(height: 16),
-        content,
       ],
     ),
   );

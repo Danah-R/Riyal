@@ -194,7 +194,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                                       'signin_subtitle',
                                                     ),
                                                     style: const TextStyle(
-                                                      color: AppColors.staff,
+                                                      color: AppColors.coinMuted,
                                                       fontSize: 14,
                                                     ),
                                                   ),
@@ -224,25 +224,10 @@ class _LoginScreenState extends State<LoginScreen> {
                                                   const SizedBox(height: 16),
                                                   Container(
                                                     width: 250,
-                                                    padding:
-                                                        const EdgeInsets.all(3),
                                                     decoration: BoxDecoration(
                                                       borderRadius:
                                                           BorderRadius.circular(
                                                             40,
-                                                          ),
-                                                      gradient:
-                                                          const LinearGradient(
-                                                            begin: Alignment
-                                                                .topLeft,
-                                                            end: Alignment
-                                                                .bottomRight,
-                                                            colors: [
-                                                              Color(0xFFD9C68A),
-                                                              AppColors
-                                                                  .goldDark,
-                                                              Color(0xFFD9C68A),
-                                                            ],
                                                           ),
                                                       boxShadow: [
                                                         BoxShadow(
@@ -331,23 +316,30 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                       ),
                       const SizedBox(height: 32),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          const Icon(
-                            Icons.shield_outlined,
-                            size: 15,
-                            color: AppColors.textSecondary,
-                          ),
-                          const SizedBox(width: 7),
-                          Text(
-                            Strings.t('finances_on_device'),
-                            style: const TextStyle(
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            const Icon(
+                              Icons.shield_outlined,
+                              size: 15,
                               color: AppColors.textSecondary,
-                              fontSize: 12,
                             ),
-                          ),
-                        ],
+                            const SizedBox(width: 7),
+                            Flexible(
+                              child: Text(
+                                Strings.t('finances_on_device'),
+                                textAlign: TextAlign.center,
+                                style: const TextStyle(
+                                  color: AppColors.textSecondary,
+                                  fontSize: 12,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ],
                   ),
@@ -394,8 +386,8 @@ class _LoginScreenState extends State<LoginScreen> {
           isDense: true,
           errorStyle: const TextStyle(fontSize: 10),
           hintText: hint,
-          hintStyle: const TextStyle(color: AppColors.staff),
-          prefixIcon: Icon(icon, color: AppColors.staff, size: 22),
+          hintStyle: const TextStyle(color: AppColors.coinMuted),
+          prefixIcon: Icon(icon, color: AppColors.coinMuted, size: 22),
           suffixIcon: password
               ? IconButton(
                   tooltip: _obscurePassword
@@ -407,7 +399,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     _obscurePassword
                         ? Icons.visibility_outlined
                         : Icons.visibility_off_outlined,
-                    color: AppColors.staff,
+                    color: AppColors.coinMuted,
                     size: 20,
                   ),
                 )

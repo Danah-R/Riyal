@@ -21,7 +21,7 @@ class BottomNav extends StatelessWidget {
         child: Container(
           height: 64,
           decoration: BoxDecoration(
-            color: AppColors.surface,
+            color: AppColors.surfaceElevated,
             borderRadius: BorderRadius.circular(32),
             border: Border.all(color: AppColors.cardBorder),
           ),

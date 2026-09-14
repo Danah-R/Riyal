@@ -73,7 +73,7 @@ class _NotificationCoinButtonState extends State<NotificationCoinButton>
                     width: 11,
                     height: 11,
                     decoration: BoxDecoration(
-                      color: const Color(0xFFEF4444),
+                      color: AppColors.statusCancelled,
                       shape: BoxShape.circle,
                       border: Border.all(
                         color: AppColors.background,

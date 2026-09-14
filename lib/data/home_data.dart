@@ -13,8 +13,11 @@ class SpendingCategory {
 const subscriptionsSpent = 950.0;
 const subscriptionsBudget = 2000.0;
 
+// Mirrors AppColors.subscriptions/utilities/staff (lib/theme/app_theme.dart)
+// as raw ints — this file stays free of a Flutter/Material import so it
+// can be a plain data file.
 const overview = [
-  SpendingCategory(label: 'Subscriptions', amount: 950, color: 0xFF6FBF9A),
-  SpendingCategory(label: 'Utilities', amount: 620, color: 0xFF8FA85E),
-  SpendingCategory(label: 'Staff', amount: 770, color: 0xFF4B4630),
+  SpendingCategory(label: 'Subscriptions', amount: 950, color: 0xFFCBA960),
+  SpendingCategory(label: 'Utilities', amount: 620, color: 0xFF2CB3B3),
+  SpendingCategory(label: 'Staff', amount: 770, color: 0xFFBD7D60),
 ];
