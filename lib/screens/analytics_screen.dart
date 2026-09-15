@@ -1,12 +1,15 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import '../data/analytics_data.dart';
+import '../data/people_catalog.dart';
+import '../data/subscription_catalog.dart';
 import '../l10n/app_locale.dart';
 import '../l10n/strings.dart';
 import '../theme/app_theme.dart';
 import '../theme/app_typography.dart';
 import '../widgets/card_logo_watermark.dart';
 import '../widgets/coin_back_button.dart';
+import '../widgets/logo_image.dart';
 
 /// Full-page analytics, reached from Home ("See all" / the chevron on the
 /// spending card). Just a thin Scaffold around [AnalyticsContent].
@@ -495,25 +498,61 @@ class _AnalyticsContentState extends State<AnalyticsContent> {
     );
   }
 
+  /// Matches a demo analytics item against the real subscription/people
+  /// catalogs so recognizable items (Netflix, ChatGPT Plus, Housekeeper,
+  /// ...) show their actual logo/icon instead of one generic icon per
+  /// category. Generic item names with no specific brand behind them
+  /// (e.g. "Electricity", "Fitness membership") fall through to the
+  /// category icon below rather than being guessed at.
+  ({String? logoAsset, IconData? icon, Color? iconColor})? _resolveItemVisual(
+    AnalyticsItem item,
+  ) {
+    final name = item.name.toUpperCase();
+    for (final app in subscriptionCatalog) {
+      if (name == app.name.toUpperCase()) {
+        return (logoAsset: app.logoAsset, icon: null, iconColor: null);
+      }
+    }
+    for (final entry in peopleCatalog) {
+      if (name.contains(entry.name.toUpperCase())) {
+        return (
+          logoAsset: entry.logoAsset,
+          icon: entry.icon,
+          iconColor: entry.iconColor,
+        );
+      }
+    }
+    return null;
+  }
+
   Widget _renewal(AnalyticsItem item) {
     final date = DateTime(_today.year, _today.month, _today.day + item.days);
+    final visual = _resolveItemVisual(item);
     return Row(
       children: [
-        Container(
-          padding: const EdgeInsets.all(10),
-          decoration: BoxDecoration(
-            color: AppColors.trackBackground,
-            borderRadius: BorderRadius.circular(12),
+        if (visual != null)
+          LogoImage(
+            assetPath: visual.logoAsset,
+            icon: visual.icon,
+            iconColor: visual.iconColor,
+            size: 44,
+          )
+        else
+          Container(
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: AppColors.trackBackground,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Icon(
+              item.category == 'Subscriptions'
+                  ? Icons.autorenew
+                  : item.category == 'Utilities'
+                  ? Icons.bolt_outlined
+                  : Icons.person_outline,
+              color: AppColors.gold,
+            ),
           ),
-          child: Icon(
-            item.category == 'Subscriptions'
-                ? Icons.autorenew
-                : item.category == 'Utilities'
-                ? Icons.bolt_outlined
-                : Icons.person_outline,
-            color: AppColors.gold,
-          ),
-        ),
         const SizedBox(width: 12),
         Expanded(
           child: Column(
@@ -555,7 +594,6 @@ class _AnalyticsContentState extends State<AnalyticsContent> {
     WatermarkCorner watermark = WatermarkCorner.bottomEnd,
   }) => Container(
     width: double.infinity,
-    padding: const EdgeInsets.all(20),
     clipBehavior: Clip.antiAlias,
     decoration: BoxDecoration(
       color: AppColors.surface,
@@ -565,19 +603,22 @@ class _AnalyticsContentState extends State<AnalyticsContent> {
     child: Stack(
       children: [
         CardLogoWatermark(corner: watermark),
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              title,
-              style: const TextStyle(
-                color: AppColors.textSecondary,
-                fontSize: 15,
+        Padding(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                title,
+                style: const TextStyle(
+                  color: AppColors.textSecondary,
+                  fontSize: 15,
+                ),
               ),
-            ),
-            const SizedBox(height: 16),
-            content,
-          ],
+              const SizedBox(height: 16),
+              content,
+            ],
+          ),
         ),
       ],
     ),

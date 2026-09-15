@@ -118,7 +118,6 @@ class _MonthlyReviewCard extends StatelessWidget {
           MaterialPageRoute<void>(builder: (_) => const MonthlyReviewScreen()),
         ),
         child: Container(
-          padding: const EdgeInsets.all(16),
           clipBehavior: Clip.antiAlias,
           decoration: BoxDecoration(
             color: AppColors.surface,
@@ -129,52 +128,57 @@ class _MonthlyReviewCard extends StatelessWidget {
           ),
           child: Stack(
             children: [
+              // Unpadded, so it sits flush against the card's true edges
+              // instead of being inset by the content's own padding below.
               const CardLogoWatermark(corner: WatermarkCorner.bottomEnd),
-              Row(
-                children: [
-                  Container(
-                    width: 44,
-                    height: 44,
-                    decoration: const BoxDecoration(
-                      color: AppColors.trackBackground,
-                      shape: BoxShape.circle,
+              Padding(
+                padding: const EdgeInsets.all(16),
+                child: Row(
+                  children: [
+                    Container(
+                      width: 44,
+                      height: 44,
+                      decoration: const BoxDecoration(
+                        color: AppColors.trackBackground,
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(
+                        completed
+                            ? Icons.check_circle_outline
+                            : Icons.assignment_outlined,
+                        color: AppColors.gold,
+                      ),
                     ),
-                    child: Icon(
-                      completed
-                          ? Icons.check_circle_outline
-                          : Icons.assignment_outlined,
-                      color: AppColors.gold,
-                    ),
-                  ),
-                  const SizedBox(width: 13),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          completed
-                              ? Strings.t('monthly_review_completed')
-                              : Strings.t('monthly_review_card_title'),
-                          style: const TextStyle(
-                            color: AppColors.textPrimary,
-                            fontWeight: FontWeight.w700,
+                    const SizedBox(width: 13),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            completed
+                                ? Strings.t('monthly_review_completed')
+                                : Strings.t('monthly_review_card_title'),
+                            style: const TextStyle(
+                              color: AppColors.textPrimary,
+                              fontWeight: FontWeight.w700,
+                            ),
                           ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          completed
-                              ? Strings.t('monthly_review_completed_sub')
-                              : Strings.t('monthly_review_card_sub'),
-                          style: const TextStyle(
-                            color: AppColors.textSecondary,
-                            fontSize: 12.5,
+                          const SizedBox(height: 4),
+                          Text(
+                            completed
+                                ? Strings.t('monthly_review_completed_sub')
+                                : Strings.t('monthly_review_card_sub'),
+                            style: const TextStyle(
+                              color: AppColors.textSecondary,
+                              fontSize: 12.5,
+                            ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
-                  ),
-                  const Icon(Icons.chevron_right, color: AppColors.gold),
-                ],
+                    const Icon(Icons.chevron_right, color: AppColors.gold),
+                  ],
+                ),
               ),
             ],
           ),
@@ -477,7 +481,6 @@ class _SpendingCard extends StatelessWidget {
     final left = subscriptionsBudget - subscriptionsSpent;
 
     return Container(
-      padding: const EdgeInsets.all(20),
       clipBehavior: Clip.antiAlias,
       decoration: BoxDecoration(
         color: AppColors.surface,
@@ -487,81 +490,84 @@ class _SpendingCard extends StatelessWidget {
       child: Stack(
         children: [
           const CardLogoWatermark(corner: WatermarkCorner.topEnd),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                Strings.t('spending_heading'),
-                style: const TextStyle(
-                  color: AppColors.textSecondary,
-                  fontSize: 14,
-                  height: 1.3,
-                ),
-              ),
-              const SizedBox(height: 12),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    '⃁${subscriptionsSpent.toStringAsFixed(0)}',
-                    style: AppTypography.amount(
-                      color: AppColors.textPrimary,
-                      fontSize: 32,
-                      fontWeight: FontWeight.w600,
-                    ),
+          Padding(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  Strings.t('spending_heading'),
+                  style: const TextStyle(
+                    color: AppColors.textSecondary,
+                    fontSize: 14,
+                    height: 1.3,
                   ),
-                  GestureDetector(
-                    onTap: () => Navigator.of(context).push(
-                      MaterialPageRoute<void>(
-                        builder: (_) =>
-                            const AnalyticsScreen(category: 'Subscriptions'),
+                ),
+                const SizedBox(height: 12),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      '⃁${subscriptionsSpent.toStringAsFixed(0)}',
+                      style: AppTypography.amount(
+                        color: AppColors.textPrimary,
+                        fontSize: 32,
+                        fontWeight: FontWeight.w600,
                       ),
                     ),
-                    child: const Icon(
-                      Icons.chevron_right,
-                      color: AppColors.gold,
-                      size: 26,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 14),
-              ClipRRect(
-                borderRadius: BorderRadius.circular(8),
-                child: LinearProgressIndicator(
-                  value: progress,
-                  minHeight: 8,
-                  backgroundColor: AppColors.trackBackground,
-                  valueColor: const AlwaysStoppedAnimation(AppColors.gold),
-                ),
-              ),
-              const SizedBox(height: 10),
-              Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      Strings.f(
-                        'of_sar_budget',
-                        subscriptionsBudget.toStringAsFixed(0),
+                    GestureDetector(
+                      onTap: () => Navigator.of(context).push(
+                        MaterialPageRoute<void>(
+                          builder: (_) =>
+                              const AnalyticsScreen(category: 'Subscriptions'),
+                        ),
                       ),
-                      overflow: TextOverflow.ellipsis,
+                      child: const Icon(
+                        Icons.chevron_right,
+                        color: AppColors.gold,
+                        size: 26,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 14),
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(8),
+                  child: LinearProgressIndicator(
+                    value: progress,
+                    minHeight: 8,
+                    backgroundColor: AppColors.trackBackground,
+                    valueColor: const AlwaysStoppedAnimation(AppColors.gold),
+                  ),
+                ),
+                const SizedBox(height: 10),
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        Strings.f(
+                          'of_sar_budget',
+                          subscriptionsBudget.toStringAsFixed(0),
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          color: AppColors.textSecondary,
+                          fontSize: 13,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      Strings.f('sar_left', left.toStringAsFixed(0)),
                       style: const TextStyle(
                         color: AppColors.textSecondary,
                         fontSize: 13,
                       ),
                     ),
-                  ),
-                  const SizedBox(width: 8),
-                  Text(
-                    Strings.f('sar_left', left.toStringAsFixed(0)),
-                    style: const TextStyle(
-                      color: AppColors.textSecondary,
-                      fontSize: 13,
-                    ),
-                  ),
-                ],
-              ),
-            ],
+                  ],
+                ),
+              ],
+            ),
           ),
         ],
       ),
@@ -742,8 +748,7 @@ class _UpcomingRenewalsState extends State<_UpcomingRenewals> {
   void _openDetails(Subscription subscription) {
     Navigator.of(context).push(
       MaterialPageRoute<void>(
-        builder: (_) =>
-            SubscriptionViewScreen(subscriptionId: subscription.id),
+        builder: (_) => SubscriptionViewScreen(subscriptionId: subscription.id),
       ),
     );
   }
@@ -766,7 +771,6 @@ class _UpcomingRenewalsState extends State<_UpcomingRenewals> {
         final displayedMonth = DateTime(now.year, now.month + _monthOffset);
         final selectedDay = _selectedDay;
         return Container(
-          padding: const EdgeInsets.all(12),
           clipBehavior: Clip.antiAlias,
           decoration: BoxDecoration(
             color: AppColors.surface,
@@ -776,74 +780,77 @@ class _UpcomingRenewalsState extends State<_UpcomingRenewals> {
           child: Stack(
             children: [
               const CardLogoWatermark(corner: WatermarkCorner.bottomEnd),
-              Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  SizedBox(
-                    height: 26,
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        _CalendarNavButton(
-                          icon: Icons.chevron_left_rounded,
-                          onTap: _monthOffset > 0
-                              ? () => _goToMonth(_monthOffset - 1)
-                              : null,
-                        ),
-                        Text(
-                          '${Strings.monthAbbrev(displayedMonth.month)} '
-                          '${displayedMonth.year}',
-                          style: const TextStyle(
-                            color: AppColors.textPrimary,
-                            fontSize: 13,
-                            fontWeight: FontWeight.w700,
+              Padding(
+                padding: const EdgeInsets.all(12),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    SizedBox(
+                      height: 26,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          _CalendarNavButton(
+                            icon: Icons.chevron_left_rounded,
+                            onTap: _monthOffset > 0
+                                ? () => _goToMonth(_monthOffset - 1)
+                                : null,
                           ),
-                        ),
-                        _CalendarNavButton(
-                          icon: Icons.chevron_right_rounded,
-                          onTap: () => _goToMonth(_monthOffset + 1),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  SizedBox(
-                    height: 230,
-                    child: PageView.builder(
-                      controller: _pageController,
-                      onPageChanged: (i) => setState(() {
-                        _monthOffset = i;
-                        // A selection belongs to the month it was made in —
-                        // swiping away from it would otherwise leave a
-                        // stale, mismatched panel open.
-                        _selectedDay = null;
-                        _selectedDaySubs = const [];
-                      }),
-                      itemBuilder: (context, index) => _MonthGrid(
-                        month: DateTime(now.year, now.month + index),
-                        subscriptions: subs,
-                        selectedDay: selectedDay,
-                        onDayTap: _toggleDay,
+                          Text(
+                            '${Strings.monthAbbrev(displayedMonth.month)} '
+                            '${displayedMonth.year}',
+                            style: const TextStyle(
+                              color: AppColors.textPrimary,
+                              fontSize: 13,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                          _CalendarNavButton(
+                            icon: Icons.chevron_right_rounded,
+                            onTap: () => _goToMonth(_monthOffset + 1),
+                          ),
+                        ],
                       ),
                     ),
-                  ),
-                  // Renewal details for the selected day expand from the
-                  // bottom of the calendar card itself, instead of a
-                  // full-screen modal sheet from the bottom of the screen.
-                  AnimatedSize(
-                    duration: const Duration(milliseconds: 220),
-                    curve: Curves.easeInOut,
-                    alignment: Alignment.topCenter,
-                    child: selectedDay == null
-                        ? const SizedBox(width: double.infinity)
-                        : _DayRenewalsPanel(
-                            day: selectedDay,
-                            subscriptions: _selectedDaySubs,
-                            onClose: _closePanel,
-                            onMoreDetails: _openDetails,
-                          ),
-                  ),
-                ],
+                    const SizedBox(height: 4),
+                    SizedBox(
+                      height: 230,
+                      child: PageView.builder(
+                        controller: _pageController,
+                        onPageChanged: (i) => setState(() {
+                          _monthOffset = i;
+                          // A selection belongs to the month it was made in —
+                          // swiping away from it would otherwise leave a
+                          // stale, mismatched panel open.
+                          _selectedDay = null;
+                          _selectedDaySubs = const [];
+                        }),
+                        itemBuilder: (context, index) => _MonthGrid(
+                          month: DateTime(now.year, now.month + index),
+                          subscriptions: subs,
+                          selectedDay: selectedDay,
+                          onDayTap: _toggleDay,
+                        ),
+                      ),
+                    ),
+                    // Renewal details for the selected day expand from the
+                    // bottom of the calendar card itself, instead of a
+                    // full-screen modal sheet from the bottom of the screen.
+                    AnimatedSize(
+                      duration: const Duration(milliseconds: 220),
+                      curve: Curves.easeInOut,
+                      alignment: Alignment.topCenter,
+                      child: selectedDay == null
+                          ? const SizedBox(width: double.infinity)
+                          : _DayRenewalsPanel(
+                              day: selectedDay,
+                              subscriptions: _selectedDaySubs,
+                              onClose: _closePanel,
+                              onMoreDetails: _openDetails,
+                            ),
+                    ),
+                  ],
+                ),
               ),
             ],
           ),

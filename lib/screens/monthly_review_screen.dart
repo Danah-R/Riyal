@@ -8,7 +8,7 @@ import '../services/riyal_bot_config.dart';
 import '../theme/app_theme.dart';
 import '../theme/app_typography.dart';
 import '../widgets/coin_back_button.dart';
-import '../widgets/gold_coin_painter.dart';
+import '../widgets/logo_image.dart';
 
 class MonthlyReviewScreen extends StatefulWidget {
   const MonthlyReviewScreen({super.key});
@@ -217,17 +217,11 @@ ${actionable.isEmpty ? 'No action recommended; current commitments appear suitab
             children: [
               Row(
                 children: [
-                  SizedBox(
-                    width: 56,
-                    height: 56,
-                    child: CustomPaint(
-                      painter: const NavCoinPainter(),
-                      child: Icon(
-                        _domainIcon(item.domain),
-                        color: AppColors.surface,
-                        size: 26,
-                      ),
-                    ),
+                  LogoImage(
+                    assetPath: item.logoAsset,
+                    icon: item.icon ?? _domainIcon(item.domain),
+                    iconColor: item.iconColor,
+                    size: 56,
                   ),
                   const SizedBox(width: 14),
                   Expanded(
