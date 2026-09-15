@@ -8,6 +8,7 @@ MockBankTransactionRow _tx(
   double amount,
   DateTime date, {
   String category = 'other',
+  String? logoAsset,
 }) => MockBankTransactionRow(
   id: '$merchantName-${date.toIso8601String()}',
   bankId: 'bank-1',
@@ -15,6 +16,7 @@ MockBankTransactionRow _tx(
   amount: amount,
   transactionDate: date,
   category: category,
+  logoAsset: logoAsset,
 );
 
 void main() {
@@ -118,5 +120,60 @@ void main() {
     ];
 
     expect(RecurringDetectionEngine.detect(transactions), isEmpty);
+  });
+
+  test('carries the transaction\'s own logo through to the suggestion', () {
+    final base = DateTime(2026, 1, 15);
+    final transactions = [
+      _tx(
+        'ANGHAMI MUSIC',
+        20,
+        base,
+        category: 'subscription',
+        logoAsset: 'lib/assets/logos/anghami.png',
+      ),
+      _tx(
+        'ANGHAMI MUSIC',
+        20,
+        base.add(const Duration(days: 30)),
+        category: 'subscription',
+        logoAsset: 'lib/assets/logos/anghami.png',
+      ),
+      _tx(
+        'ANGHAMI MUSIC',
+        20,
+        base.add(const Duration(days: 61)),
+        category: 'subscription',
+        logoAsset: 'lib/assets/logos/anghami.png',
+      ),
+    ];
+
+    final detected = RecurringDetectionEngine.detect(transactions);
+
+    expect(detected.single.logoAsset, 'lib/assets/logos/anghami.png');
+  });
+
+  test('leaves logoAsset null when the transaction has none', () {
+    final base = DateTime(2026, 1, 15);
+    final transactions = [
+      _tx('NANNY SALARY - MARIA', 1200, base, category: 'person'),
+      _tx(
+        'NANNY SALARY - MARIA',
+        1200,
+        base.add(const Duration(days: 30)),
+        category: 'person',
+      ),
+      _tx(
+        'NANNY SALARY - MARIA',
+        1200,
+        base.add(const Duration(days: 61)),
+        category: 'person',
+      ),
+    ];
+
+    final detected = RecurringDetectionEngine.detect(transactions);
+
+    expect(detected.single.category, 'person');
+    expect(detected.single.logoAsset, isNull);
   });
 }

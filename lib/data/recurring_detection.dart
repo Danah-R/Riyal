@@ -12,6 +12,7 @@ class DetectedSubscription {
     required this.lastDate,
     required this.occurrences,
     required this.category,
+    this.logoAsset,
   });
 
   final String merchantName;
@@ -25,6 +26,12 @@ class DetectedSubscription {
   /// lib/screens/accounts_screen.dart's `_addSuggestion`), not just a
   /// blanket "subscription".
   final String category;
+
+  /// From the matching transaction's own `logo_asset` column when set (see
+  /// supabase/migrations/0005_transaction_logos.sql) — null for merchants
+  /// with no bundled image, in which case the caller falls back to
+  /// matching [merchantName] against a Dart-side catalog instead.
+  final String? logoAsset;
 
   /// Naive next-due estimate from the last seen charge — good enough as a
   /// starting point for a suggested subscription; the user can adjust it.
@@ -101,6 +108,7 @@ class RecurringDetectionEngine {
           lastDate: sorted.last.transactionDate,
           occurrences: sorted.length,
           category: sorted.first.category,
+          logoAsset: sorted.last.logoAsset,
         ),
       );
     }

@@ -170,13 +170,15 @@ class _SignupScreenState extends State<SignupScreen> {
                                                 children: [
                                                   Text(
                                                     Strings.t('signup_heading'),
-                                                    style: AppTypography.wordmark(
-                                                      fontSize: 36,
-                                                      fontWeight:
-                                                          FontWeight.w700,
-                                                      color: AppColors.surface,
-                                                      height: 1.1,
-                                                    ),
+                                                    style:
+                                                        AppTypography.wordmark(
+                                                          fontSize: 36,
+                                                          fontWeight:
+                                                              FontWeight.w700,
+                                                          color:
+                                                              AppColors.surface,
+                                                          height: 1.1,
+                                                        ),
                                                   ),
                                                   const SizedBox(height: 8),
                                                   Text(
@@ -184,7 +186,8 @@ class _SignupScreenState extends State<SignupScreen> {
                                                       'create_account_subtitle',
                                                     ),
                                                     style: const TextStyle(
-                                                      color: AppColors.coinMuted,
+                                                      color:
+                                                          AppColors.coinMuted,
                                                       fontSize: 14,
                                                     ),
                                                   ),
@@ -243,10 +246,12 @@ class _SignupScreenState extends State<SignupScreen> {
                                                             end: Alignment
                                                                 .bottomRight,
                                                             colors: [
-                                                              Color(0xFFD9C68A),
+                                                              AppColors
+                                                                  .goldLight,
                                                               AppColors
                                                                   .goldDark,
-                                                              Color(0xFFD9C68A),
+                                                              AppColors
+                                                                  .goldLight,
                                                             ],
                                                           ),
                                                       boxShadow: [
@@ -286,12 +291,14 @@ class _SignupScreenState extends State<SignupScreen> {
                                                           ? const SizedBox(
                                                               width: 18,
                                                               height: 18,
-                                                              child: CircularProgressIndicator(
-                                                                strokeWidth: 2,
-                                                                color: Color(
-                                                                  0xFFFFF0C2,
-                                                                ),
-                                                              ),
+                                                              child:
+                                                                  CircularProgressIndicator(
+                                                                    strokeWidth:
+                                                                        2,
+                                                                    color: Color(
+                                                                      0xFFFFF0C2,
+                                                                    ),
+                                                                  ),
                                                             )
                                                           : Text(
                                                               Strings.t(
@@ -446,7 +453,7 @@ class _SignupScreenState extends State<SignupScreen> {
                 )
               : null,
           filled: true,
-          fillColor: const Color(0xFFFFFAE9),
+          fillColor: AppColors.authFieldFill,
           contentPadding: const EdgeInsets.symmetric(
             horizontal: 18,
             vertical: 12,

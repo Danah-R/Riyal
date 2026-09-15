@@ -23,7 +23,7 @@ class UserBankAccountsStore {
         .from('user_bank_accounts')
         .select('*, mock_banks(*)')
         .eq('device_id', deviceId)
-        .order('connected_at');
+        .order('connected_at', ascending: true);
     accounts.value = rows.map(UserBankAccount.fromRow).toList();
   }
 

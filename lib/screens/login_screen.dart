@@ -180,13 +180,15 @@ class _LoginScreenState extends State<LoginScreen> {
                                                 children: [
                                                   Text(
                                                     Strings.t('login_heading'),
-                                                    style: AppTypography.wordmark(
-                                                      fontSize: 36,
-                                                      fontWeight:
-                                                          FontWeight.w700,
-                                                      color: AppColors.surface,
-                                                      height: 1.1,
-                                                    ),
+                                                    style:
+                                                        AppTypography.wordmark(
+                                                          fontSize: 36,
+                                                          fontWeight:
+                                                              FontWeight.w700,
+                                                          color:
+                                                              AppColors.surface,
+                                                          height: 1.1,
+                                                        ),
                                                   ),
                                                   const SizedBox(height: 8),
                                                   Text(
@@ -194,7 +196,8 @@ class _LoginScreenState extends State<LoginScreen> {
                                                       'signin_subtitle',
                                                     ),
                                                     style: const TextStyle(
-                                                      color: AppColors.coinMuted,
+                                                      color:
+                                                          AppColors.coinMuted,
                                                       fontSize: 14,
                                                     ),
                                                   ),
@@ -203,8 +206,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                                     controller:
                                                         _emailController,
                                                     hint: Strings.t('email'),
-                                                    icon: Icons
-                                                        .email_outlined,
+                                                    icon: Icons.email_outlined,
                                                     autofillHints: const [
                                                       AutofillHints.email,
                                                     ],
@@ -266,12 +268,14 @@ class _LoginScreenState extends State<LoginScreen> {
                                                           ? const SizedBox(
                                                               width: 18,
                                                               height: 18,
-                                                              child: CircularProgressIndicator(
-                                                                strokeWidth: 2,
-                                                                color: Color(
-                                                                  0xFFFFF0C2,
-                                                                ),
-                                                              ),
+                                                              child:
+                                                                  CircularProgressIndicator(
+                                                                    strokeWidth:
+                                                                        2,
+                                                                    color: Color(
+                                                                      0xFFFFF0C2,
+                                                                    ),
+                                                                  ),
                                                             )
                                                           : Text(
                                                               Strings.t(
@@ -363,7 +367,9 @@ class _LoginScreenState extends State<LoginScreen> {
       padding: const EdgeInsets.symmetric(horizontal: 55),
       child: TextFormField(
         controller: controller,
-        keyboardType: password ? TextInputType.text : TextInputType.emailAddress,
+        keyboardType: password
+            ? TextInputType.text
+            : TextInputType.emailAddress,
         obscureText: password && _obscurePassword,
         autofillHints: autofillHints,
         autocorrect: false,
@@ -405,7 +411,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 )
               : null,
           filled: true,
-          fillColor: const Color(0xFFFFFAE9),
+          fillColor: AppColors.authFieldFill,
           contentPadding: const EdgeInsets.symmetric(
             horizontal: 18,
             vertical: 12,

@@ -44,6 +44,42 @@ class AppColors {
   static const statusTrial = Color(0xFFD8B260);
   static const statusCancelled = Color(0xFFE2726B);
   static const statusPaused = Color(0xFF908F89);
+
+  // Gold-filled chrome (buttons, chips) needs a dark foreground; a lighter
+  // gold shows up in one button's border gradient (signup).
+  static const goldForeground = Color(0xFF1B1F16);
+  static const goldLight = Color(0xFFD9C68A);
+
+  /// Pale cream fill for text fields sitting on the light auth coin
+  /// (login/signup) — the coin is the one bright surface in the theme.
+  static const authFieldFill = Color(0xFFFFFAE9);
+
+  /// Black at the alpha values used behind modal sheets/dialogs and under
+  /// small floating buttons — baked into the alpha channel so both stay
+  /// compile-time constants instead of a `.withValues()` call.
+  static const dialogBarrier = Color(0x2E000000); // 18%
+  static const softShadow = Color(0x40000000); // 25%
+
+  static const errorText = Color(0xFFECA5A5);
+
+  /// The fourth onboarding slide's accent — the other three reuse the
+  /// category colors above; this one has no existing counterpart.
+  static const onboardingAnalyticsAccent = Color(0xFF82C7A8);
+
+  // Staff catalog/seed role accents — named once here instead of the same
+  // hex repeated across staff_catalog.dart and staff_store.dart.
+  static const staffDriving = Color(0xFF37474F);
+  static const staffHousekeeping = Color(0xFF6B7A3A);
+  static const staffChildcare = Color(0xFFC2637A);
+  static const staffGardening = Color(0xFF4C7A3A);
+  static const staffSecurity = Color(0xFF7A3A3A);
+  static const staffTutoring = Color(0xFF3A5A7A);
+  static const staffAssistant = Color(0xFF6A5A8A);
+
+  // Utility catalog/seed role accents.
+  static const utilityGas = Color(0xFFB44622);
+  static const utilityOther = Color(0xFF546E7A);
+  static const utilityWater = Color(0xFF2B6CB0);
 }
 
 /// Builds the app theme for the given language — body/UI text renders in
@@ -54,8 +90,10 @@ ThemeData buildAppTheme({String languageCode = 'en'}) {
   const baseTextTheme = TextTheme(
     bodyMedium: TextStyle(color: AppColors.textPrimary),
   );
-  final textTheme = AppTypography.textTheme(languageCode, baseTextTheme)
-      .apply(bodyColor: AppColors.textPrimary, displayColor: AppColors.textPrimary);
+  final textTheme = AppTypography.textTheme(languageCode, baseTextTheme).apply(
+    bodyColor: AppColors.textPrimary,
+    displayColor: AppColors.textPrimary,
+  );
 
   return ThemeData(
     useMaterial3: true,

@@ -8,6 +8,7 @@ import '../l10n/strings.dart';
 import '../theme/app_theme.dart';
 import '../theme/app_typography.dart';
 import '../widgets/coin_back_button.dart';
+import '../widgets/logo_image.dart';
 import 'main_shell.dart';
 
 enum _ConnectStep { chooseBank, bankLogin, connecting, success }
@@ -98,7 +99,8 @@ class _ConnectBankScreenState extends State<ConnectBankScreen> {
       canPop: canPopFreely,
       onPopInvokedWithResult: (didPop, _) {
         if (didPop) return;
-        if (_step != _ConnectStep.chooseBank && _step != _ConnectStep.connecting) {
+        if (_step != _ConnectStep.chooseBank &&
+            _step != _ConnectStep.connecting) {
           _backToChooseBank();
         }
       },
@@ -111,9 +113,7 @@ class _ConnectBankScreenState extends State<ConnectBankScreen> {
               _ConnectStep.chooseBank => _ChooseBankStep(
                 key: const ValueKey('chooseBank'),
                 forced: widget.forced,
-                onBack: canPopFreely
-                    ? () => Navigator.of(context).pop()
-                    : null,
+                onBack: canPopFreely ? () => Navigator.of(context).pop() : null,
                 onSelectBank: _selectBank,
               ),
               _ConnectStep.bankLogin => _BankLoginStep(
@@ -183,6 +183,8 @@ class _MockBankDisclaimer extends StatelessWidget {
   }
 }
 
+/// The bank's real logo when it has one (see mock_banks.logo_asset_path),
+/// falling back to a colored initials circle otherwise.
 class _BankBadge extends StatelessWidget {
   const _BankBadge({required this.bank, this.size = 56});
 
@@ -191,6 +193,13 @@ class _BankBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (bank.logoAssetPath != null) {
+      return LogoImage(
+        assetPath: bank.logoAssetPath,
+        size: size,
+        radius: size / 2,
+      );
+    }
     final initials = bank.name
         .split(' ')
         .where((w) => w.isNotEmpty)

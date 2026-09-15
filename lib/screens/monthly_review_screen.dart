@@ -497,7 +497,7 @@ ${actionable.isEmpty ? 'No action recommended; current commitments appear suitab
                 const SizedBox(height: 10),
                 Text(
                   _aiError!,
-                  style: const TextStyle(color: Color(0xFFECA5A5)),
+                  style: const TextStyle(color: AppColors.errorText),
                 ),
               ],
               const SizedBox(height: 14),

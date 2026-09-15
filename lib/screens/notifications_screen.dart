@@ -1,10 +1,46 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import '../data/notifications_store.dart';
+import '../data/utilities_domain.dart';
 import '../l10n/strings.dart';
 import '../theme/app_theme.dart';
 import '../widgets/coin_back_button.dart';
 import 'monthly_review_screen.dart';
+import 'tracked_item_view_screen.dart';
+
+/// The destination for tapping [notice], if any — shared by the full
+/// notifications list and the coin-button popup so both route the same
+/// way. [beforeNavigate] runs first (e.g. to pop a dialog before pushing).
+VoidCallback? noticeTapHandler(
+  NavigatorState navigator,
+  PaymentNotice notice, {
+  VoidCallback? beforeNavigate,
+}) {
+  switch (notice.kind) {
+    case PaymentNoticeKind.monthlyReview:
+      return () {
+        beforeNavigate?.call();
+        navigator.push(
+          MaterialPageRoute<void>(builder: (_) => const MonthlyReviewScreen()),
+        );
+      };
+    case PaymentNoticeKind.utilityAnomaly:
+      final itemId = notice.itemId;
+      if (itemId == null) return null;
+      return () {
+        beforeNavigate?.call();
+        navigator.push(
+          MaterialPageRoute<void>(
+            builder: (_) =>
+                TrackedItemViewScreen(domain: utilitiesDomain, itemId: itemId),
+          ),
+        );
+      };
+    case PaymentNoticeKind.itemAdded:
+    case PaymentNoticeKind.paymentReminder:
+      return null;
+  }
+}
 
 class NotificationsScreen extends StatelessWidget {
   const NotificationsScreen({super.key});
@@ -26,13 +62,7 @@ class NotificationsScreen extends StatelessWidget {
               separatorBuilder: (_, index) => const SizedBox(height: 12),
               itemBuilder: (context, index) => NoticeTile(
                 notice: notices[index],
-                onTap: notices[index].kind == PaymentNoticeKind.monthlyReview
-                    ? () => Navigator.of(context).push(
-                        MaterialPageRoute<void>(
-                          builder: (_) => const MonthlyReviewScreen(),
-                        ),
-                      )
-                    : null,
+                onTap: noticeTapHandler(Navigator.of(context), notices[index]),
               ),
             ),
     ),
@@ -57,11 +87,14 @@ class NoticeTile extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Icon(
-            notice.kind == PaymentNoticeKind.monthlyReview
-                ? Icons.assignment_outlined
-                : notice.reminder
-                ? Icons.notifications_active_outlined
-                : Icons.add_card_rounded,
+            switch (notice.kind) {
+              PaymentNoticeKind.monthlyReview => Icons.assignment_outlined,
+              PaymentNoticeKind.utilityAnomaly => Icons.warning_amber_rounded,
+              PaymentNoticeKind.itemAdded || PaymentNoticeKind.paymentReminder =>
+                notice.reminder
+                    ? Icons.notifications_active_outlined
+                    : Icons.add_card_rounded,
+            },
             color: AppColors.gold,
             size: 23,
           ),
@@ -119,7 +152,7 @@ Future<void> showNotificationsPreview(BuildContext context) async {
   await showDialog<void>(
     context: context,
     useSafeArea: false,
-    barrierColor: Colors.black.withValues(alpha: 0.18),
+    barrierColor: AppColors.dialogBarrier,
     builder: (dialogContext) => StatefulBuilder(
       builder: (dialogContext, setPopupState) => LayoutBuilder(
         builder: (context, constraints) {
@@ -226,19 +259,12 @@ Future<void> showNotificationsPreview(BuildContext context) async {
                                       final notice = notices[index];
                                       return NoticeTile(
                                         notice: notice,
-                                        onTap:
-                                            notice.kind ==
-                                                PaymentNoticeKind.monthlyReview
-                                            ? () {
-                                                Navigator.pop(dialogContext);
-                                                pageNavigator.push(
-                                                  MaterialPageRoute<void>(
-                                                    builder: (_) =>
-                                                        const MonthlyReviewScreen(),
-                                                  ),
-                                                );
-                                              }
-                                            : null,
+                                        onTap: noticeTapHandler(
+                                          pageNavigator,
+                                          notice,
+                                          beforeNavigate: () =>
+                                              Navigator.pop(dialogContext),
+                                        ),
                                       );
                                     },
                                   ),

@@ -15,7 +15,7 @@ class MockBanksStore {
     final rows = await supabase
         .from('mock_banks')
         .select()
-        .order('sort_order');
+        .order('sort_order', ascending: true);
     final banks = rows.map(MockBank.fromRow).toList();
     _cached = banks;
     return banks;

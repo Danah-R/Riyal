@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../theme/app_theme.dart';
+import 'id_generator.dart';
 import 'subscription.dart' show BillingCycle;
 import 'tracked_item.dart';
 import 'utility_categories.dart';
@@ -13,6 +15,7 @@ class UtilitiesStore {
     final now = DateTime.now();
     return [
       TrackedItem(
+        id: IdGenerator.uuidV4(),
         name: 'Saudi Electricity Company',
         logoAsset:
             'lib/assets/logos/1696007538-89-saudi-electricity-company.jpg',
@@ -22,6 +25,7 @@ class UtilitiesStore {
         category: UtilityCategories.electricity,
       ),
       TrackedItem(
+        id: IdGenerator.uuidV4(),
         name: 'STC',
         logoAsset: 'lib/assets/logos/stc.jpeg',
         amount: 250,
@@ -30,15 +34,17 @@ class UtilitiesStore {
         category: UtilityCategories.internet,
       ),
       TrackedItem(
+        id: IdGenerator.uuidV4(),
         name: 'National Water Company',
         icon: Icons.water_drop_outlined,
-        iconColor: const Color(0xFF2B6CB0),
+        iconColor: AppColors.utilityWater,
         amount: 70,
         cycle: BillingCycle.monthly,
         nextBillingDate: now.add(const Duration(days: 20)),
         category: UtilityCategories.water,
       ),
       TrackedItem(
+        id: IdGenerator.uuidV4(),
         name: 'Zain',
         logoAsset: 'lib/assets/logos/zain.png',
         amount: 150,

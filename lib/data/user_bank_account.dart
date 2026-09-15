@@ -13,6 +13,7 @@ class UserBankAccount {
     required this.id,
     required this.bankId,
     required this.bankName,
+    required this.bankLogoAssetPath,
     required this.bankPrimaryColor,
     required this.accountLabel,
     required this.maskedAccountNumber,
@@ -22,6 +23,7 @@ class UserBankAccount {
   final String id;
   final String bankId;
   final String bankName;
+  final String? bankLogoAssetPath;
   final Color bankPrimaryColor;
   final String accountLabel;
   final String maskedAccountNumber;
@@ -29,11 +31,13 @@ class UserBankAccount {
 
   factory UserBankAccount.fromRow(Map<String, dynamic> row) {
     final bank = row['mock_banks'] as Map<String, dynamic>;
+    final mockBank = MockBank.fromRow(bank);
     return UserBankAccount(
       id: row['id'] as String,
       bankId: row['bank_id'] as String,
       bankName: bank['name'] as String,
-      bankPrimaryColor: MockBank.fromRow(bank).primaryColor,
+      bankLogoAssetPath: mockBank.logoAssetPath,
+      bankPrimaryColor: mockBank.primaryColor,
       accountLabel: row['account_label'] as String,
       maskedAccountNumber: row['masked_account_number'] as String,
       connectedAt: DateTime.parse(row['connected_at'] as String),

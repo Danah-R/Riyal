@@ -7,12 +7,14 @@ import '../data/tracked_category.dart';
 import '../l10n/strings.dart';
 import '../theme/app_theme.dart';
 import '../theme/app_typography.dart';
+import '../widgets/capsule_tab_selector.dart';
 import '../widgets/category_filter_bar.dart';
 import '../widgets/circle_icon_button.dart';
 import '../widgets/inline_search_field.dart';
 import '../widgets/logo_image.dart';
 import 'add_subscription_sheet.dart';
 import 'analytics_screen.dart';
+import 'subscription_view_screen.dart';
 
 enum _PageTab { subscriptions, analytics }
 
@@ -58,7 +60,17 @@ class _SubscriptionsBodyState extends State<SubscriptionsBody> {
                   Row(
                     children: [
                       Expanded(
-                        child: _TopTabs(
+                        child: CapsuleTabSelector<_PageTab>(
+                          options: [
+                            CapsuleTabOption(
+                              Strings.t('nav_subscriptions'),
+                              _PageTab.subscriptions,
+                            ),
+                            CapsuleTabOption(
+                              Strings.t('analytics_tab'),
+                              _PageTab.analytics,
+                            ),
+                          ],
                           selected: _tab,
                           onChanged: (t) => setState(() => _tab = t),
                         ),
@@ -101,59 +113,11 @@ class _SubscriptionsBodyState extends State<SubscriptionsBody> {
               child: CircleIconButton(
                 icon: Icons.add_rounded,
                 background: AppColors.gold,
-                iconColor: const Color(0xFF1B1F16),
+                iconColor: AppColors.goldForeground,
                 size: 44,
                 onTap: () => showAddSubscriptionSheet(context),
               ),
             ),
-        ],
-      ),
-    );
-  }
-}
-
-class _TopTabs extends StatelessWidget {
-  const _TopTabs({required this.selected, required this.onChanged});
-
-  final _PageTab selected;
-  final ValueChanged<_PageTab> onChanged;
-
-  @override
-  Widget build(BuildContext context) {
-    Widget tab(String label, _PageTab value) {
-      final isSelected = selected == value;
-      return GestureDetector(
-        onTap: () => onChanged(value),
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 150),
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-          decoration: BoxDecoration(
-            color: isSelected ? AppColors.gold : Colors.transparent,
-            borderRadius: BorderRadius.circular(24),
-          ),
-          child: Text(
-            label,
-            style: TextStyle(
-              color: isSelected
-                  ? const Color(0xFF1B1F16)
-                  : AppColors.textSecondary,
-              fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
-              fontSize: 14,
-            ),
-          ),
-        ),
-      );
-    }
-
-    return FittedBox(
-      fit: BoxFit.scaleDown,
-      alignment: Alignment.centerLeft,
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          tab(Strings.t('nav_subscriptions'), _PageTab.subscriptions),
-          const SizedBox(width: 6),
-          tab(Strings.t('analytics_tab'), _PageTab.analytics),
         ],
       ),
     );
@@ -232,48 +196,55 @@ class _SubscriptionTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final s = subscription;
-    return Container(
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(20),
+    return GestureDetector(
+      onTap: () => Navigator.of(context).push(
+        MaterialPageRoute<void>(
+          builder: (_) => SubscriptionViewScreen(subscriptionId: s.id),
+        ),
       ),
-      child: Row(
-        children: [
-          LogoImage(assetPath: s.logoAsset, size: 44),
-          const SizedBox(width: 14),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  s.name,
-                  style: const TextStyle(
-                    color: AppColors.textPrimary,
-                    fontSize: 15,
-                    fontWeight: FontWeight.w600,
+      child: Container(
+        padding: const EdgeInsets.all(14),
+        decoration: BoxDecoration(
+          color: AppColors.surface,
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: Row(
+          children: [
+            LogoImage(assetPath: s.logoAsset, size: 44),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    s.name,
+                    style: const TextStyle(
+                      color: AppColors.textPrimary,
+                      fontSize: 15,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  Strings.renewsIn(s.renewsInDays),
-                  style: const TextStyle(
-                    color: AppColors.textSecondary,
-                    fontSize: 12.5,
+                  const SizedBox(height: 2),
+                  Text(
+                    Strings.renewsIn(s.renewsInDays),
+                    style: const TextStyle(
+                      color: AppColors.textSecondary,
+                      fontSize: 12.5,
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
-          Text(
-            '⃁${s.amount.toStringAsFixed(0)}',
-            style: AppTypography.amount(
-              color: AppColors.textPrimary,
-              fontSize: 14,
-              fontWeight: FontWeight.w600,
+            Text(
+              '⃁${s.amount.toStringAsFixed(0)}',
+              style: AppTypography.amount(
+                color: AppColors.textPrimary,
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

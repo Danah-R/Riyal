@@ -82,7 +82,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
           'شاهد الإحصائيات وفرص التوفير، واطلب من ريال بوت شرحها بالعربية أو الإنجليزية.',
       enBody:
           'Explore analytics and saving opportunities, then ask Riyal Bot to explain them in Arabic or English.',
-      accent: Color(0xFF82C7A8),
+      accent: AppColors.onboardingAnalyticsAccent,
     ),
   ];
 

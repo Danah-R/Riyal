@@ -6,12 +6,14 @@ import '../data/tracked_item.dart';
 import '../l10n/strings.dart';
 import '../theme/app_theme.dart';
 import '../theme/app_typography.dart';
+import '../widgets/capsule_tab_selector.dart';
 import '../widgets/category_filter_bar.dart';
 import '../widgets/circle_icon_button.dart';
 import '../widgets/inline_search_field.dart';
 import '../widgets/logo_image.dart';
 import 'add_tracked_item_sheet.dart';
 import 'analytics_screen.dart';
+import 'tracked_item_view_screen.dart';
 
 enum _PageTab { items, analytics }
 
@@ -59,8 +61,17 @@ class _TrackedItemsScreenState extends State<TrackedItemsScreen> {
                   Row(
                     children: [
                       Expanded(
-                        child: _TopTabs(
-                          title: widget.domain.displayTitle,
+                        child: CapsuleTabSelector<_PageTab>(
+                          options: [
+                            CapsuleTabOption(
+                              widget.domain.displayTitle,
+                              _PageTab.items,
+                            ),
+                            CapsuleTabOption(
+                              Strings.t('analytics_tab'),
+                              _PageTab.analytics,
+                            ),
+                          ],
                           selected: _tab,
                           onChanged: (t) => setState(() => _tab = t),
                         ),
@@ -107,64 +118,11 @@ class _TrackedItemsScreenState extends State<TrackedItemsScreen> {
               child: CircleIconButton(
                 icon: Icons.add_rounded,
                 background: AppColors.gold,
-                iconColor: const Color(0xFF1B1F16),
+                iconColor: AppColors.goldForeground,
                 size: 44,
                 onTap: () => showAddTrackedItemSheet(context, widget.domain),
               ),
             ),
-        ],
-      ),
-    );
-  }
-}
-
-class _TopTabs extends StatelessWidget {
-  const _TopTabs({
-    required this.title,
-    required this.selected,
-    required this.onChanged,
-  });
-
-  final String title;
-  final _PageTab selected;
-  final ValueChanged<_PageTab> onChanged;
-
-  @override
-  Widget build(BuildContext context) {
-    Widget tab(String label, _PageTab value) {
-      final isSelected = selected == value;
-      return GestureDetector(
-        onTap: () => onChanged(value),
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 150),
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-          decoration: BoxDecoration(
-            color: isSelected ? AppColors.gold : Colors.transparent,
-            borderRadius: BorderRadius.circular(24),
-          ),
-          child: Text(
-            label,
-            style: TextStyle(
-              color: isSelected
-                  ? const Color(0xFF1B1F16)
-                  : AppColors.textSecondary,
-              fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
-              fontSize: 14,
-            ),
-          ),
-        ),
-      );
-    }
-
-    return FittedBox(
-      fit: BoxFit.scaleDown,
-      alignment: Alignment.centerLeft,
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          tab(title, _PageTab.items),
-          const SizedBox(width: 6),
-          tab(Strings.t('analytics_tab'), _PageTab.analytics),
         ],
       ),
     );
@@ -232,7 +190,8 @@ class _TrackedItemsList extends StatelessWidget {
           padding: const EdgeInsets.only(bottom: 190),
           itemCount: items.length,
           separatorBuilder: (_, _) => const SizedBox(height: 12),
-          itemBuilder: (context, i) => _TrackedItemTile(item: items[i]),
+          itemBuilder: (context, i) =>
+              _TrackedItemTile(domain: domain, item: items[i]),
         );
       },
     );
@@ -240,60 +199,69 @@ class _TrackedItemsList extends StatelessWidget {
 }
 
 class _TrackedItemTile extends StatelessWidget {
-  const _TrackedItemTile({required this.item});
+  const _TrackedItemTile({required this.domain, required this.item});
 
+  final TrackedDomain domain;
   final TrackedItem item;
 
   @override
   Widget build(BuildContext context) {
     final s = item;
-    return Container(
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(20),
+    return GestureDetector(
+      onTap: () => Navigator.of(context).push(
+        MaterialPageRoute<void>(
+          builder: (_) =>
+              TrackedItemViewScreen(domain: domain, itemId: s.id),
+        ),
       ),
-      child: Row(
-        children: [
-          LogoImage(
-            assetPath: s.logoAsset,
-            icon: s.icon,
-            iconColor: s.iconColor,
-            size: 44,
-          ),
-          const SizedBox(width: 14),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  s.name,
-                  style: const TextStyle(
-                    color: AppColors.textPrimary,
-                    fontSize: 15,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  Strings.renewsIn(s.renewsInDays),
-                  style: const TextStyle(
-                    color: AppColors.textSecondary,
-                    fontSize: 12.5,
-                  ),
-                ),
-              ],
+      child: Container(
+        padding: const EdgeInsets.all(14),
+        decoration: BoxDecoration(
+          color: AppColors.surface,
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: Row(
+          children: [
+            LogoImage(
+              assetPath: s.logoAsset,
+              icon: s.icon,
+              iconColor: s.iconColor,
+              size: 44,
             ),
-          ),
-          Text(
-            '⃁${s.amount.toStringAsFixed(0)}',
-            style: AppTypography.amount(
-              color: AppColors.textPrimary,
-              fontSize: 14,
-              fontWeight: FontWeight.w600,
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    s.name,
+                    style: const TextStyle(
+                      color: AppColors.textPrimary,
+                      fontSize: 15,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    Strings.renewsIn(s.renewsInDays),
+                    style: const TextStyle(
+                      color: AppColors.textSecondary,
+                      fontSize: 12.5,
+                    ),
+                  ),
+                ],
+              ),
             ),
-          ),
-        ],
+            Text(
+              '⃁${s.amount.toStringAsFixed(0)}',
+              style: AppTypography.amount(
+                color: AppColors.textPrimary,
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

@@ -20,7 +20,7 @@ class _CoinBackButtonState extends State<CoinBackButton>
     with SingleTickerProviderStateMixin {
   late final AnimationController _controller = AnimationController(
     vsync: this,
-    duration: const Duration(milliseconds: 750),
+    duration: const Duration(milliseconds: 400),
   );
   bool _busy = false;
   @override
@@ -29,15 +29,19 @@ class _CoinBackButtonState extends State<CoinBackButton>
     super.dispose();
   }
 
+  /// How much of the flip plays before navigation actually starts — just
+  /// enough of a head start that the motion registers, without gating the
+  /// whole interaction behind the full animation (which felt slow) or
+  /// starting navigation instantly, which cut the pop transition off before
+  /// a single frame of the flip was visible.
+  static const _headStart = Duration(milliseconds: 150);
+
   Future<void> _back() async {
     if (_busy) return;
     _busy = true;
     if (!MediaQuery.disableAnimationsOf(context)) {
-      try {
-        await _controller.forward().orCancel;
-      } on TickerCanceled {
-        return;
-      }
+      _controller.forward();
+      await Future.delayed(_headStart);
     }
     if (!mounted) return;
     if (widget.onPressed != null) {
@@ -60,7 +64,7 @@ class _CoinBackButtonState extends State<CoinBackButton>
       animation: _controller,
       builder: (context, _) {
         final angle =
-            Curves.easeInOutSine.transform(_controller.value) * math.pi * 2;
+            Curves.easeInOutSine.transform(_controller.value) * math.pi;
         return Transform(
           alignment: Alignment.center,
           transform: Matrix4.identity()

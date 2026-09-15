@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../widgets/coin_back_button.dart';
 
+import '../data/id_generator.dart';
 import '../data/subscription.dart' show BillingCycle;
 import '../data/tracked_category.dart';
 import '../data/tracked_domain.dart';
@@ -66,6 +67,7 @@ class _TrackedItemDetailsScreenState extends State<TrackedItemDetailsScreen> {
     final amount = double.tryParse(_amountController.text) ?? 0;
     widget.domain.store.add(
       TrackedItem(
+        id: IdGenerator.uuidV4(),
         name: widget.name,
         logoAsset: widget.logoAsset,
         icon: widget.icon,
@@ -258,7 +260,7 @@ class _TrackedItemDetailsScreenState extends State<TrackedItemDetailsScreen> {
                   onPressed: _save,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.gold,
-                    foregroundColor: const Color(0xFF1B1F16),
+                    foregroundColor: AppColors.goldForeground,
                     padding: const EdgeInsets.symmetric(vertical: 16),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(16),
@@ -308,7 +310,7 @@ class _CycleOption extends StatelessWidget {
           label,
           style: TextStyle(
             color: isSelected
-                ? const Color(0xFF1B1F16)
+                ? AppColors.goldForeground
                 : AppColors.textSecondary,
             fontWeight: FontWeight.w600,
             fontSize: 14,

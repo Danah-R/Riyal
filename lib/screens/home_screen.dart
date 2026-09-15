@@ -1,9 +1,14 @@
 import 'package:flutter/material.dart';
 
+import '../data/bank_transaction_matcher.dart';
 import '../data/home_data.dart';
+import '../data/mock_bank_transaction.dart';
 import '../data/monthly_review.dart';
+import '../data/recurring_detection.dart';
 import '../data/subscription.dart';
 import '../data/subscriptions_store.dart';
+import '../data/user_bank_account.dart';
+import '../data/user_bank_accounts_store.dart';
 import '../l10n/strings.dart';
 import '../theme/app_theme.dart';
 import '../theme/app_typography.dart';
@@ -11,10 +16,13 @@ import '../widgets/profile_menu_button.dart';
 import '../widgets/notification_coin_button.dart';
 import '../widgets/logo_image.dart';
 import '../widgets/card_logo_watermark.dart';
+import '../widgets/capsule_tab_selector.dart';
+import 'accounts_screen.dart';
 import 'analytics_screen.dart';
+import 'connect_bank_screen.dart';
 import 'monthly_review_screen.dart';
 
-enum _HomeTab { overview, analytics }
+enum _HomeTab { overview, analytics, accounts }
 
 /// The Home tab's content. Lives inside [MainShell]'s [IndexedStack], so it
 /// has no Scaffold/bottom nav of its own — the shell provides those once for
@@ -40,51 +48,60 @@ class _HomeBodyState extends State<HomeBody> {
           children: [
             _TopBar(),
             const SizedBox(height: 16),
-            _HomeTabSelector(
+            CapsuleTabSelector<_HomeTab>(
+              options: [
+                CapsuleTabOption(Strings.t('overview'), _HomeTab.overview),
+                CapsuleTabOption(
+                  Strings.t('analytics_tab'),
+                  _HomeTab.analytics,
+                ),
+                CapsuleTabOption(Strings.t('accounts_tab'), _HomeTab.accounts),
+              ],
               selected: _tab,
               onChanged: (t) => setState(() => _tab = t),
             ),
             const SizedBox(height: 16),
             Expanded(
-              child: _tab == _HomeTab.overview
-                  ? ListView(
-                      padding: const EdgeInsets.only(bottom: 130),
-                      children: [
-                        const _SpendingCard(),
-                        const SizedBox(height: 16),
-                        const _MonthlyReviewCard(),
-                        const SizedBox(height: 28),
-                        _SectionHeader(
-                          title: Strings.t('overview'),
-                          onSeeAll: () => Navigator.of(context).push(
-                            MaterialPageRoute<void>(
-                              builder: (_) => const AnalyticsScreen(),
-                            ),
-                          ),
+              child: switch (_tab) {
+                _HomeTab.overview => ListView(
+                  padding: const EdgeInsets.only(bottom: 130),
+                  children: [
+                    const _SpendingCard(),
+                    const SizedBox(height: 16),
+                    const _MonthlyReviewCard(),
+                    const SizedBox(height: 28),
+                    _SectionHeader(
+                      title: Strings.t('overview'),
+                      onSeeAll: () => Navigator.of(context).push(
+                        MaterialPageRoute<void>(
+                          builder: (_) => const AnalyticsScreen(),
                         ),
-                        const SizedBox(height: 14),
-                        const _OverviewBar(),
-                        const SizedBox(height: 16),
-                        const _OverviewStats(),
-                        const SizedBox(height: 28),
-                        _SectionHeader(
-                          title: Strings.t('upcoming_renewals'),
-                          onSeeAll: () => Navigator.of(context).push(
-                            MaterialPageRoute<void>(
-                              builder: (_) => const AnalyticsScreen(
-                                category: 'Subscriptions',
-                              ),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 14),
-                        const _UpcomingRenewals(),
-                      ],
-                    )
-                  : const AnalyticsContent(
-                      horizontalPadding: 0,
-                      bottomPadding: 130,
+                      ),
                     ),
+                    const SizedBox(height: 14),
+                    const _OverviewBar(),
+                    const SizedBox(height: 16),
+                    const _OverviewStats(),
+                    const SizedBox(height: 28),
+                    _SectionHeader(
+                      title: Strings.t('upcoming_renewals'),
+                      onSeeAll: () => Navigator.of(context).push(
+                        MaterialPageRoute<void>(
+                          builder: (_) =>
+                              const AnalyticsScreen(category: 'Subscriptions'),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 14),
+                    const _UpcomingRenewals(),
+                  ],
+                ),
+                _HomeTab.analytics => const AnalyticsContent(
+                  horizontalPadding: 0,
+                  bottomPadding: 130,
+                ),
+                _HomeTab.accounts => const _BankAccountsTab(),
+              },
             ),
           ],
         ),
@@ -183,49 +200,226 @@ class _TopBar extends StatelessWidget {
   }
 }
 
-class _HomeTabSelector extends StatelessWidget {
-  const _HomeTabSelector({required this.selected, required this.onChanged});
+/// The "Accounts" tab: every connected bank as a bigger card, each flagging
+/// how many recurring payments the detection engine found specifically in
+/// that bank's own transactions (not the combined cross-bank count the
+/// Accounts screen's suggestion panel uses).
+class _BankAccountsTab extends StatefulWidget {
+  const _BankAccountsTab();
 
-  final _HomeTab selected;
-  final ValueChanged<_HomeTab> onChanged;
+  @override
+  State<_BankAccountsTab> createState() => _BankAccountsTabState();
+}
+
+class _BankAccountsTabState extends State<_BankAccountsTab> {
+  Map<String, int> _commitmentCounts = const {};
+
+  @override
+  void initState() {
+    super.initState();
+    _refreshCommitmentCounts();
+  }
+
+  Future<void> _refreshCommitmentCounts() async {
+    final transactions = await loadAllConnectedTransactions();
+    final byBank = <String, List<MockBankTransactionRow>>{};
+    for (final transaction in transactions) {
+      byBank.putIfAbsent(transaction.bankId, () => []).add(transaction);
+    }
+    final counts = {
+      for (final entry in byBank.entries)
+        entry.key: RecurringDetectionEngine.detect(entry.value).length,
+    };
+    if (mounted) setState(() => _commitmentCounts = counts);
+  }
+
+  Future<void> _addAccount() async {
+    await Navigator.of(context).push<void>(
+      MaterialPageRoute<void>(builder: (_) => const ConnectBankScreen()),
+    );
+    await _refreshCommitmentCounts();
+  }
 
   @override
   Widget build(BuildContext context) {
-    Widget tab(String label, _HomeTab value) {
-      final isSelected = selected == value;
-      return GestureDetector(
-        onTap: () => onChanged(value),
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 150),
-          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
-          decoration: BoxDecoration(
-            color: isSelected ? AppColors.gold : Colors.transparent,
-            borderRadius: BorderRadius.circular(24),
-          ),
-          child: Text(
-            label,
-            style: TextStyle(
-              color: isSelected
-                  ? const Color(0xFF1B1F16)
-                  : AppColors.textSecondary,
-              fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
-              fontSize: 14,
+    return ValueListenableBuilder<List<UserBankAccount>>(
+      valueListenable: UserBankAccountsStore.instance.accounts,
+      builder: (context, accounts, _) {
+        if (accounts.isEmpty) {
+          return Center(
+            child: Padding(
+              padding: const EdgeInsets.only(bottom: 60),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    Strings.t('no_accounts_yet'),
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                      color: AppColors.textSecondary,
+                      fontSize: 14,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  ElevatedButton.icon(
+                    onPressed: _addAccount,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.gold,
+                      foregroundColor: AppColors.goldForeground,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 20,
+                        vertical: 14,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                    ),
+                    icon: const Icon(Icons.add_rounded),
+                    label: Text(Strings.t('add_account')),
+                  ),
+                ],
+              ),
             ),
-          ),
-        ),
-      );
-    }
+          );
+        }
+        return ListView(
+          padding: const EdgeInsets.only(bottom: 130),
+          children: [
+            for (final account in accounts)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 14),
+                child: _BankAccountCard(
+                  account: account,
+                  commitmentCount: _commitmentCounts[account.bankId] ?? 0,
+                  onTap: () => Navigator.of(context).push(
+                    MaterialPageRoute<void>(
+                      builder: (_) => const AccountsScreen(),
+                    ),
+                  ),
+                ),
+              ),
+            const SizedBox(height: 6),
+            SizedBox(
+              width: double.infinity,
+              child: OutlinedButton.icon(
+                onPressed: _addAccount,
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: AppColors.gold,
+                  side: const BorderSide(color: AppColors.goldDark),
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                ),
+                icon: const Icon(Icons.add_rounded),
+                label: Text(Strings.t('add_account')),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+}
 
-    return FittedBox(
-      fit: BoxFit.scaleDown,
-      alignment: Alignment.centerLeft,
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          tab(Strings.t('overview'), _HomeTab.overview),
-          const SizedBox(width: 6),
-          tab(Strings.t('analytics_tab'), _HomeTab.analytics),
-        ],
+class _BankAccountCard extends StatelessWidget {
+  const _BankAccountCard({
+    required this.account,
+    required this.commitmentCount,
+    required this.onTap,
+  });
+
+  final UserBankAccount account;
+  final int commitmentCount;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.all(18),
+        decoration: BoxDecoration(
+          color: AppColors.surface,
+          borderRadius: BorderRadius.circular(24),
+          border: Border.all(color: AppColors.cardBorder),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                LogoImage(
+                  assetPath: account.bankLogoAssetPath,
+                  icon: Icons.account_balance_rounded,
+                  iconColor: account.bankPrimaryColor,
+                  size: 52,
+                ),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        account.bankName,
+                        style: const TextStyle(
+                          color: AppColors.textPrimary,
+                          fontSize: 17,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        account.maskedAccountNumber,
+                        style: const TextStyle(
+                          color: AppColors.textSecondary,
+                          fontSize: 13,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const Icon(Icons.chevron_right, color: AppColors.gold),
+              ],
+            ),
+            const SizedBox(height: 14),
+            const Divider(color: AppColors.cardBorder, height: 1),
+            const SizedBox(height: 14),
+            Row(
+              children: [
+                if (commitmentCount > 0)
+                  Container(
+                    width: 8,
+                    height: 8,
+                    margin: const EdgeInsets.only(right: 8),
+                    decoration: const BoxDecoration(
+                      color: AppColors.gold,
+                      shape: BoxShape.circle,
+                    ),
+                  ),
+                Expanded(
+                  child: Text(
+                    commitmentCount > 0
+                        ? Strings.f(
+                            'recurring_payments_found_count',
+                            '$commitmentCount',
+                          )
+                        : Strings.t('no_recurring_payments_found'),
+                    style: TextStyle(
+                      color: commitmentCount > 0
+                          ? AppColors.gold
+                          : AppColors.textSecondary,
+                      fontSize: 13,
+                      fontWeight: commitmentCount > 0
+                          ? FontWeight.w600
+                          : FontWeight.w400,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }

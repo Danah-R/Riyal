@@ -1,14 +1,26 @@
 import 'package:flutter/foundation.dart';
 import '../l10n/strings.dart';
+import 'bank_transaction_matcher.dart';
+import 'item_payment_history.dart';
+import 'item_status.dart';
+import 'mock_bank_transaction.dart';
 import 'subscriptions_store.dart';
 import 'utilities_store.dart';
 import 'staff_store.dart';
 import 'app_settings.dart';
 import 'monthly_review.dart';
 import 'notice_read_state.dart';
+import 'user_bank_accounts_store.dart';
+import 'utility_anomaly_detection.dart';
+import 'dart:async';
 import 'dart:convert';
 
-enum PaymentNoticeKind { itemAdded, paymentReminder, monthlyReview }
+enum PaymentNoticeKind {
+  itemAdded,
+  paymentReminder,
+  monthlyReview,
+  utilityAnomaly,
+}
 
 class PaymentNotice {
   const PaymentNotice({
@@ -18,6 +30,7 @@ class PaymentNotice {
     required this.createdAt,
     required this.reminder,
     this.kind = PaymentNoticeKind.itemAdded,
+    this.itemId,
   });
   final String id;
   final String title;
@@ -25,6 +38,10 @@ class PaymentNotice {
   final DateTime createdAt;
   final bool reminder;
   final PaymentNoticeKind kind;
+
+  /// Set only on [PaymentNoticeKind.utilityAnomaly] notices — the
+  /// [TrackedItem.id] of the utility bill to open when tapped.
+  final String? itemId;
 }
 
 /// In-app demo inbox, fed by the same observable stores as the payment screens.
@@ -43,6 +60,11 @@ class NotificationsStore {
   final Set<Object> _seen = Set.identity();
   final Map<Object, Set<DateTime>> _reminded = Map.identity();
 
+  /// The current-bill amount last notified about, per utility id — so an
+  /// unchanged anomaly doesn't re-notify on every refresh tick, but a new
+  /// bill that crosses the threshold again does.
+  final Map<String, double> _lastAnomalyAmount = {};
+
   void refresh({bool seed = false}) {
     final now = DateTime.now();
     final additions = <PaymentNotice>[];
@@ -51,8 +73,11 @@ class NotificationsStore {
       String name,
       String category,
       double amount,
-      DateTime due,
-    ) {
+      DateTime due, {
+      required bool notificationsEnabled,
+      required bool isActive,
+    }) {
+      if (!notificationsEnabled) return;
       final date = DateTime(due.year, due.month, due.day);
       final itemId = _itemIds.putIfAbsent(
         identity,
@@ -86,7 +111,8 @@ class NotificationsStore {
       // Calendar subtraction avoids truncating 5 days to 4 due to time of day.
       final leadDays = AppSettings.instance.reminderDays;
       final reminderDate = DateTime(date.year, date.month, date.day - leadDays);
-      if (AppSettings.instance.paymentReminders &&
+      if (isActive &&
+          AppSettings.instance.paymentReminders &&
           !reminderDate.isAfter(now) &&
           (_reminded[identity] ??= {}).add(date)) {
         additions.add(
@@ -112,13 +138,31 @@ class NotificationsStore {
         'Subscriptions',
         item.amount,
         item.nextBillingDate,
+        notificationsEnabled: item.notificationsEnabled,
+        isActive: item.status == ItemStatus.active,
       );
     }
     for (final item in UtilitiesStore.instance.items.value) {
-      visit(item, item.name, 'Utilities', item.amount, item.nextBillingDate);
+      visit(
+        item,
+        item.name,
+        'Utilities',
+        item.amount,
+        item.nextBillingDate,
+        notificationsEnabled: item.notificationsEnabled,
+        isActive: item.status == ItemStatus.active,
+      );
     }
     for (final item in StaffStore.instance.items.value) {
-      visit(item, item.name, 'Staff', item.amount, item.nextBillingDate);
+      visit(
+        item,
+        item.name,
+        'Staff',
+        item.amount,
+        item.nextBillingDate,
+        notificationsEnabled: item.notificationsEnabled,
+        isActive: item.status == ItemStatus.active,
+      );
     }
     final reviewStore = MonthlyReviewStore.instance;
     final reviewId = 'monthly-review:${reviewStore.currentPeriod}';
@@ -150,5 +194,65 @@ class NotificationsStore {
       notices.value = retained;
       readState.updateIds(notices.value.map((notice) => notice.id));
     }
+
+    // Fire-and-forget: unlike everything above, this needs a network call
+    // (connected banks' transaction history), so it can't run synchronously
+    // inline with the rest of refresh() without delaying — or, worse,
+    // making callers await — every other notice update.
+    unawaited(_refreshUtilityAnomalies());
+  }
+
+  /// Flags utility bills whose latest charge is unusual relative to their
+  /// own trailing history (see lib/data/utility_anomaly_detection.dart) and
+  /// turns any newly-crossed threshold into a notice, same as every other
+  /// notice kind above. Only bills matched against a connected bank's
+  /// transaction history have enough data to evaluate — utilities added
+  /// from scratch with no matching transactions are silently skipped, same
+  /// as the "needs 3 prior bills" rule already requires.
+  Future<void> _refreshUtilityAnomalies() async {
+    if (UserBankAccountsStore.instance.accounts.value.isEmpty) return;
+    final List<MockBankTransactionRow> allTransactions;
+    try {
+      allTransactions = await loadAllConnectedTransactions();
+    } catch (error) {
+      debugPrint('Utility anomaly check failed: $error');
+      return;
+    }
+
+    final additions = <PaymentNotice>[];
+    for (final item in UtilitiesStore.instance.items.value) {
+      if (!item.notificationsEnabled) continue;
+      final history = historyForItemName(allTransactions, item.name);
+      if (history.isEmpty) continue;
+      final anomaly = UtilityAnomalyDetector.detect(
+        category: item.category,
+        priorAmounts: history.skip(1).take(3).map((t) => t.amount).toList(),
+        currentAmount: history.first.amount,
+      );
+      if (anomaly == null) continue;
+      if (_lastAnomalyAmount[item.id] == anomaly.currentAmount) continue;
+      _lastAnomalyAmount[item.id] = anomaly.currentAmount;
+
+      additions.add(
+        PaymentNotice(
+          id: 'utility-anomaly:${item.id}:${anomaly.currentAmount}',
+          title: Strings.t('notice_utility_anomaly_title'),
+          message: Strings.utilityAnomalyMessage(
+            name: item.name,
+            currentAmount: anomaly.currentAmount,
+            averageAmount: anomaly.trailingAverage,
+            percentAbove: anomaly.percentAbove,
+          ),
+          createdAt: DateTime.now(),
+          reminder: true,
+          kind: PaymentNoticeKind.utilityAnomaly,
+          itemId: item.id,
+        ),
+      );
+    }
+    if (additions.isEmpty) return;
+    notices.value = [...notices.value, ...additions]
+      ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+    readState.updateIds(notices.value.map((notice) => notice.id));
   }
 }

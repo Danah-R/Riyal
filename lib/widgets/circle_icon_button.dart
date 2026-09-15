@@ -32,7 +32,7 @@ class CircleIconButton extends StatelessWidget {
           shape: BoxShape.circle,
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.25),
+              color: AppColors.softShadow,
               blurRadius: 10,
               offset: const Offset(0, 4),
             ),

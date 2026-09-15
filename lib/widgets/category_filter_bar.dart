@@ -46,7 +46,7 @@ class CategoryFilterBar extends StatelessWidget {
                   icon,
                   size: 15,
                   color: isSelected
-                      ? const Color(0xFF1B1F16)
+                      ? AppColors.goldForeground
                       : AppColors.textSecondary,
                 ),
                 const SizedBox(width: 6),
@@ -55,7 +55,7 @@ class CategoryFilterBar extends StatelessWidget {
                 label,
                 style: TextStyle(
                   color: isSelected
-                      ? const Color(0xFF1B1F16)
+                      ? AppColors.goldForeground
                       : AppColors.textSecondary,
                   fontSize: 13,
                   fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,

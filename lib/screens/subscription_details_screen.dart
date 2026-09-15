@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../widgets/coin_back_button.dart';
 
+import '../data/id_generator.dart';
 import '../data/subscription.dart';
 import '../data/subscription_category.dart';
 import '../data/subscriptions_store.dart';
@@ -60,6 +61,7 @@ class _SubscriptionDetailsScreenState extends State<SubscriptionDetailsScreen> {
     final amount = double.tryParse(_amountController.text) ?? 0;
     SubscriptionsStore.instance.add(
       Subscription(
+        id: IdGenerator.uuidV4(),
         name: widget.name,
         logoAsset: widget.logoAsset,
         amount: amount,
@@ -245,7 +247,7 @@ class _SubscriptionDetailsScreenState extends State<SubscriptionDetailsScreen> {
                   onPressed: _save,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.gold,
-                    foregroundColor: const Color(0xFF1B1F16),
+                    foregroundColor: AppColors.goldForeground,
                     padding: const EdgeInsets.symmetric(vertical: 16),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(16),
@@ -295,7 +297,7 @@ class _CycleOption extends StatelessWidget {
           label,
           style: TextStyle(
             color: isSelected
-                ? const Color(0xFF1B1F16)
+                ? AppColors.goldForeground
                 : AppColors.textSecondary,
             fontWeight: FontWeight.w600,
             fontSize: 14,

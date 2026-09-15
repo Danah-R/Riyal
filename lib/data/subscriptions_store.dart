@@ -1,6 +1,8 @@
 import 'package:flutter/foundation.dart';
 
 import 'device_id_store.dart';
+import 'id_generator.dart';
+import 'item_status.dart';
 import 'subscription.dart';
 import 'subscription_category.dart';
 import 'supabase_config.dart';
@@ -24,7 +26,7 @@ class SubscriptionsStore {
         .from('subscriptions')
         .select()
         .eq('device_id', deviceId)
-        .order('created_at');
+        .order('created_at', ascending: true);
 
     if (rows.isEmpty) {
       final seeded = _seed();
@@ -51,8 +53,55 @@ class SubscriptionsStore {
     }
   }
 
+  /// Same optimistic-then-persist shape as [add]: the list updates
+  /// immediately, and a persistence failure is logged rather than thrown at
+  /// an unrelated caller.
+  Future<void> update(Subscription subscription) async {
+    subscriptions.value = [
+      for (final existing in subscriptions.value)
+        if (existing.id == subscription.id) subscription else existing,
+    ];
+    try {
+      await supabase
+          .from('subscriptions')
+          .update({
+            'name': subscription.name,
+            'logo_asset': subscription.logoAsset,
+            'amount': subscription.amount,
+            'cycle': subscription.cycle.name,
+            'next_billing_date': subscription.nextBillingDate
+                .toIso8601String()
+                .split('T')
+                .first,
+            'category_key': subscription.category.key,
+            'status': subscription.status.name,
+            'purpose_tag': subscription.purposeTag,
+            'reminder_date': subscription.reminderDate
+                ?.toIso8601String()
+                .split('T')
+                .first,
+            'notifications_enabled': subscription.notificationsEnabled,
+          })
+          .eq('id', subscription.id);
+    } catch (error) {
+      debugPrint('Subscription update failed: $error');
+    }
+  }
+
+  Future<void> remove(String id) async {
+    subscriptions.value = subscriptions.value
+        .where((s) => s.id != id)
+        .toList();
+    try {
+      await supabase.from('subscriptions').delete().eq('id', id);
+    } catch (error) {
+      debugPrint('Subscription delete failed: $error');
+    }
+  }
+
   Future<void> _insert(String deviceId, Subscription subscription) {
     return supabase.from('subscriptions').insert({
+      'id': subscription.id,
       'device_id': deviceId,
       'name': subscription.name,
       'logo_asset': subscription.logoAsset,
@@ -63,16 +112,30 @@ class SubscriptionsStore {
           .split('T')
           .first,
       'category_key': subscription.category.key,
+      'status': subscription.status.name,
+      'purpose_tag': subscription.purposeTag,
+      'reminder_date': subscription.reminderDate
+          ?.toIso8601String()
+          .split('T')
+          .first,
+      'notifications_enabled': subscription.notificationsEnabled,
     });
   }
 
   Subscription _fromRow(Map<String, dynamic> row) => Subscription(
+    id: row['id'] as String,
     name: row['name'] as String,
     logoAsset: row['logo_asset'] as String?,
     amount: (row['amount'] as num).toDouble(),
     cycle: BillingCycle.values.byName(row['cycle'] as String),
     nextBillingDate: DateTime.parse(row['next_billing_date'] as String),
     category: _categoryFromKey(row['category_key'] as String),
+    status: ItemStatusDisplay.fromName(row['status'] as String?),
+    purposeTag: row['purpose_tag'] as String?,
+    reminderDate: row['reminder_date'] != null
+        ? DateTime.parse(row['reminder_date'] as String)
+        : null,
+    notificationsEnabled: row['notifications_enabled'] as bool? ?? true,
   );
 
   TrackedCategory _categoryFromKey(String key) =>
@@ -85,6 +148,7 @@ class SubscriptionsStore {
     final now = DateTime.now();
     return [
       Subscription(
+        id: IdGenerator.uuidV4(),
         name: 'Netflix',
         logoAsset: 'lib/assets/logos/Netflix_icon.svg',
         amount: 45,
@@ -93,6 +157,7 @@ class SubscriptionsStore {
         category: SubscriptionCategories.entertainment,
       ),
       Subscription(
+        id: IdGenerator.uuidV4(),
         name: 'ChatGPT Plus',
         logoAsset:
             'lib/assets/logos/chatgpt-logo-chat-gpt-icon-on-white-background-free-vector.jpg',
@@ -102,6 +167,7 @@ class SubscriptionsStore {
         category: SubscriptionCategories.ai,
       ),
       Subscription(
+        id: IdGenerator.uuidV4(),
         name: 'Duolingo',
         logoAsset: 'lib/assets/logos/doulingo.webp',
         amount: 30,
@@ -110,6 +176,7 @@ class SubscriptionsStore {
         category: SubscriptionCategories.education,
       ),
       Subscription(
+        id: IdGenerator.uuidV4(),
         name: 'Spotify',
         logoAsset: 'lib/assets/logos/Spotify_App_Logo.svg.webp',
         amount: 25,
@@ -118,6 +185,7 @@ class SubscriptionsStore {
         category: SubscriptionCategories.entertainment,
       ),
       Subscription(
+        id: IdGenerator.uuidV4(),
         name: 'Adobe Creative Cloud',
         logoAsset: 'lib/assets/logos/Adobe_Creative_Cloud_rainbow_icon.svg',
         amount: 249,

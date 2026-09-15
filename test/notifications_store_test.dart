@@ -1,5 +1,6 @@
 import 'package:riyal/data/app_settings.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:riyal/data/item_status.dart';
 import 'package:riyal/data/notifications_store.dart';
 import 'package:riyal/data/subscription.dart';
 import 'package:riyal/data/subscriptions_store.dart';
@@ -20,6 +21,7 @@ void main() {
       final initial = inbox.notices.value.length;
       SubscriptionsStore.instance.add(
         Subscription(
+          id: 'test-sub-boundary-five',
           name: 'Boundary five',
           logoAsset: null,
           amount: 39,
@@ -30,6 +32,7 @@ void main() {
       expect(inbox.notices.value.length, initial + 2);
       SubscriptionsStore.instance.add(
         Subscription(
+          id: 'test-sub-boundary-six',
           name: 'Boundary six',
           logoAsset: null,
           amount: 50,
@@ -40,6 +43,7 @@ void main() {
       expect(inbox.notices.value.length, initial + 3);
       UtilitiesStore.instance.add(
         TrackedItem(
+          id: 'test-utility-1',
           name: 'Test utility',
           amount: 100,
           cycle: BillingCycle.monthly,
@@ -49,6 +53,7 @@ void main() {
       );
       StaffStore.instance.add(
         TrackedItem(
+          id: 'test-staff-1',
           name: 'Test staff',
           amount: 200,
           cycle: BillingCycle.monthly,
@@ -86,6 +91,7 @@ void main() {
       settings.paymentReminders = false;
       SubscriptionsStore.instance.add(
         Subscription(
+          id: 'test-sub-settings',
           name: 'Settings test',
           logoAsset: null,
           amount: 30,
@@ -121,4 +127,49 @@ void main() {
       settings.reminderDays = 5;
     },
   );
+  test('An item with notifications off generates no notices at all', () {
+    final inbox = NotificationsStore.instance;
+    final now = DateTime.now();
+    final before = inbox.notices.value.length;
+    SubscriptionsStore.instance.add(
+      Subscription(
+        id: 'test-sub-muted',
+        name: 'Muted sub',
+        logoAsset: null,
+        amount: 20,
+        cycle: BillingCycle.monthly,
+        nextBillingDate: now.add(const Duration(days: 1)),
+        notificationsEnabled: false,
+      ),
+    );
+    expect(inbox.notices.value.length, before);
+    expect(
+      inbox.notices.value.where((n) => n.message.contains('Muted sub')),
+      isEmpty,
+    );
+  });
+
+  test('A cancelled/paused item stops getting renewal reminders', () {
+    final inbox = NotificationsStore.instance;
+    final now = DateTime.now();
+    SubscriptionsStore.instance.add(
+      Subscription(
+        id: 'test-sub-cancelled',
+        name: 'Cancelled sub',
+        logoAsset: null,
+        amount: 20,
+        cycle: BillingCycle.monthly,
+        nextBillingDate: now.add(const Duration(days: 1)),
+        status: ItemStatus.cancelled,
+      ),
+    );
+    // The one-time "added" notice still fires, but no renewal reminder does
+    // for an item that's no longer active.
+    expect(
+      inbox.notices.value.where(
+        (n) => n.reminder && n.message.contains('Cancelled sub'),
+      ),
+      isEmpty,
+    );
+  });
 }

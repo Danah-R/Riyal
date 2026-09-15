@@ -18,7 +18,7 @@ class ProfileMenuButton extends StatelessWidget {
     final action = await showDialog<String>(
       context: context,
       useSafeArea: false,
-      barrierColor: Colors.black.withValues(alpha: 0.18),
+      barrierColor: AppColors.dialogBarrier,
       builder: (dialogContext) => LayoutBuilder(
         builder: (context, constraints) {
           final media = MediaQuery.of(context);

@@ -55,6 +55,19 @@ class Strings {
       ? 'تذكير: $leadDays أيام قبل الدفع.'
       : 'Reminder: $leadDays days before payment.';
 
+  static String utilityAnomalyMessage({
+    required String name,
+    required double currentAmount,
+    required double averageAmount,
+    required int percentAbove,
+  }) {
+    final current = currentAmount.toStringAsFixed(2);
+    final average = averageAmount.toStringAsFixed(2);
+    return _isArabic
+        ? 'فاتورة $name هذا الشهر (ريال $current) أعلى بنسبة $percentAbove% من متوسطك (ريال $average) — تحقق من وجود تسرب'
+        : 'Your $name this month (SAR $current) is $percentAbove% higher than your average (SAR $average) — check for leaks';
+  }
+
   static String emptyDomainMessage(String pluralNoun) => _isArabic
       ? 'لا يوجد $pluralNoun حتى الآن.\nاضغط + لإضافة واحد.'
       : 'No $pluralNoun yet.\nTap + to add one.';
@@ -135,6 +148,12 @@ class Strings {
     // Shared / generic
     'renews_today': 'Renews today',
     'analytics_tab': 'Analytics',
+    'accounts_tab': 'Accounts',
+    'recurring_payments_found_count': '%s recurring payments found',
+    'no_recurring_payments_found': 'No recurring payments found yet',
+    'add_suggestion_where_title': 'Add this as…',
+    'add_suggestion_where_sub':
+        'Choose where it belongs, and adjust anything before saving.',
     'general': 'General',
     'upcoming_renewals': 'Upcoming renewals',
     'see_all': 'See all',
@@ -457,9 +476,54 @@ class Strings {
     'notice_new_commitment': 'New payment commitment',
     'notice_renewal_reminder': 'Subscription renewal reminder',
     'notice_payment_reminder': 'Payment reminder',
+    'notice_utility_anomaly_title': 'Unusual bill',
     'monthly_review_notice_title': 'Your monthly money check-in is ready',
     'monthly_review_notice_message':
         'Review your subscriptions and payment commitments to find saving opportunities.',
+
+    // Item details page (Subscriptions / Utilities / Staff)
+    'status_active': 'Active',
+    'status_trial': 'Trial',
+    'status_cancelled': 'Cancelled',
+    'status_paused': 'Paused',
+    'total_paid_to_date': 'Total paid to date',
+    'still_using_this': 'Still using this?',
+    'not_reviewed_this_month': 'Not reviewed yet this month',
+    'price_history': 'Price history',
+    'payment_history': 'Payment history',
+    'no_payment_history_yet': 'No payment history yet',
+    'purpose_tag_label': 'Purpose / notes',
+    'reminder_date_label': 'Reminder date',
+    'no_reminder_set': 'No reminder set',
+    'amount_history': 'Amount history',
+    'average_monthly_spend': 'Average monthly spend',
+    'vs_last_bill': 'vs last bill',
+    'not_enough_history': 'Not enough history yet',
+    'role_label': 'Role',
+    'notes_label': 'Notes',
+    'add_notes_hint': 'Add a note…',
+    'pause_allowance': 'Pause allowance',
+    'resume_now': 'Resume now',
+    'edit_action': 'Edit',
+    'save_action': 'Save',
+    'pause_action': 'Pause',
+    'resume_action': 'Resume',
+    'cancel_subscription_action': 'Cancel subscription',
+    'delete_action': 'Delete',
+    'delete_confirm_title': 'Delete this?',
+    'delete_confirm_message': 'This can\'t be undone.',
+    'cancel_confirm_title': 'Cancel this subscription?',
+    'cancel_confirm_message':
+        'You can still see it here, marked as cancelled.',
+    'notifications_toggle_label': 'Notifications',
+    'yearly_plan_nudge_title': 'Switch to yearly and save',
+    'unusual_spike_label': 'Unusual spike',
+    'check_for_leak_label': 'Check for leak/fault',
+    'edit_subscription_title': 'Edit subscription',
+    'edit_details_title': 'Edit details',
+    'clear_action': 'Clear',
+    'select_date_action': 'Select date',
+    'not_set': 'Not set',
   };
 
   static const _ar = <String, String>{
@@ -470,6 +534,12 @@ class Strings {
 
     'renews_today': 'يتجدد اليوم',
     'analytics_tab': 'التحليلات',
+    'accounts_tab': 'الحسابات',
+    'recurring_payments_found_count': 'تم رصد %s مدفوعات متكررة',
+    'no_recurring_payments_found': 'لم يتم رصد مدفوعات متكررة بعد',
+    'add_suggestion_where_title': 'أضف هذا كـ...',
+    'add_suggestion_where_sub':
+        'اختر التصنيف المناسب، وعدّل أي تفاصيل قبل الحفظ.',
     'general': 'عام',
     'upcoming_renewals': 'التجديدات القادمة',
     'see_all': 'عرض الكل',
@@ -770,8 +840,52 @@ class Strings {
     'notice_new_commitment': 'التزام دفع جديد',
     'notice_renewal_reminder': 'تذكير بتجديد الاشتراك',
     'notice_payment_reminder': 'تذكير بالدفع',
+    'notice_utility_anomaly_title': 'فاتورة غير معتادة',
     'monthly_review_notice_title': 'مراجعتك المالية الشهرية جاهزة',
     'monthly_review_notice_message':
         'راجع اشتراكاتك والتزاماتك المالية واكتشف فرص التوفير.',
+
+    // Item details page (Subscriptions / Utilities / Staff)
+    'status_active': 'نشط',
+    'status_trial': 'تجريبي',
+    'status_cancelled': 'ملغى',
+    'status_paused': 'متوقف مؤقتًا',
+    'total_paid_to_date': 'إجمالي المدفوع حتى الآن',
+    'still_using_this': 'ألا زلت تستخدم هذا؟',
+    'not_reviewed_this_month': 'لم تتم مراجعته هذا الشهر بعد',
+    'price_history': 'سجل تغير السعر',
+    'payment_history': 'سجل المدفوعات',
+    'no_payment_history_yet': 'لا يوجد سجل مدفوعات حتى الآن',
+    'purpose_tag_label': 'الغرض / ملاحظات',
+    'reminder_date_label': 'تاريخ التذكير',
+    'no_reminder_set': 'لا يوجد تذكير محدد',
+    'amount_history': 'سجل المبالغ',
+    'average_monthly_spend': 'متوسط الإنفاق الشهري',
+    'vs_last_bill': 'مقارنة بآخر فاتورة',
+    'not_enough_history': 'لا يوجد سجل كافٍ بعد',
+    'role_label': 'الدور',
+    'notes_label': 'ملاحظات',
+    'add_notes_hint': 'أضف ملاحظة…',
+    'pause_allowance': 'إيقاف المخصص مؤقتًا',
+    'resume_now': 'استئناف الآن',
+    'edit_action': 'تعديل',
+    'save_action': 'حفظ',
+    'pause_action': 'إيقاف مؤقت',
+    'resume_action': 'استئناف',
+    'cancel_subscription_action': 'إلغاء الاشتراك',
+    'delete_action': 'حذف',
+    'delete_confirm_title': 'هل تريد الحذف؟',
+    'delete_confirm_message': 'لا يمكن التراجع عن هذا الإجراء.',
+    'cancel_confirm_title': 'هل تريد إلغاء هذا الاشتراك؟',
+    'cancel_confirm_message': 'سيبقى ظاهرًا هنا، مُعلَّمًا كملغى.',
+    'notifications_toggle_label': 'الإشعارات',
+    'yearly_plan_nudge_title': 'التبديل للسنوي يوفر لك',
+    'unusual_spike_label': 'ارتفاع غير معتاد',
+    'check_for_leak_label': 'تحقق من وجود تسرب أو عطل',
+    'edit_subscription_title': 'تعديل الاشتراك',
+    'edit_details_title': 'تعديل التفاصيل',
+    'clear_action': 'مسح',
+    'select_date_action': 'اختر تاريخًا',
+    'not_set': 'غير محدد',
   };
 }

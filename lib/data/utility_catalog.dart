@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../theme/app_theme.dart';
 import 'catalog_entry.dart';
 import 'utility_categories.dart';
 
@@ -32,13 +33,13 @@ const List<CatalogEntry> utilityCatalog = [
   CatalogEntry(
     name: 'Gas Provider',
     icon: Icons.local_fire_department_outlined,
-    iconColor: Color(0xFFB44622),
+    iconColor: AppColors.utilityGas,
     category: UtilityCategories.gas,
   ),
   CatalogEntry(
     name: 'Waste & Municipality',
     icon: Icons.delete_outline_rounded,
-    iconColor: Color(0xFF546E7A),
+    iconColor: AppColors.utilityOther,
     category: UtilityCategories.other,
   ),
 ];
