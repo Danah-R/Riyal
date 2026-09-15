@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'people_store.dart';
@@ -23,6 +23,9 @@ class MonthlyReviewItem {
     required this.domain,
     required this.monthlyAmount,
     required this.cycle,
+    this.logoAsset,
+    this.icon,
+    this.iconColor,
   });
 
   final String id;
@@ -30,6 +33,13 @@ class MonthlyReviewItem {
   final ReviewDomain domain;
   final double monthlyAmount;
   final BillingCycle cycle;
+
+  /// The item's own logo/icon — carried over from the real [Subscription]/
+  /// [TrackedItem] this was built from, so the check-in shows the same
+  /// branding as everywhere else instead of one generic icon per domain.
+  final String? logoAsset;
+  final IconData? icon;
+  final Color? iconColor;
 
   static List<MonthlyReviewItem> currentItems() {
     String id(ReviewDomain domain, String name) =>
@@ -43,6 +53,7 @@ class MonthlyReviewItem {
           domain: ReviewDomain.subscription,
           monthlyAmount: item.monthlyAmount,
           cycle: item.cycle,
+          logoAsset: item.logoAsset,
         ),
       for (final item in UtilitiesStore.instance.items.value)
         MonthlyReviewItem(
@@ -51,6 +62,9 @@ class MonthlyReviewItem {
           domain: ReviewDomain.utility,
           monthlyAmount: item.monthlyAmount,
           cycle: item.cycle,
+          logoAsset: item.logoAsset,
+          icon: item.icon,
+          iconColor: item.iconColor,
         ),
       for (final item in PeopleStore.instance.items.value)
         MonthlyReviewItem(
@@ -59,6 +73,9 @@ class MonthlyReviewItem {
           domain: ReviewDomain.people,
           monthlyAmount: item.monthlyAmount,
           cycle: item.cycle,
+          logoAsset: item.logoAsset,
+          icon: item.icon,
+          iconColor: item.iconColor,
         ),
     ];
   }

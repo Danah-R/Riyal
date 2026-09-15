@@ -26,7 +26,7 @@ supabase db push
 
 ## Free trials
 
-Apply `supabase/migrations/0010_subscription_free_trials.sql` in the
+Apply `supabase/migrations/0013_subscription_free_trials.sql` in the
 Supabase SQL editor before using the updated subscription forms. It adds
 the nullable `trial_start_date` and `trial_duration` fields; existing
 subscriptions retain their billing details. Trials use seven calendar

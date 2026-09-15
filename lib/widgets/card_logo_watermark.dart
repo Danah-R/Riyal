@@ -13,9 +13,12 @@ enum WatermarkCorner { topEnd, bottomEnd }
 /// rather than tinted with a [ColorFilter] (which would just flatten it
 /// into a solid block).
 ///
-/// Place as the first child of a [Stack] inside a card whose outer
-/// [Container]/[DecoratedBox] has `clipBehavior: Clip.antiAlias` set, so
-/// the watermark's overflow gets clipped to the card's rounded corners.
+/// Sits flush in the card's corner — place as the first (unpadded) child
+/// of a [Stack] whose sibling content carries its own [Padding], and
+/// whose enclosing [Container] has `clipBehavior: Clip.antiAlias` set, so
+/// only the very tip of the coin gets clipped by the card's own rounded
+/// corner (not sliced by a straight edge, and not floating inset from
+/// the sides either).
 class CardLogoWatermark extends StatelessWidget {
   const CardLogoWatermark({
     super.key,
@@ -30,7 +33,7 @@ class CardLogoWatermark extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final offset = -size * 0.22;
+    const offset = 0.0;
     return Positioned(
       top: corner == WatermarkCorner.topEnd ? offset : null,
       bottom: corner == WatermarkCorner.bottomEnd ? offset : null,
