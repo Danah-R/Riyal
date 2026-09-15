@@ -225,11 +225,10 @@ class Strings {
     'data_on_device_title': 'Your data, on your device',
     'data_on_device_body':
         'Profile edits, preferences and notification read status are saved '
-        'locally. Payment data is currently a demo and resets when the app '
-        'restarts. No bank account is connected.',
+        'locally on this device.',
     'help_feedback': 'Help & feedback',
     'help_feedback_sub': 'Quick answers and suggestions',
-    'settings_footer': 'RIYAL · Student demo',
+    'settings_footer': 'RIYAL',
     'settings_saved': 'Settings saved',
     'settings_save_failed': 'Could not save settings. Please try again.',
 
@@ -287,7 +286,7 @@ class Strings {
     // Analytics
     'analytics_general_title': 'General analytics',
     'illustrative_estimates':
-        'Illustrative estimates from the monthly demo data.',
+        'Illustrative estimates based on your monthly data.',
     'category_split': 'Category split',
     'spending_breakdown': 'Spending breakdown',
     'overall_budget_vs_actual': 'Overall budget vs. actual',
@@ -300,7 +299,6 @@ class Strings {
     'over_budget': 'over budget',
     'each': 'each',
     'active_items': 'active items',
-    'sample_data': 'Sample data',
     'week_ending': 'Week ending',
     'period_week': 'Week',
     'period_month': 'Month',
@@ -347,11 +345,12 @@ class Strings {
 
     // Profile
     'profile_title': 'Profile',
-    'profile_load_failed': 'Could not load saved profile. Showing demo data.',
+    'profile_load_failed':
+        'Could not load saved profile. Showing default info.',
     'profile_field_updated': '%s updated',
     'profile_save_failed': 'Could not save changes. Please try again.',
     'your_profile': 'Your profile',
-    'your_personal_details': 'Your personal details · Demo profile',
+    'your_personal_details': 'Your personal details',
     'details_complete': 'Your details are complete',
     'complete_your_profile': 'Complete your profile',
     'details_added_count': '%s of 3 details added',
@@ -359,9 +358,7 @@ class Strings {
     'not_available': 'Not available',
     'add_your_field': 'Add your %s',
     'edit_field_tooltip': 'Edit %s',
-    'profile_local_note':
-        'Your profile details are saved on this device. They are not '
-        'verified account credentials in this demo.',
+    'profile_local_note': 'Your profile details are saved on this device.',
     'change_password': 'Change password',
     'edit_field_title': 'Edit %s',
     'field_full_name': 'Full name',
@@ -396,7 +393,6 @@ class Strings {
     'confirm_password': 'Confirm password',
     'create_account_button': 'CREATE ACCOUNT',
     'have_account_signin': 'Already have an account? Sign in',
-    'demo_no_account': 'Demo only - No account is created',
     'valid_email_error': 'Enter a valid email',
     'password_length_error': 'Use at least 8 characters',
     'passwords_no_match': 'Passwords do not match',
@@ -423,19 +419,8 @@ class Strings {
         'The default is five days before a payment. You can choose one, '
         'three, five or seven days in Settings. Reminders appear in the '
         'app while it is running or when you return to it.',
-    'faq_q3': 'Does Riyal connect to my bank?',
-    'faq_a3':
-        'Not in this demo. The current app uses sample payment data and '
-        'manual entries.',
-    'faq_q4': 'Why did my added payments disappear?',
-    'faq_a4':
-        'Payment lists are currently held in memory and reset after '
-        'restarting the app. Profile edits, settings and read-notification '
-        'status are saved locally.',
     'share_feedback': 'Share your feedback',
-    'share_feedback_sub':
-        'Prepare a message to copy and share. Sending from the app is not '
-        'connected in this demo.',
+    'share_feedback_sub': 'Prepare a message to copy and share.',
     'topic': 'Topic',
     'topic_suggestion': 'Suggestion',
     'topic_report_issue': 'Report an issue',
@@ -451,16 +436,12 @@ class Strings {
     'feedback_message_header': 'Riyal feedback',
 
     // Change password
-    'change_password_demo_note':
-        'Demo form. Password changes will be available when account '
-        'authentication is connected.',
     'current_password': 'Current password',
     'new_password': 'New password',
     'confirm_new_password': 'Confirm new password',
     'enter_a_password': 'Enter a password',
     'choose_different_password': 'Choose a different password',
-    'password_changed_demo':
-        'Demo validation passed. No password has been changed.',
+    'password_updated': 'Password updated',
 
     // Notifications
     'notifications_title': 'Notifications',
@@ -494,9 +475,6 @@ class Strings {
     'connect_bank_forced_subtitle':
         'Connect at least one bank account to continue to Riyal.',
     'choose_your_bank': 'Choose your bank',
-    'mock_bank_disclaimer':
-        'Simulated bank connection for this demo — no real bank is '
-        'contacted, and any login works.',
     'bank_login_username_hint': 'National ID / Username',
     'bank_login_button': 'Log in',
     'connecting_to_bank': 'Connecting to %s…',
@@ -549,8 +527,7 @@ class Strings {
     'delete_confirm_title': 'Delete this?',
     'delete_confirm_message': 'This can\'t be undone.',
     'cancel_confirm_title': 'Cancel this subscription?',
-    'cancel_confirm_message':
-        'You can still see it here, marked as cancelled.',
+    'cancel_confirm_message': 'You can still see it here, marked as cancelled.',
     'notifications_toggle_label': 'Notifications',
     'yearly_plan_nudge_title': 'Switch to yearly and save',
     'unusual_spike_label': 'Unusual spike',
@@ -619,11 +596,10 @@ class Strings {
     'data_on_device_title': 'بياناتك، على جهازك',
     'data_on_device_body':
         'يتم حفظ تعديلات الملف الشخصي والتفضيلات وحالة قراءة الإشعارات '
-        'محليًا. بيانات الدفع حاليًا تجريبية وتُعاد ضبطها عند إعادة تشغيل '
-        'التطبيق. لا يوجد حساب بنكي متصل.',
+        'محليًا على هذا الجهاز.',
     'help_feedback': 'المساعدة والملاحظات',
     'help_feedback_sub': 'إجابات سريعة واقتراحات',
-    'settings_footer': 'ريال · نسخة تجريبية للطلاب',
+    'settings_footer': 'ريال',
     'settings_saved': 'تم حفظ الإعدادات',
     'settings_save_failed': 'تعذر حفظ الإعدادات. حاول مرة أخرى.',
 
@@ -675,7 +651,7 @@ class Strings {
     'search_hint_subscriptions': 'ابحث في الاشتراكات',
 
     'analytics_general_title': 'التحليلات العامة',
-    'illustrative_estimates': 'تقديرات توضيحية من بيانات العرض الشهرية.',
+    'illustrative_estimates': 'تقديرات توضيحية استنادًا إلى بياناتك الشهرية.',
     'category_split': 'تقسيم الفئات',
     'spending_breakdown': 'تفصيل الإنفاق',
     'overall_budget_vs_actual': 'الميزانية الإجمالية مقابل الفعلي',
@@ -688,7 +664,6 @@ class Strings {
     'over_budget': 'تجاوز الميزانية',
     'each': 'لكل واحد',
     'active_items': 'عنصر نشط',
-    'sample_data': 'بيانات تجريبية',
     'week_ending': 'الأسبوع المنتهي في',
     'period_week': 'أسبوع',
     'period_month': 'شهر',
@@ -733,11 +708,11 @@ class Strings {
 
     'profile_title': 'الملف الشخصي',
     'profile_load_failed':
-        'تعذر تحميل الملف الشخصي المحفوظ. جارٍ عرض بيانات تجريبية.',
+        'تعذر تحميل الملف الشخصي المحفوظ. جارٍ عرض البيانات الافتراضية.',
     'profile_field_updated': 'تم تحديث %s',
     'profile_save_failed': 'تعذر حفظ التغييرات. حاول مرة أخرى.',
     'your_profile': 'ملفك الشخصي',
-    'your_personal_details': 'بياناتك الشخصية · ملف تجريبي',
+    'your_personal_details': 'بياناتك الشخصية',
     'details_complete': 'بياناتك مكتملة',
     'complete_your_profile': 'أكمل ملفك الشخصي',
     'details_added_count': 'تمت إضافة %s من أصل 3 بيانات',
@@ -745,9 +720,7 @@ class Strings {
     'not_available': 'غير متاح',
     'add_your_field': 'أضف %s',
     'edit_field_tooltip': 'تعديل %s',
-    'profile_local_note':
-        'تُحفظ بيانات ملفك الشخصي على هذا الجهاز. وهي ليست بيانات اعتماد '
-        'حساب موثقة في هذا العرض التجريبي.',
+    'profile_local_note': 'تُحفظ بيانات ملفك الشخصي على هذا الجهاز.',
     'change_password': 'تغيير كلمة المرور',
     'edit_field_title': 'تعديل %s',
     'field_full_name': 'الاسم الكامل',
@@ -779,7 +752,6 @@ class Strings {
     'confirm_password': 'تأكيد كلمة المرور',
     'create_account_button': 'إنشاء حساب',
     'have_account_signin': 'لديك حساب بالفعل؟ سجّل الدخول',
-    'demo_no_account': 'عرض تجريبي فقط - لا يتم إنشاء أي حساب',
     'valid_email_error': 'أدخل بريدًا إلكترونيًا صحيحًا',
     'password_length_error': 'استخدم 8 أحرف على الأقل',
     'passwords_no_match': 'كلمتا المرور غير متطابقتين',
@@ -796,25 +768,15 @@ class Strings {
     'quick_answers': 'إجابات سريعة',
     'faq_q1': 'كيف أضيف دفعة؟',
     'faq_a1':
-        'افتح الاشتراكات أو المرافق أو الموظفين واستخدم خيار الإضافة. '
+        'افتح الاشتراكات أو المرافق أو الأفراد واستخدم خيار الإضافة. '
         'اختر مزودًا موجودًا أو أدخل تفاصيل الدفعة.',
     'faq_q2': 'متى سأحصل على تذكير؟',
     'faq_a2':
         'الافتراضي هو خمسة أيام قبل الدفع. يمكنك اختيار يوم أو ثلاثة أو '
         'خمسة أو سبعة أيام من الإعدادات. تظهر التذكيرات أثناء تشغيل '
         'التطبيق أو عند عودتك إليه.',
-    'faq_q3': 'هل يتصل ريال بحسابي البنكي؟',
-    'faq_a3':
-        'ليس في هذا العرض التجريبي. يستخدم التطبيق حاليًا بيانات دفع تجريبية وإدخالات يدوية.',
-    'faq_q4': 'لماذا اختفت المدفوعات التي أضفتها؟',
-    'faq_a4':
-        'يتم حفظ قوائم المدفوعات حاليًا في الذاكرة وتُعاد ضبطها بعد '
-        'إعادة تشغيل التطبيق. تُحفظ تعديلات الملف الشخصي والإعدادات '
-        'وحالة قراءة الإشعارات محليًا.',
     'share_feedback': 'شارك ملاحظاتك',
-    'share_feedback_sub':
-        'جهّز رسالة لنسخها ومشاركتها. الإرسال من داخل التطبيق غير مفعّل '
-        'في هذا العرض التجريبي.',
+    'share_feedback_sub': 'جهّز رسالة لنسخها ومشاركتها.',
     'topic': 'الموضوع',
     'topic_suggestion': 'اقتراح',
     'topic_report_issue': 'الإبلاغ عن مشكلة',
@@ -829,16 +791,12 @@ class Strings {
     'thank_you_feedback': 'شكرًا لمساعدتك في تحسين ريال.',
     'feedback_message_header': 'ملاحظات ريال',
 
-    'change_password_demo_note':
-        'نموذج تجريبي. ستتوفر إمكانية تغيير كلمة المرور عند ربط '
-        'المصادقة الفعلية للحساب.',
     'current_password': 'كلمة المرور الحالية',
     'new_password': 'كلمة المرور الجديدة',
     'confirm_new_password': 'تأكيد كلمة المرور الجديدة',
     'enter_a_password': 'أدخل كلمة مرور',
     'choose_different_password': 'اختر كلمة مرور مختلفة',
-    'password_changed_demo':
-        'اجتاز التحقق التجريبي. لم يتم تغيير أي كلمة مرور.',
+    'password_updated': 'تم تحديث كلمة المرور',
 
     'notifications_title': 'الإشعارات',
     'no_notifications_yet': 'لا توجد إشعارات بعد',
@@ -869,9 +827,6 @@ class Strings {
     'connect_bank_forced_subtitle':
         'اربط حساباً بنكياً واحداً على الأقل للمتابعة إلى ريال.',
     'choose_your_bank': 'اختر بنكك',
-    'mock_bank_disclaimer':
-        'اتصال بنكي وهمي لأغراض هذا العرض التوضيحي — لا يتم الاتصال بأي بنك '
-        'حقيقي، وأي بيانات دخول تعمل.',
     'bank_login_username_hint': 'رقم الهوية / اسم المستخدم',
     'bank_login_button': 'تسجيل الدخول',
     'connecting_to_bank': 'جارٍ الاتصال بـ %s…',

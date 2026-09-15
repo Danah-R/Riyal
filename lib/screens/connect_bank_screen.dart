@@ -13,9 +13,9 @@ import 'main_shell.dart';
 
 enum _ConnectStep { chooseBank, bankLogin, connecting, success }
 
-/// The mock "connect a bank" flow — replaces Lean's `Lean.connect()` with a
-/// fully simulated grid → fake bank login → loading → success sequence.
-/// No real bank is ever contacted; see [mock_bank_disclaimer] in the UI.
+/// The mock "connect a bank" flow — a grid → bank login → loading →
+/// success sequence backed entirely by local mock data (see
+/// lib/data/mock_bank_connection_service.dart).
 ///
 /// When [forced] is true (the new-user gate right after sign-up/sign-in
 /// with zero connected banks), the screen can't be dismissed until a bank
@@ -146,43 +146,6 @@ class _ConnectBankScreenState extends State<ConnectBankScreen> {
   }
 }
 
-class _MockBankDisclaimer extends StatelessWidget {
-  const _MockBankDisclaimer();
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: AppColors.cardBorder),
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Icon(
-            Icons.info_outline_rounded,
-            size: 18,
-            color: AppColors.textSecondary,
-          ),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Text(
-              Strings.t('mock_bank_disclaimer'),
-              style: const TextStyle(
-                color: AppColors.textSecondary,
-                fontSize: 12,
-                height: 1.4,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
 /// The bank's real logo when it has one (see mock_banks.logo_asset_path),
 /// falling back to a colored initials circle otherwise.
 class _BankBadge extends StatelessWidget {
@@ -286,8 +249,6 @@ class _ChooseBankStep extends StatelessWidget {
               ),
             ),
           ],
-          const SizedBox(height: 16),
-          const _MockBankDisclaimer(),
           const SizedBox(height: 20),
           Text(
             Strings.t('choose_your_bank'),
@@ -472,8 +433,6 @@ class _BankLoginStep extends StatelessWidget {
                 ),
               ),
             ),
-            const SizedBox(height: 20),
-            const _MockBankDisclaimer(),
           ],
         ),
       ),

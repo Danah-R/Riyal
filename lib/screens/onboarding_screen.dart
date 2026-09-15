@@ -167,12 +167,12 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         child: Row(
           children: [
             Text(
-              'R I Y A L',
+              'RIYAL',
               style: AppTypography.wordmark(
                 color: AppColors.gold,
                 fontSize: 16,
                 fontWeight: FontWeight.w700,
-                letterSpacing: 4,
+                letterSpacing: 2,
               ),
             ),
             const Spacer(),

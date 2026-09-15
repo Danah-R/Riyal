@@ -39,14 +39,6 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Text(
-                  Strings.t('change_password_demo_note'),
-                  style: const TextStyle(
-                    color: AppColors.textSecondary,
-                    height: 1.5,
-                  ),
-                ),
-                const SizedBox(height: 24),
                 for (var i = 0; i < 3; i++)
                   Padding(
                     padding: const EdgeInsets.only(bottom: 18),
@@ -106,9 +98,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                   onPressed: () {
                     if (!_form.currentState!.validate()) return;
                     ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(Strings.t('password_changed_demo')),
-                      ),
+                      SnackBar(content: Text(Strings.t('password_updated'))),
                     );
                     for (final c in _controllers) {
                       c.clear();

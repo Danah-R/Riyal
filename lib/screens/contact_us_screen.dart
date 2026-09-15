@@ -87,8 +87,6 @@ class _ContactUsScreenState extends State<ContactUsScreen> {
                     for (final faqKeys in const [
                       ('faq_q1', 'faq_a1'),
                       ('faq_q2', 'faq_a2'),
-                      ('faq_q3', 'faq_a3'),
-                      ('faq_q4', 'faq_a4'),
                     ])
                       ExpansionTile(
                         tilePadding: EdgeInsets.zero,

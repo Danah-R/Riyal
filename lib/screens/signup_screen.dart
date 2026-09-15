@@ -93,12 +93,12 @@ class _SignupScreenState extends State<SignupScreen> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Text(
-                        'R I Y A L',
+                        'RIYAL',
                         style: AppTypography.wordmark(
                           color: AppColors.gold,
                           fontSize: 16,
                           fontWeight: FontWeight.w600,
-                          letterSpacing: 5,
+                          letterSpacing: 2,
                         ),
                       ),
                       const SizedBox(height: 10),
@@ -335,13 +335,6 @@ class _SignupScreenState extends State<SignupScreen> {
                         child: Text(
                           Strings.t('have_account_signin'),
                           style: const TextStyle(color: AppColors.gold),
-                        ),
-                      ),
-                      Text(
-                        Strings.t('demo_no_account'),
-                        style: const TextStyle(
-                          color: AppColors.textSecondary,
-                          fontSize: 11,
                         ),
                       ),
                       const SizedBox(height: 32),

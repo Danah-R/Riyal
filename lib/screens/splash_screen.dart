@@ -135,12 +135,12 @@ class _SplashScreenState extends State<SplashScreen>
                     child: Transform.translate(
                       offset: Offset(0, (1 - titleT) * 12),
                       child: Text(
-                        'R I Y A L',
+                        'RIYAL',
                         style: AppTypography.wordmark(
                           color: AppColors.gold,
                           fontSize: 20,
                           fontWeight: FontWeight.w600,
-                          letterSpacing: 6,
+                          letterSpacing: 3,
                         ),
                       ),
                     ),

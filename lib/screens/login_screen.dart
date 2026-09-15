@@ -103,12 +103,12 @@ class _LoginScreenState extends State<LoginScreen> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Text(
-                        'R I Y A L',
+                        'RIYAL',
                         style: AppTypography.wordmark(
                           color: AppColors.gold,
                           fontSize: 16,
                           fontWeight: FontWeight.w600,
-                          letterSpacing: 5,
+                          letterSpacing: 2,
                         ),
                       ),
                       const SizedBox(height: 10),

@@ -170,7 +170,7 @@ class _AnalyticsContentState extends State<AnalyticsContent> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                '$periodLabel / ${Strings.t('sample_data')}',
+                periodLabel,
                 style: const TextStyle(color: AppColors.textSecondary),
               ),
               const SizedBox(height: 18),
