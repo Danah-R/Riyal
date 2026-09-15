@@ -1,15 +1,17 @@
 import 'package:flutter/material.dart';
 
-import '../data/tracked_category.dart';
+import '../data/item_status.dart';
+import '../data/monthly_review.dart';
+import '../data/people_domain.dart';
 import '../data/tracked_domain.dart';
 import '../data/tracked_item.dart';
 import '../l10n/strings.dart';
 import '../theme/app_theme.dart';
 import '../theme/app_typography.dart';
 import '../widgets/capsule_tab_selector.dart';
-import '../widgets/category_filter_bar.dart';
 import '../widgets/circle_icon_button.dart';
 import '../widgets/inline_search_field.dart';
+import '../widgets/item_filter_sheet.dart';
 import '../widgets/logo_image.dart';
 import 'add_tracked_item_sheet.dart';
 import 'analytics_screen.dart';
@@ -30,7 +32,7 @@ class TrackedItemsScreen extends StatefulWidget {
 
 class _TrackedItemsScreenState extends State<TrackedItemsScreen> {
   _PageTab _tab = _PageTab.items;
-  TrackedCategory? _category;
+  ItemFilterState _filter = const ItemFilterState();
   bool _searching = false;
   String _query = '';
 
@@ -38,6 +40,11 @@ class _TrackedItemsScreenState extends State<TrackedItemsScreen> {
     _searching = false;
     _query = '';
   });
+
+  ReviewDomain get _reviewDomain =>
+      identical(widget.domain, peopleDomain)
+          ? ReviewDomain.people
+          : ReviewDomain.utility;
 
   @override
   Widget build(BuildContext context) {
@@ -87,10 +94,10 @@ class _TrackedItemsScreenState extends State<TrackedItemsScreen> {
                   ),
                 if (_tab == _PageTab.items) ...[
                   const SizedBox(height: 16),
-                  CategoryFilterBar(
+                  MultiCategoryChipsRow(
                     categories: widget.domain.categories,
-                    selected: _category,
-                    onChanged: (c) => setState(() => _category = c),
+                    state: _filter,
+                    onChanged: (f) => setState(() => _filter = f),
                   ),
                 ],
                 const SizedBox(height: 16),
@@ -98,7 +105,8 @@ class _TrackedItemsScreenState extends State<TrackedItemsScreen> {
                   child: _tab == _PageTab.items
                       ? _TrackedItemsList(
                           domain: widget.domain,
-                          category: _category,
+                          reviewDomain: _reviewDomain,
+                          filter: _filter,
                           query: _query,
                         )
                       : AnalyticsContent(
@@ -132,12 +140,14 @@ class _TrackedItemsScreenState extends State<TrackedItemsScreen> {
 class _TrackedItemsList extends StatelessWidget {
   const _TrackedItemsList({
     required this.domain,
-    this.category,
+    required this.reviewDomain,
+    required this.filter,
     this.query = '',
   });
 
   final TrackedDomain domain;
-  final TrackedCategory? category;
+  final ReviewDomain reviewDomain;
+  final ItemFilterState filter;
   final String query;
 
   @override
@@ -145,9 +155,12 @@ class _TrackedItemsList extends StatelessWidget {
     return ValueListenableBuilder<List<TrackedItem>>(
       valueListenable: domain.store.items,
       builder: (context, allItems, _) {
-        var items = category == null
-            ? allItems
-            : allItems.where((s) => s.category == category).toList();
+        var items = allItems.where((s) => filter.matches(s.category)).toList();
+        if (!filter.showCancelled) {
+          items = items
+              .where((s) => s.status != ItemStatus.cancelled)
+              .toList();
+        }
         if (query.trim().isNotEmpty) {
           items = items
               .where(
@@ -155,6 +168,26 @@ class _TrackedItemsList extends StatelessWidget {
                     s.name.toLowerCase().contains(query.trim().toLowerCase()),
               )
               .toList();
+        }
+        switch (filter.sortMode) {
+          case ItemSortMode.newest:
+            items = items.reversed.toList();
+          case ItemSortMode.mostUsed:
+          case ItemSortMode.leastUsed:
+            final ranked = items
+                .map((i) => (i, usageRank(reviewDomain, i.name)))
+                .toList();
+            ranked.sort((a, b) {
+              if (a.$2 == null && b.$2 == null) return 0;
+              if (a.$2 == null) return 1;
+              if (b.$2 == null) return -1;
+              return filter.sortMode == ItemSortMode.mostUsed
+                  ? b.$2!.compareTo(a.$2!)
+                  : a.$2!.compareTo(b.$2!);
+            });
+            items = ranked.map((r) => r.$1).toList();
+          case null:
+            break;
         }
 
         if (allItems.isEmpty) {
@@ -170,14 +203,19 @@ class _TrackedItemsList extends StatelessWidget {
           );
         }
         if (items.isEmpty) {
+          final categoryLabel = filter.categories.isEmpty
+              ? null
+              : filter.categories.map((c) => c.label).join(', ');
           return Center(
             child: Text(
               query.trim().isNotEmpty
                   ? Strings.noMatchMessage(domain.itemNounPlural, query)
-                  : Strings.noCategoryMessage(
-                      category!.label,
+                  : categoryLabel != null
+                  ? Strings.noCategoryMessage(
+                      categoryLabel,
                       domain.itemNounPlural,
-                    ),
+                    )
+                  : Strings.emptyDomainMessage(domain.itemNounPlural),
               textAlign: TextAlign.center,
               style: const TextStyle(
                 color: AppColors.textSecondary,

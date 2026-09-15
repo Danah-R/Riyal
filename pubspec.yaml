@@ -28,6 +28,7 @@ flutter:
   uses-material-design: true
   assets:
     - assets/icons/
+    - assets/icon/
     - lib/assets/logos/
     - .env
   fonts:

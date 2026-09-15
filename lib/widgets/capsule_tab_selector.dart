@@ -72,7 +72,7 @@ class _CapsuleTabSelectorState<T> extends State<CapsuleTabSelector<T>> {
         key: _tabKeys[option.value],
         onTap: () => widget.onChanged(option.value),
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 7),
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 9),
           child: Text(
             option.label,
             style: TextStyle(
@@ -80,7 +80,7 @@ class _CapsuleTabSelectorState<T> extends State<CapsuleTabSelector<T>> {
                   ? AppColors.textPrimary
                   : AppColors.textSecondary,
               fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-              fontSize: 12,
+              fontSize: 13,
             ),
           ),
         ),

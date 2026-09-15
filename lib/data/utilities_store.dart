@@ -1,6 +1,3 @@
-import 'package:flutter/material.dart';
-
-import '../theme/app_theme.dart';
 import 'id_generator.dart';
 import 'subscription.dart' show BillingCycle;
 import 'tracked_item.dart';
@@ -36,8 +33,7 @@ class UtilitiesStore {
       TrackedItem(
         id: IdGenerator.uuidV4(),
         name: 'National Water Company',
-        icon: Icons.water_drop_outlined,
-        iconColor: AppColors.utilityWater,
+        logoAsset: 'lib/assets/logos/saudi water comp.png',
         amount: 70,
         cycle: BillingCycle.monthly,
         nextBillingDate: now.add(const Duration(days: 20)),

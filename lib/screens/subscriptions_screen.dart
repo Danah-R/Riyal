@@ -1,16 +1,17 @@
 import 'package:flutter/material.dart';
 
+import '../data/item_status.dart';
+import '../data/monthly_review.dart';
 import '../data/subscription.dart';
 import '../data/subscription_category.dart';
 import '../data/subscriptions_store.dart';
-import '../data/tracked_category.dart';
 import '../l10n/strings.dart';
 import '../theme/app_theme.dart';
 import '../theme/app_typography.dart';
 import '../widgets/capsule_tab_selector.dart';
-import '../widgets/category_filter_bar.dart';
 import '../widgets/circle_icon_button.dart';
 import '../widgets/inline_search_field.dart';
+import '../widgets/item_filter_sheet.dart';
 import '../widgets/logo_image.dart';
 import 'add_subscription_sheet.dart';
 import 'analytics_screen.dart';
@@ -29,7 +30,7 @@ class SubscriptionsBody extends StatefulWidget {
 
 class _SubscriptionsBodyState extends State<SubscriptionsBody> {
   _PageTab _tab = _PageTab.subscriptions;
-  TrackedCategory? _category;
+  ItemFilterState _filter = const ItemFilterState();
   bool _searching = false;
   String _query = '';
 
@@ -86,16 +87,16 @@ class _SubscriptionsBodyState extends State<SubscriptionsBody> {
                   ),
                 if (_tab == _PageTab.subscriptions) ...[
                   const SizedBox(height: 16),
-                  CategoryFilterBar(
+                  MultiCategoryChipsRow(
                     categories: SubscriptionCategories.values,
-                    selected: _category,
-                    onChanged: (c) => setState(() => _category = c),
+                    state: _filter,
+                    onChanged: (f) => setState(() => _filter = f),
                   ),
                 ],
                 const SizedBox(height: 16),
                 Expanded(
                   child: _tab == _PageTab.subscriptions
-                      ? _SubscriptionsList(category: _category, query: _query)
+                      ? _SubscriptionsList(filter: _filter, query: _query)
                       : const AnalyticsContent(
                           category: 'Subscriptions',
                           showCategoryPicker: false,
@@ -125,9 +126,9 @@ class _SubscriptionsBodyState extends State<SubscriptionsBody> {
 }
 
 class _SubscriptionsList extends StatelessWidget {
-  const _SubscriptionsList({this.category, this.query = ''});
+  const _SubscriptionsList({required this.filter, this.query = ''});
 
-  final TrackedCategory? category;
+  final ItemFilterState filter;
   final String query;
 
   @override
@@ -135,9 +136,10 @@ class _SubscriptionsList extends StatelessWidget {
     return ValueListenableBuilder<List<Subscription>>(
       valueListenable: SubscriptionsStore.instance.subscriptions,
       builder: (context, allSubs, _) {
-        var subs = category == null
-            ? allSubs
-            : allSubs.where((s) => s.category == category).toList();
+        var subs = allSubs.where((s) => filter.matches(s.category)).toList();
+        if (!filter.showCancelled) {
+          subs = subs.where((s) => s.status != ItemStatus.cancelled).toList();
+        }
         if (query.trim().isNotEmpty) {
           subs = subs
               .where(
@@ -145,6 +147,29 @@ class _SubscriptionsList extends StatelessWidget {
                     s.name.toLowerCase().contains(query.trim().toLowerCase()),
               )
               .toList();
+        }
+        switch (filter.sortMode) {
+          case ItemSortMode.newest:
+            // The store's own order is oldest-first (Supabase load()
+            // sorts by created_at ascending, and add() appends), so
+            // "newest" is simply that order reversed.
+            subs = subs.reversed.toList();
+          case ItemSortMode.mostUsed:
+          case ItemSortMode.leastUsed:
+            final ranked = subs
+                .map((s) => (s, usageRank(ReviewDomain.subscription, s.name)))
+                .toList();
+            ranked.sort((a, b) {
+              if (a.$2 == null && b.$2 == null) return 0;
+              if (a.$2 == null) return 1;
+              if (b.$2 == null) return -1;
+              return filter.sortMode == ItemSortMode.mostUsed
+                  ? b.$2!.compareTo(a.$2!)
+                  : a.$2!.compareTo(b.$2!);
+            });
+            subs = ranked.map((r) => r.$1).toList();
+          case null:
+            break;
         }
 
         final subscriptionsNoun = Strings.t('nav_subscriptions').toLowerCase();
@@ -161,14 +186,16 @@ class _SubscriptionsList extends StatelessWidget {
           );
         }
         if (subs.isEmpty) {
+          final categoryLabel = filter.categories.isEmpty
+              ? null
+              : filter.categories.map((c) => c.label).join(', ');
           return Center(
             child: Text(
               query.trim().isNotEmpty
                   ? Strings.noMatchMessage(subscriptionsNoun, query)
-                  : Strings.noCategoryMessage(
-                      category!.label,
-                      subscriptionsNoun,
-                    ),
+                  : categoryLabel != null
+                  ? Strings.noCategoryMessage(categoryLabel, subscriptionsNoun)
+                  : Strings.emptyDomainMessage(subscriptionsNoun),
               textAlign: TextAlign.center,
               style: const TextStyle(
                 color: AppColors.textSecondary,

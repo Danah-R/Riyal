@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../l10n/strings.dart';
+import 'auth_store.dart';
 
 /// English display label for a profile field key -> its localized text.
 /// The keys themselves ('Full name', 'Email', ...) stay English: they're
@@ -26,6 +27,17 @@ class ProfileStore {
   Future<void> load() async {
     final saved = await _prefs.getString('riyal.demo_profile.v1');
     if (saved == null) {
+      // First run for this device: seed from whatever the user actually
+      // typed in at sign-up (Supabase Auth's user metadata) instead of the
+      // generic "Riyal User" placeholder, when that's available.
+      final user = AuthStore.instance.currentUser;
+      final authName = user?.userMetadata?['full_name'] as String?;
+      if (authName != null && authName.trim().isNotEmpty) {
+        values = {...values, 'Full name': authName.trim()};
+      }
+      if (user?.email != null) {
+        values = {...values, 'Email': user!.email!};
+      }
       await _prefs.setString('riyal.demo_profile.v1', jsonEncode(values));
     }
     if (saved != null) {

@@ -30,10 +30,10 @@ class CategoryFilterBar extends StatelessWidget {
         onTap: onTap,
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 150),
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
+          padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 6),
           decoration: BoxDecoration(
             color: isSelected ? AppColors.gold : AppColors.surface,
-            borderRadius: BorderRadius.circular(20),
+            borderRadius: BorderRadius.circular(18),
             border: Border.all(
               color: isSelected ? AppColors.gold : AppColors.cardBorder,
             ),
@@ -44,12 +44,12 @@ class CategoryFilterBar extends StatelessWidget {
               if (icon != null) ...[
                 Icon(
                   icon,
-                  size: 15,
+                  size: 13,
                   color: isSelected
                       ? AppColors.goldForeground
                       : AppColors.textSecondary,
                 ),
-                const SizedBox(width: 6),
+                const SizedBox(width: 5),
               ],
               Text(
                 label,
@@ -57,7 +57,7 @@ class CategoryFilterBar extends StatelessWidget {
                   color: isSelected
                       ? AppColors.goldForeground
                       : AppColors.textSecondary,
-                  fontSize: 13,
+                  fontSize: 12,
                   fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
                 ),
               ),
@@ -68,7 +68,7 @@ class CategoryFilterBar extends StatelessWidget {
     }
 
     return SizedBox(
-      height: 38,
+      height: 32,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
         itemCount: categories.length + (showAll ? 1 : 0),

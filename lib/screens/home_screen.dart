@@ -6,6 +6,7 @@ import '../data/mock_bank_transaction.dart';
 import '../data/monthly_review.dart';
 import '../data/recurring_detection.dart';
 import '../data/subscription.dart';
+import '../data/profile_store.dart';
 import '../data/subscriptions_store.dart';
 import '../data/user_bank_account.dart';
 import '../data/user_bank_accounts_store.dart';
@@ -21,6 +22,7 @@ import 'accounts_screen.dart';
 import 'analytics_screen.dart';
 import 'connect_bank_screen.dart';
 import 'monthly_review_screen.dart';
+import 'subscription_view_screen.dart';
 
 enum _HomeTab { overview, analytics, accounts }
 
@@ -83,15 +85,7 @@ class _HomeBodyState extends State<HomeBody> {
                     const SizedBox(height: 16),
                     const _OverviewStats(),
                     const SizedBox(height: 28),
-                    _SectionHeader(
-                      title: Strings.t('upcoming_renewals'),
-                      onSeeAll: () => Navigator.of(context).push(
-                        MaterialPageRoute<void>(
-                          builder: (_) =>
-                              const AnalyticsScreen(category: 'Subscriptions'),
-                        ),
-                      ),
-                    ),
+                    _SectionHeader(title: Strings.t('upcoming_renewals')),
                     const SizedBox(height: 14),
                     const _UpcomingRenewals(),
                   ],
@@ -190,12 +184,61 @@ class _MonthlyReviewCard extends StatelessWidget {
   );
 }
 
-class _TopBar extends StatelessWidget {
+class _TopBar extends StatefulWidget {
+  @override
+  State<_TopBar> createState() => _TopBarState();
+}
+
+class _TopBarState extends State<_TopBar> {
+  String? _firstName;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadName();
+  }
+
+  Future<void> _loadName() async {
+    try {
+      await ProfileStore.instance.load();
+    } catch (_) {
+      // Falls back to whatever's already in ProfileStore.instance.values
+      // (its in-memory default, or a previous successful load this
+      // session) — the greeting just stays hidden if even that's empty.
+    }
+    final fullName = ProfileStore.instance.values['Full name']?.trim() ?? '';
+    if (!mounted || fullName.isEmpty) return;
+    setState(() => _firstName = fullName.split(' ').first);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [const ProfileMenuButton(), const NotificationCoinButton()],
+      children: [
+        const ProfileMenuButton(),
+        const SizedBox(width: 10),
+        Expanded(
+          child: Align(
+            alignment: AlignmentDirectional.centerStart,
+            child: AnimatedSwitcher(
+              duration: const Duration(milliseconds: 200),
+              child: _firstName == null
+                  ? const SizedBox.shrink()
+                  : Text(
+                      Strings.f('greeting_hi', _firstName!),
+                      key: ValueKey(_firstName),
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        color: AppColors.textPrimary,
+                        fontSize: 15,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+            ),
+          ),
+        ),
+        const NotificationCoinButton(),
+      ],
     );
   }
 }
@@ -547,18 +590,20 @@ class _SectionHeader extends StatelessWidget {
             ),
           ),
         ),
-        const SizedBox(width: 8),
-        GestureDetector(
-          onTap: onSeeAll,
-          child: Text(
-            Strings.t('see_all'),
-            style: const TextStyle(
-              color: AppColors.gold,
-              fontSize: 13,
-              fontWeight: FontWeight.w500,
+        if (onSeeAll != null) ...[
+          const SizedBox(width: 8),
+          GestureDetector(
+            onTap: onSeeAll,
+            child: Text(
+              Strings.t('see_all'),
+              style: const TextStyle(
+                color: AppColors.gold,
+                fontSize: 13,
+                fontWeight: FontWeight.w500,
+              ),
             ),
           ),
-        ),
+        ],
       ],
     );
   }
@@ -655,6 +700,8 @@ class _UpcomingRenewals extends StatefulWidget {
 class _UpcomingRenewalsState extends State<_UpcomingRenewals> {
   final _pageController = PageController();
   int _monthOffset = 0;
+  DateTime? _selectedDay;
+  List<Subscription> _selectedDaySubs = const [];
 
   @override
   void dispose() {
@@ -670,37 +717,33 @@ class _UpcomingRenewalsState extends State<_UpcomingRenewals> {
     );
   }
 
-  void _showDayRenewals(List<Subscription> daySubs, DateTime day) {
-    showModalBottomSheet<void>(
-      context: context,
-      backgroundColor: AppColors.surface,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-      ),
-      builder: (_) => SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(20, 20, 20, 20),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                '${day.day} ${Strings.monthAbbrev(day.month)} ${day.year}',
-                style: const TextStyle(
-                  color: AppColors.textPrimary,
-                  fontSize: 16,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-              const SizedBox(height: 14),
-              for (final s in daySubs)
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 12),
-                  child: _RenewalTile(subscription: s),
-                ),
-            ],
-          ),
-        ),
+  bool _isSameDay(DateTime a, DateTime b) =>
+      a.year == b.year && a.month == b.month && a.day == b.day;
+
+  /// Tapping the same day again collapses the panel instead of re-showing
+  /// it, so the calendar can act like a simple expand/collapse toggle.
+  void _toggleDay(List<Subscription> daySubs, DateTime day) {
+    setState(() {
+      if (_selectedDay != null && _isSameDay(_selectedDay!, day)) {
+        _selectedDay = null;
+        _selectedDaySubs = const [];
+      } else {
+        _selectedDay = day;
+        _selectedDaySubs = daySubs;
+      }
+    });
+  }
+
+  void _closePanel() => setState(() {
+    _selectedDay = null;
+    _selectedDaySubs = const [];
+  });
+
+  void _openDetails(Subscription subscription) {
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) =>
+            SubscriptionViewScreen(subscriptionId: subscription.id),
       ),
     );
   }
@@ -721,6 +764,7 @@ class _UpcomingRenewalsState extends State<_UpcomingRenewals> {
         }
         final now = DateTime.now();
         final displayedMonth = DateTime(now.year, now.month + _monthOffset);
+        final selectedDay = _selectedDay;
         return Container(
           padding: const EdgeInsets.all(12),
           clipBehavior: Clip.antiAlias,
@@ -733,6 +777,7 @@ class _UpcomingRenewalsState extends State<_UpcomingRenewals> {
             children: [
               const CardLogoWatermark(corner: WatermarkCorner.bottomEnd),
               Column(
+                mainAxisSize: MainAxisSize.min,
                 children: [
                   SizedBox(
                     height: 26,
@@ -766,13 +811,37 @@ class _UpcomingRenewalsState extends State<_UpcomingRenewals> {
                     height: 230,
                     child: PageView.builder(
                       controller: _pageController,
-                      onPageChanged: (i) => setState(() => _monthOffset = i),
+                      onPageChanged: (i) => setState(() {
+                        _monthOffset = i;
+                        // A selection belongs to the month it was made in —
+                        // swiping away from it would otherwise leave a
+                        // stale, mismatched panel open.
+                        _selectedDay = null;
+                        _selectedDaySubs = const [];
+                      }),
                       itemBuilder: (context, index) => _MonthGrid(
                         month: DateTime(now.year, now.month + index),
                         subscriptions: subs,
-                        onDayTap: _showDayRenewals,
+                        selectedDay: selectedDay,
+                        onDayTap: _toggleDay,
                       ),
                     ),
+                  ),
+                  // Renewal details for the selected day expand from the
+                  // bottom of the calendar card itself, instead of a
+                  // full-screen modal sheet from the bottom of the screen.
+                  AnimatedSize(
+                    duration: const Duration(milliseconds: 220),
+                    curve: Curves.easeInOut,
+                    alignment: Alignment.topCenter,
+                    child: selectedDay == null
+                        ? const SizedBox(width: double.infinity)
+                        : _DayRenewalsPanel(
+                            day: selectedDay,
+                            subscriptions: _selectedDaySubs,
+                            onClose: _closePanel,
+                            onMoreDetails: _openDetails,
+                          ),
                   ),
                 ],
               ),
@@ -784,15 +853,80 @@ class _UpcomingRenewalsState extends State<_UpcomingRenewals> {
   }
 }
 
+/// Expands inline from the bottom of the calendar card when a day with
+/// renewals is tapped — one row per subscription due that day, each with
+/// an explicit "More details" action into [SubscriptionViewScreen].
+class _DayRenewalsPanel extends StatelessWidget {
+  const _DayRenewalsPanel({
+    required this.day,
+    required this.subscriptions,
+    required this.onClose,
+    required this.onMoreDetails,
+  });
+
+  final DateTime day;
+  final List<Subscription> subscriptions;
+  final VoidCallback onClose;
+  final ValueChanged<Subscription> onMoreDetails;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(top: 12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Divider(height: 1, color: AppColors.cardBorder),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  '${day.day} ${Strings.monthAbbrev(day.month)} ${day.year}',
+                  style: const TextStyle(
+                    color: AppColors.textPrimary,
+                    fontSize: 15,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
+              GestureDetector(
+                onTap: onClose,
+                child: const Icon(
+                  Icons.close_rounded,
+                  color: AppColors.textSecondary,
+                  size: 20,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          for (final s in subscriptions)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 10),
+              child: _RenewalTile(
+                subscription: s,
+                onMoreDetails: () => onMoreDetails(s),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+}
+
 class _MonthGrid extends StatelessWidget {
   const _MonthGrid({
     required this.month,
     required this.subscriptions,
+    required this.selectedDay,
     required this.onDayTap,
   });
 
   final DateTime month;
   final List<Subscription> subscriptions;
+  final DateTime? selectedDay;
   final void Function(List<Subscription> daySubs, DateTime day) onDayTap;
 
   List<Subscription> _subscriptionsOn(int day) => subscriptions
@@ -851,6 +985,11 @@ class _MonthGrid extends StatelessWidget {
                             today.year == month.year &&
                             today.month == month.month &&
                             today.day == dayNum;
+                        final isSelected =
+                            selectedDay != null &&
+                            selectedDay!.year == month.year &&
+                            selectedDay!.month == month.month &&
+                            selectedDay!.day == dayNum;
                         return GestureDetector(
                           onTap: daySubs.isEmpty
                               ? null
@@ -864,11 +1003,13 @@ class _MonthGrid extends StatelessWidget {
                               vertical: 1,
                             ),
                             decoration: BoxDecoration(
-                              color: isToday
+                              color: isSelected
+                                  ? AppColors.gold.withValues(alpha: 0.28)
+                                  : isToday
                                   ? AppColors.gold.withValues(alpha: 0.15)
                                   : Colors.transparent,
                               borderRadius: BorderRadius.circular(8),
-                              border: isToday
+                              border: isSelected || isToday
                                   ? Border.all(color: AppColors.gold)
                                   : null,
                             ),
@@ -878,11 +1019,11 @@ class _MonthGrid extends StatelessWidget {
                                 Text(
                                   '$dayNum',
                                   style: TextStyle(
-                                    color: isToday
+                                    color: isSelected || isToday
                                         ? AppColors.gold
                                         : AppColors.textPrimary,
                                     fontSize: 10,
-                                    fontWeight: isToday
+                                    fontWeight: isSelected || isToday
                                         ? FontWeight.w700
                                         : FontWeight.w500,
                                   ),
@@ -987,69 +1128,89 @@ class _CalendarNavButton extends StatelessWidget {
 }
 
 class _RenewalTile extends StatelessWidget {
-  const _RenewalTile({required this.subscription});
+  const _RenewalTile({required this.subscription, required this.onMoreDetails});
 
   final Subscription subscription;
+  final VoidCallback onMoreDetails;
 
   @override
   Widget build(BuildContext context) {
     final s = subscription;
-    return Container(
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: Row(
-        children: [
-          LogoImage(assetPath: s.logoAsset, size: 44),
-          const SizedBox(width: 14),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+    return GestureDetector(
+      onTap: onMoreDetails,
+      child: Container(
+        padding: const EdgeInsets.all(14),
+        decoration: BoxDecoration(
+          color: AppColors.surface,
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
               children: [
-                Text(
-                  s.name,
-                  style: const TextStyle(
-                    color: AppColors.textPrimary,
-                    fontSize: 15,
-                    fontWeight: FontWeight.w600,
+                LogoImage(assetPath: s.logoAsset, size: 44),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        s.name,
+                        style: const TextStyle(
+                          color: AppColors.textPrimary,
+                          fontSize: 15,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        Strings.renewsIn(s.renewsInDays),
+                        style: const TextStyle(
+                          color: AppColors.textSecondary,
+                          fontSize: 12.5,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-                const SizedBox(height: 2),
                 Text(
-                  Strings.renewsIn(s.renewsInDays),
-                  style: const TextStyle(
-                    color: AppColors.textSecondary,
-                    fontSize: 12.5,
+                  '⃁${s.amount.toStringAsFixed(0)}',
+                  style: AppTypography.amount(
+                    color: AppColors.textPrimary,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
               ],
             ),
-          ),
-          Text(
-            '⃁${s.amount.toStringAsFixed(0)}',
-            style: AppTypography.amount(
-              color: AppColors.textPrimary,
-              fontSize: 14,
-              fontWeight: FontWeight.w600,
+            const SizedBox(height: 10),
+            const Divider(height: 1, color: AppColors.cardBorder),
+            const SizedBox(height: 8),
+            GestureDetector(
+              onTap: onMoreDetails,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  Text(
+                    Strings.t('more_details_action'),
+                    style: const TextStyle(
+                      color: AppColors.gold,
+                      fontSize: 12.5,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  const SizedBox(width: 2),
+                  const Icon(
+                    Icons.chevron_right_rounded,
+                    color: AppColors.gold,
+                    size: 16,
+                  ),
+                ],
+              ),
             ),
-          ),
-          const SizedBox(width: 10),
-          Container(
-            width: 34,
-            height: 34,
-            decoration: const BoxDecoration(
-              color: AppColors.trackBackground,
-              shape: BoxShape.circle,
-            ),
-            child: const Icon(
-              Icons.notifications_none_rounded,
-              color: AppColors.gold,
-              size: 17,
-            ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

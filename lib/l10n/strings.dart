@@ -234,6 +234,7 @@ class Strings {
     'settings_save_failed': 'Could not save settings. Please try again.',
 
     // Home
+    'greeting_hi': 'Hi, %s',
     'overview': 'Overview',
     'spending_heading': "This month's spending\non recurring payments",
     'of_sar_budget': 'of ⃁%s budget',
@@ -329,11 +330,18 @@ class Strings {
     // Details / add-item forms
     'subscription_details': 'Subscription details',
     'details': 'Details',
+    'more_details_action': 'More details',
     'amount_sar': 'Amount (⃁)',
     'billing_cycle': 'Billing cycle',
     'monthly': 'Monthly',
     'yearly': 'Yearly',
     'category_field': 'Category',
+    'filter_sheet_title': 'Filter & sort',
+    'show_cancelled_label': 'Show cancelled',
+    'sort_by_label': 'Sort by',
+    'sort_newest': 'Newest',
+    'sort_most_used': 'Most used',
+    'sort_least_used': 'Least used',
     'next_billing_date': 'Next billing date',
     'add_subscription_button': 'Add subscription',
 
@@ -619,6 +627,7 @@ class Strings {
     'settings_saved': 'تم حفظ الإعدادات',
     'settings_save_failed': 'تعذر حفظ الإعدادات. حاول مرة أخرى.',
 
+    'greeting_hi': 'مرحبًا، %s',
     'overview': 'نظرة عامة',
     'spending_heading': 'إنفاق هذا الشهر\nعلى المدفوعات المتكررة',
     'of_sar_budget': 'من ميزانية %s ريال',
@@ -707,11 +716,18 @@ class Strings {
 
     'subscription_details': 'تفاصيل الاشتراك',
     'details': 'التفاصيل',
+    'more_details_action': 'مزيد من التفاصيل',
     'amount_sar': 'المبلغ (ريال)',
     'billing_cycle': 'دورة الفوترة',
     'monthly': 'شهري',
     'yearly': 'سنوي',
     'category_field': 'الفئة',
+    'filter_sheet_title': 'التصفية والترتيب',
+    'show_cancelled_label': 'إظهار الملغاة',
+    'sort_by_label': 'ترتيب حسب',
+    'sort_newest': 'الأحدث',
+    'sort_most_used': 'الأكثر استخدامًا',
+    'sort_least_used': 'الأقل استخدامًا',
     'next_billing_date': 'تاريخ الفوترة القادم',
     'add_subscription_button': 'إضافة اشتراك',
 
