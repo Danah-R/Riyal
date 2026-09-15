@@ -4,7 +4,7 @@ import 'tracked_category.dart';
 import 'tracked_item.dart';
 
 /// Everything a page needs to reuse the generic Subscriptions-style UI for
-/// a different domain (Utilities, Staff, ...): its catalog, categories,
+/// a different domain (Utilities, People, ...): its catalog, categories,
 /// and store.
 class TrackedDomain {
   const TrackedDomain({
@@ -25,7 +25,7 @@ class TrackedDomain {
   final String nounKey;
 
   /// English key matching [analyticsBudgets]/[analyticsHistory] and each
-  /// [AnalyticsItem.category] ('Utilities' / 'Staff') — used for lookups
+  /// [AnalyticsItem.category] ('Utilities' / 'People') — used for lookups
   /// and equality, not for display.
   final String analyticsCategoryKey;
 

@@ -4,10 +4,10 @@ import 'package:riyal/data/item_status.dart';
 import 'package:riyal/data/notifications_store.dart';
 import 'package:riyal/data/subscription.dart';
 import 'package:riyal/data/subscriptions_store.dart';
-import 'package:riyal/data/staff_store.dart';
+import 'package:riyal/data/people_store.dart';
 import 'package:riyal/data/utilities_store.dart';
 import 'package:riyal/data/tracked_item.dart';
-import 'package:riyal/data/staff_categories.dart';
+import 'package:riyal/data/people_categories.dart';
 import 'package:riyal/data/utility_categories.dart';
 
 void main() {
@@ -51,14 +51,14 @@ void main() {
           category: UtilityCategories.water,
         ),
       );
-      StaffStore.instance.add(
+      PeopleStore.instance.add(
         TrackedItem(
-          id: 'test-staff-1',
-          name: 'Test staff',
+          id: 'test-person-1',
+          name: 'Test person',
           amount: 200,
           cycle: BillingCycle.monthly,
           nextBillingDate: due6,
-          category: StaffCategories.household,
+          category: PeopleCategories.household,
         ),
       );
       expect(inbox.notices.value.length, initial + 5);

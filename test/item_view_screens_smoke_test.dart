@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:riyal/data/staff_categories.dart';
-import 'package:riyal/data/staff_domain.dart';
+import 'package:riyal/data/people_categories.dart';
+import 'package:riyal/data/people_domain.dart';
 import 'package:riyal/data/subscription.dart';
 import 'package:riyal/data/subscriptions_store.dart';
 import 'package:riyal/data/tracked_item.dart';
@@ -75,25 +75,25 @@ void main() {
     expect(find.text('Smoke Test Utility'), findsWidgets);
   });
 
-  testWidgets('TrackedItemViewScreen renders for a staff member with no history', (
+  testWidgets('TrackedItemViewScreen renders for a person with no history', (
     tester,
   ) async {
     final item = TrackedItem(
-      id: 'smoke-staff-1',
-      name: 'Smoke Test Staff',
+      id: 'smoke-person-1',
+      name: 'Smoke Test Person',
       amount: 200,
       cycle: BillingCycle.monthly,
       nextBillingDate: DateTime.now().add(const Duration(days: 5)),
-      category: StaffCategories.household,
+      category: PeopleCategories.household,
       notes: 'A test note',
     );
-    staffDomain.store.items.value = [...staffDomain.store.items.value, item];
+    peopleDomain.store.items.value = [...peopleDomain.store.items.value, item];
     await pump(
       tester,
-      TrackedItemViewScreen(domain: staffDomain, itemId: 'smoke-staff-1'),
+      TrackedItemViewScreen(domain: peopleDomain, itemId: 'smoke-person-1'),
     );
     expect(tester.takeException(), isNull);
-    expect(find.text('Smoke Test Staff'), findsWidgets);
+    expect(find.text('Smoke Test Person'), findsWidgets);
     expect(find.text('A test note'), findsOneWidget);
   });
 }

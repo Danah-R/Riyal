@@ -122,15 +122,41 @@ class Strings {
       (_isArabic ? _weekdaysAr : _weekdaysEn)[sundayIndex0to6];
 
   /// Display text for the three top-level analytics/spending categories.
-  /// The underlying value ('Subscriptions'/'Utilities'/'Staff') stays
+  /// The underlying value ('Subscriptions'/'Utilities'/'People') stays
   /// English wherever it's used as a lookup key or compared for equality —
   /// this is purely for what's shown on screen.
   static String categoryDisplay(String category) => switch (category) {
     'Subscriptions' => t('nav_subscriptions'),
     'Utilities' => t('nav_utilities'),
-    'Staff' => t('nav_staff'),
+    'People' => t('nav_people'),
     _ => category,
   };
+
+  /// "We noticed Netflix charges you 49 SAR monthly — added to your
+  /// Subscriptions." — used when a recurring bank charge crosses the
+  /// auto-add occurrence threshold and is matched against the
+  /// subscription/utility reference catalog.
+  static String autoAddedItemMessage({
+    required String name,
+    required double amount,
+    required bool isMonthly,
+    required String categoryDisplay,
+  }) {
+    final cadence = isMonthly
+        ? (_isArabic ? 'شهريًا' : 'monthly')
+        : (_isArabic ? 'سنويًا' : 'yearly');
+    final amountText = amount.toStringAsFixed(0);
+    return _isArabic
+        ? 'لاحظنا أن $name يحصّل منك ريال $amountText $cadence — تمت إضافته إلى $categoryDisplay.'
+        : 'We noticed $name charges you $amountText SAR $cadence — added to your $categoryDisplay.';
+  }
+
+  /// "We noticed a recurring payment to [payee] — added to People, tap to
+  /// fill in details." — used when a recurring bank charge crosses the
+  /// auto-add threshold but matches neither reference catalog.
+  static String autoAddedPersonMessage(String name) => _isArabic
+      ? 'لاحظنا دفعة متكررة إلى $name — تمت إضافته إلى الأفراد، اضغط لإكمال التفاصيل.'
+      : 'We noticed a recurring payment to $name — added to People, tap to fill in details.';
 
   /// Display text for analytics demo "group" names (finer-grained than the
   /// three top-level categories, e.g. 'Streaming', 'Fitness').
@@ -143,7 +169,7 @@ class Strings {
     'nav_home': 'Home',
     'nav_subscriptions': 'Subscriptions',
     'nav_utilities': 'Utilities',
-    'nav_staff': 'Staff',
+    'nav_people': 'People',
 
     // Shared / generic
     'renews_today': 'Renews today',
@@ -179,7 +205,7 @@ class Strings {
     'monthly_review_completed_sub':
         'View your suggestions. Your next check-in is next month.',
     'upcoming_payments': 'Upcoming payments',
-    'upcoming_payments_sub': 'Renewals, utility bills and staff payments.',
+    'upcoming_payments_sub': 'Renewals, utility bills and people payments.',
     'remind_before_payment': 'Remind me before payment',
     'day_singular': 'day',
     'day_plural': 'days',
@@ -232,6 +258,7 @@ class Strings {
     'category_childcare': 'Childcare',
     'category_driving': 'Driving',
     'category_security': 'Security',
+    'category_unassigned': 'Role not set',
     'category_all': 'All',
 
     // Analytics groups (finer-grained demo groupings)
@@ -245,15 +272,15 @@ class Strings {
     'group_household': 'Household',
     'group_transport': 'Transport',
 
-    // Domain nouns (Utilities / Staff)
+    // Domain nouns (Utilities / People)
     'noun_singular_utility_bill': 'utility bill',
     'noun_plural_utility_bill': 'utility bills',
     'add_from_scratch_utility_bill': 'Choose a provider',
-    'noun_singular_staff_member': 'staff member',
-    'noun_plural_staff_member': 'staff members',
-    'add_from_scratch_staff_member': 'Choose a role',
+    'noun_singular_people_member': 'person',
+    'noun_plural_people_member': 'people',
+    'add_from_scratch_people_member': 'Choose a role',
     'search_hint_utilities': 'Search utilities',
-    'search_hint_staff': 'Search staff',
+    'search_hint_people': 'Search people',
     'search_hint_subscriptions': 'Search subscriptions',
 
     // Analytics
@@ -381,7 +408,7 @@ class Strings {
     'quick_answers': 'QUICK ANSWERS',
     'faq_q1': 'How do I add a payment?',
     'faq_a1':
-        'Open Subscriptions, Utilities or Staff and use the add option. '
+        'Open Subscriptions, Utilities or People and use the add option. '
         'Choose an existing provider or enter the payment details.',
     'faq_q2': 'When will I get a reminder?',
     'faq_a2':
@@ -477,11 +504,12 @@ class Strings {
     'notice_renewal_reminder': 'Subscription renewal reminder',
     'notice_payment_reminder': 'Payment reminder',
     'notice_utility_anomaly_title': 'Unusual bill',
+    'notice_auto_added_title': 'Added automatically',
     'monthly_review_notice_title': 'Your monthly money check-in is ready',
     'monthly_review_notice_message':
         'Review your subscriptions and payment commitments to find saving opportunities.',
 
-    // Item details page (Subscriptions / Utilities / Staff)
+    // Item details page (Subscriptions / Utilities / People)
     'status_active': 'Active',
     'status_trial': 'Trial',
     'status_cancelled': 'Cancelled',
@@ -530,7 +558,7 @@ class Strings {
     'nav_home': 'الرئيسية',
     'nav_subscriptions': 'الاشتراكات',
     'nav_utilities': 'المرافق',
-    'nav_staff': 'الموظفون',
+    'nav_people': 'الأفراد',
 
     'renews_today': 'يتجدد اليوم',
     'analytics_tab': 'التحليلات',
@@ -563,7 +591,7 @@ class Strings {
     'monthly_review_completed_sub':
         'اعرض اقتراحاتك. ستتوفر المراجعة القادمة الشهر المقبل.',
     'upcoming_payments': 'المدفوعات القادمة',
-    'upcoming_payments_sub': 'التجديدات وفواتير المرافق ومدفوعات الموظفين.',
+    'upcoming_payments_sub': 'التجديدات وفواتير المرافق ومدفوعات الأفراد.',
     'remind_before_payment': 'ذكّرني قبل الدفع',
     'day_singular': 'يوم',
     'day_plural': 'أيام',
@@ -614,6 +642,7 @@ class Strings {
     'category_childcare': 'رعاية الأطفال',
     'category_driving': 'القيادة',
     'category_security': 'الأمن',
+    'category_unassigned': 'الدور غير محدد',
     'category_all': 'الكل',
 
     'group_streaming': 'البث',
@@ -629,11 +658,11 @@ class Strings {
     'noun_singular_utility_bill': 'فاتورة مرافق',
     'noun_plural_utility_bill': 'فواتير المرافق',
     'add_from_scratch_utility_bill': 'اختر مزود الخدمة',
-    'noun_singular_staff_member': 'فرد من الطاقم',
-    'noun_plural_staff_member': 'أفراد الطاقم',
-    'add_from_scratch_staff_member': 'اختر الدور',
+    'noun_singular_people_member': 'فرد',
+    'noun_plural_people_member': 'أفراد',
+    'add_from_scratch_people_member': 'اختر الدور',
     'search_hint_utilities': 'ابحث في المرافق',
-    'search_hint_staff': 'ابحث عن الموظفين',
+    'search_hint_people': 'ابحث عن الأفراد',
     'search_hint_subscriptions': 'ابحث في الاشتراكات',
 
     'analytics_general_title': 'التحليلات العامة',
@@ -841,11 +870,12 @@ class Strings {
     'notice_renewal_reminder': 'تذكير بتجديد الاشتراك',
     'notice_payment_reminder': 'تذكير بالدفع',
     'notice_utility_anomaly_title': 'فاتورة غير معتادة',
+    'notice_auto_added_title': 'أُضيف تلقائيًا',
     'monthly_review_notice_title': 'مراجعتك المالية الشهرية جاهزة',
     'monthly_review_notice_message':
         'راجع اشتراكاتك والتزاماتك المالية واكتشف فرص التوفير.',
 
-    // Item details page (Subscriptions / Utilities / Staff)
+    // Item details page (Subscriptions / Utilities / People)
     'status_active': 'نشط',
     'status_trial': 'تجريبي',
     'status_cancelled': 'ملغى',

@@ -38,7 +38,7 @@ Future<List<MockTransaction>> loadRecentSubscriptionTransactions() async {
 }
 
 /// Same idea as [loadRecentSubscriptionTransactions], but matched against
-/// [domain]'s own catalog (Utilities/Staff) instead of the subscription
+/// [domain]'s own catalog (Utilities/People) instead of the subscription
 /// one — still every connected transaction, not just ones already tagged
 /// with that domain's category.
 Future<List<MockCharge>> loadRecentDomainCharges(TrackedDomain domain) async {

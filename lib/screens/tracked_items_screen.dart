@@ -17,7 +17,7 @@ import 'tracked_item_view_screen.dart';
 
 enum _PageTab { items, analytics }
 
-/// The Utilities/Staff tabs' content — same layout as the Subscriptions
+/// The Utilities/People tabs' content — same layout as the Subscriptions
 /// page ([SubscriptionsBody]), driven by a [TrackedDomain] instead.
 class TrackedItemsScreen extends StatefulWidget {
   const TrackedItemsScreen({super.key, required this.domain});

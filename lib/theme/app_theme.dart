@@ -37,7 +37,7 @@ class AppColors {
   // Category accents.
   static const subscriptions = Color(0xFFCBA960);
   static const utilities = Color(0xFF2CB3B3);
-  static const staff = Color(0xFFBD7D60);
+  static const people = Color(0xFFBD7D60);
 
   // Subscription/tracked-item status accents.
   static const statusActive = Color(0xFF6CC581);
@@ -66,15 +66,15 @@ class AppColors {
   /// category colors above; this one has no existing counterpart.
   static const onboardingAnalyticsAccent = Color(0xFF82C7A8);
 
-  // Staff catalog/seed role accents — named once here instead of the same
-  // hex repeated across staff_catalog.dart and staff_store.dart.
-  static const staffDriving = Color(0xFF37474F);
-  static const staffHousekeeping = Color(0xFF6B7A3A);
-  static const staffChildcare = Color(0xFFC2637A);
-  static const staffGardening = Color(0xFF4C7A3A);
-  static const staffSecurity = Color(0xFF7A3A3A);
-  static const staffTutoring = Color(0xFF3A5A7A);
-  static const staffAssistant = Color(0xFF6A5A8A);
+  // People catalog/seed role accents — named once here instead of the same
+  // hex repeated across people_catalog.dart and people_store.dart.
+  static const peopleDriving = Color(0xFF37474F);
+  static const peopleHousekeeping = Color(0xFF6B7A3A);
+  static const peopleChildcare = Color(0xFFC2637A);
+  static const peopleGardening = Color(0xFF4C7A3A);
+  static const peopleSecurity = Color(0xFF7A3A3A);
+  static const peopleTutoring = Color(0xFF3A5A7A);
+  static const peopleAssistant = Color(0xFF6A5A8A);
 
   // Utility catalog/seed role accents.
   static const utilityGas = Color(0xFFB44622);

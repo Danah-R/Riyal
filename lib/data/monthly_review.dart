@@ -3,12 +3,12 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import 'staff_store.dart';
+import 'people_store.dart';
 import 'subscription.dart';
 import 'subscriptions_store.dart';
 import 'utilities_store.dart';
 
-enum ReviewDomain { subscription, utility, staff }
+enum ReviewDomain { subscription, utility, people }
 
 enum ReviewActivity { none, low, medium, high }
 
@@ -52,11 +52,11 @@ class MonthlyReviewItem {
           monthlyAmount: item.monthlyAmount,
           cycle: item.cycle,
         ),
-      for (final item in StaffStore.instance.items.value)
+      for (final item in PeopleStore.instance.items.value)
         MonthlyReviewItem(
-          id: id(ReviewDomain.staff, item.name),
+          id: id(ReviewDomain.people, item.name),
           name: item.name,
-          domain: ReviewDomain.staff,
+          domain: ReviewDomain.people,
           monthlyAmount: item.monthlyAmount,
           cycle: item.cycle,
         ),
@@ -171,7 +171,7 @@ class MonthlyReviewEngine {
           );
         }
         break;
-      case ReviewDomain.staff:
+      case ReviewDomain.people:
         if (answer.need == ReviewNeed.stop ||
             answer.activity == ReviewActivity.none) {
           return SavingRecommendation(

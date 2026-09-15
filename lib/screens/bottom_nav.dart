@@ -55,7 +55,7 @@ class BottomNav extends StatelessWidget {
               Expanded(
                 child: NavItem(
                   icon: Icons.groups_outlined,
-                  label: Strings.t('nav_staff'),
+                  label: Strings.t('nav_people'),
                   isActive: index == 3,
                   onTap: () => onTap(3),
                 ),

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../l10n/strings.dart';
 
-/// A filterable category shared by the Subscriptions, Utilities, and Staff
+/// A filterable category shared by the Subscriptions, Utilities, and People
 /// pages. Each page defines its own fixed list of these (see
 /// [SubscriptionCategories] etc.) so the filter chips and catalog can be
 /// domain-specific while sharing one implementation.

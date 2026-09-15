@@ -38,7 +38,7 @@ class AnalyticsScreen extends StatelessWidget {
 /// The analytics charts/cards themselves, with no Scaffold/AppBar of their
 /// own — reused both by [AnalyticsScreen] (full page, from Home) and
 /// embedded directly as the "Analytics" tab on the Subscriptions/Utilities/
-/// Staff pages (so switching to it there doesn't leave the page — the
+/// People pages (so switching to it there doesn't leave the page — the
 /// bottom nav and the Subscriptions/Analytics pill stay on screen).
 class AnalyticsContent extends StatefulWidget {
   const AnalyticsContent({
@@ -51,7 +51,7 @@ class AnalyticsContent extends StatefulWidget {
 
   final String? category;
 
-  /// Whether to show the General/Subscriptions/Utilities/Staff chooser.
+  /// Whether to show the General/Subscriptions/Utilities/People chooser.
   /// Turned off when embedded in a page that's already scoped to one
   /// category — switching category there would be redundant with the
   /// page's own identity pill.
@@ -183,7 +183,7 @@ class _AnalyticsContentState extends State<AnalyticsContent> {
                       null,
                       'Subscriptions',
                       'Utilities',
-                      'Staff',
+                      'People',
                     ])
                       ChoiceChip(
                         label: Text(

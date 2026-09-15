@@ -37,8 +37,8 @@ final analyticsItems = <AnalyticsItem>[
   const AnalyticsItem('Electricity', 'Utilities', 350, 5, 'Electricity'),
   const AnalyticsItem('Home internet', 'Utilities', 200, 8, 'Internet'),
   const AnalyticsItem('Water', 'Utilities', 70, 16, 'Water'),
-  const AnalyticsItem('Housekeeper allowance', 'Staff', 500, 2, 'Household'),
-  const AnalyticsItem('Driver allowance', 'Staff', 270, 7, 'Transport'),
+  const AnalyticsItem('Housekeeper allowance', 'People', 500, 2, 'Household'),
+  const AnalyticsItem('Driver allowance', 'People', 270, 7, 'Transport'),
 ];
 
 // Combined budget is independent of category caps.
@@ -46,10 +46,10 @@ const overallAnalyticsBudget = 3000.0;
 const analyticsBudgets = {
   'Subscriptions': subscriptionsBudget,
   'Utilities': 800.0,
-  'Staff': 1000.0,
+  'People': 1000.0,
 };
 const analyticsHistory = <String, List<double>>{
   'Subscriptions': [760, 820, 850, 880, 900, subscriptionsSpent],
   'Utilities': [500, 540, 580, 560, 600, 620],
-  'Staff': [650, 650, 700, 720, 700, 770],
+  'People': [650, 650, 700, 720, 700, 770],
 };

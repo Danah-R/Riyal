@@ -1,12 +1,17 @@
 import 'package:flutter/foundation.dart';
 import '../l10n/strings.dart';
+import 'auto_add_classifier.dart';
 import 'bank_transaction_matcher.dart';
+import 'id_generator.dart';
 import 'item_payment_history.dart';
 import 'item_status.dart';
 import 'mock_bank_transaction.dart';
+import 'recurring_detection.dart';
+import 'subscription.dart';
 import 'subscriptions_store.dart';
+import 'tracked_item.dart';
 import 'utilities_store.dart';
-import 'staff_store.dart';
+import 'people_store.dart';
 import 'app_settings.dart';
 import 'monthly_review.dart';
 import 'notice_read_state.dart';
@@ -20,6 +25,7 @@ enum PaymentNoticeKind {
   paymentReminder,
   monthlyReview,
   utilityAnomaly,
+  autoAdded,
 }
 
 class PaymentNotice {
@@ -31,6 +37,7 @@ class PaymentNotice {
     required this.reminder,
     this.kind = PaymentNoticeKind.itemAdded,
     this.itemId,
+    this.autoAddedDomain,
   });
   final String id;
   final String title;
@@ -39,9 +46,14 @@ class PaymentNotice {
   final bool reminder;
   final PaymentNoticeKind kind;
 
-  /// Set only on [PaymentNoticeKind.utilityAnomaly] notices — the
-  /// [TrackedItem.id] of the utility bill to open when tapped.
+  /// Set on [PaymentNoticeKind.utilityAnomaly] and [PaymentNoticeKind.autoAdded]
+  /// notices — the id of the item to open when tapped.
   final String? itemId;
+
+  /// Set only on [PaymentNoticeKind.autoAdded] notices — one of
+  /// 'subscription' / 'utility' / 'person', so tapping it opens the right
+  /// details page for [itemId].
+  final String? autoAddedDomain;
 }
 
 /// In-app demo inbox, fed by the same observable stores as the payment screens.
@@ -50,7 +62,7 @@ class NotificationsStore {
     refresh(seed: true);
     SubscriptionsStore.instance.subscriptions.addListener(refresh);
     UtilitiesStore.instance.items.addListener(refresh);
-    StaffStore.instance.items.addListener(refresh);
+    PeopleStore.instance.items.addListener(refresh);
     MonthlyReviewStore.instance.revision.addListener(refresh);
   }
   static final instance = NotificationsStore._();
@@ -153,11 +165,11 @@ class NotificationsStore {
         isActive: item.status == ItemStatus.active,
       );
     }
-    for (final item in StaffStore.instance.items.value) {
+    for (final item in PeopleStore.instance.items.value) {
       visit(
         item,
         item.name,
-        'Staff',
+        'People',
         item.amount,
         item.nextBillingDate,
         notificationsEnabled: item.notificationsEnabled,
@@ -200,6 +212,159 @@ class NotificationsStore {
     // inline with the rest of refresh() without delaying — or, worse,
     // making callers await — every other notice update.
     unawaited(_refreshUtilityAnomalies());
+    unawaited(_refreshAutoDetection());
+  }
+
+  bool _autoDetectionRunning = false;
+
+  /// Runs the same auto-detection [refresh] triggers on a timer, but
+  /// awaitable — the Accounts screen calls this directly before deciding
+  /// what still belongs in its manual "possible" suggestion list, so a
+  /// charge that just crossed the auto-add threshold doesn't sit there
+  /// waiting for the next periodic tick.
+  Future<void> checkForAutoAdditions() => _refreshAutoDetection();
+
+  /// Scans connected-bank transaction history for recurring charges that
+  /// have crossed [RecurringDetectionEngine.autoAddOccurrences] and adds
+  /// them straight to the right store (Subscriptions/Utilities/People) —
+  /// classified by matching the merchant against the subscription/utility
+  /// reference catalogs (see lib/data/auto_add_classifier.dart) — instead
+  /// of waiting for the user to confirm them from the Accounts screen.
+  /// Fires a dedicated notice for each addition the same way
+  /// [_refreshUtilityAnomalies] does, and pre-marks the new item as "seen"
+  /// so the generic new-item notice below doesn't also fire for it.
+  Future<void> _refreshAutoDetection() async {
+    if (_autoDetectionRunning) return;
+    if (UserBankAccountsStore.instance.accounts.value.isEmpty) return;
+    _autoDetectionRunning = true;
+    try {
+      final List<MockBankTransactionRow> allTransactions;
+      try {
+        allTransactions = await loadAllConnectedTransactions();
+      } catch (error) {
+        debugPrint('Auto-detection check failed: $error');
+        return;
+      }
+
+      final detected = RecurringDetectionEngine.detect(allTransactions)
+          .where((d) => d.occurrences >= RecurringDetectionEngine.autoAddOccurrences)
+          .toList();
+      if (detected.isEmpty) return;
+
+      final alreadyTracked = <String>{
+        for (final s in SubscriptionsStore.instance.subscriptions.value)
+          s.name.toUpperCase(),
+        for (final i in UtilitiesStore.instance.items.value)
+          i.name.toUpperCase(),
+        for (final i in PeopleStore.instance.items.value)
+          i.name.toUpperCase(),
+      };
+
+      final additions = <PaymentNotice>[];
+      final now = DateTime.now();
+      for (final suggestion in detected) {
+        final key = suggestion.merchantName.toUpperCase();
+        if (alreadyTracked.contains(key)) continue;
+        alreadyTracked.add(key);
+
+        final classification = classifyForAutoAdd(suggestion);
+        switch (classification.domain) {
+          case AutoAddDomain.subscription:
+            final subscription = Subscription(
+              id: IdGenerator.uuidV4(),
+              name: suggestion.merchantName,
+              logoAsset: classification.logoAsset,
+              amount: suggestion.amount,
+              cycle: suggestion.cycle,
+              nextBillingDate: suggestion.suggestedNextBillingDate,
+              category: classification.category,
+            );
+            _seen.add(subscription);
+            await SubscriptionsStore.instance.add(subscription);
+            additions.add(
+              PaymentNotice(
+                id: 'auto-added:${subscription.id}',
+                title: Strings.t('notice_auto_added_title'),
+                message: Strings.autoAddedItemMessage(
+                  name: subscription.name,
+                  amount: subscription.amount,
+                  isMonthly: subscription.cycle == BillingCycle.monthly,
+                  categoryDisplay: Strings.categoryDisplay('Subscriptions'),
+                ),
+                createdAt: now,
+                reminder: false,
+                kind: PaymentNoticeKind.autoAdded,
+                itemId: subscription.id,
+                autoAddedDomain: 'subscription',
+              ),
+            );
+          case AutoAddDomain.utility:
+            final item = TrackedItem(
+              id: IdGenerator.uuidV4(),
+              name: suggestion.merchantName,
+              logoAsset: classification.logoAsset,
+              icon: classification.icon,
+              iconColor: classification.iconColor,
+              amount: suggestion.amount,
+              cycle: suggestion.cycle,
+              nextBillingDate: suggestion.suggestedNextBillingDate,
+              category: classification.category,
+            );
+            _seen.add(item);
+            UtilitiesStore.instance.add(item);
+            additions.add(
+              PaymentNotice(
+                id: 'auto-added:${item.id}',
+                title: Strings.t('notice_auto_added_title'),
+                message: Strings.autoAddedItemMessage(
+                  name: item.name,
+                  amount: item.amount,
+                  isMonthly: item.cycle == BillingCycle.monthly,
+                  categoryDisplay: Strings.categoryDisplay('Utilities'),
+                ),
+                createdAt: now,
+                reminder: false,
+                kind: PaymentNoticeKind.autoAdded,
+                itemId: item.id,
+                autoAddedDomain: 'utility',
+              ),
+            );
+          case AutoAddDomain.person:
+            final item = TrackedItem(
+              id: IdGenerator.uuidV4(),
+              name: suggestion.merchantName,
+              logoAsset: classification.logoAsset,
+              icon: classification.icon,
+              iconColor: classification.iconColor,
+              amount: suggestion.amount,
+              cycle: suggestion.cycle,
+              nextBillingDate: suggestion.suggestedNextBillingDate,
+              category: classification.category,
+            );
+            _seen.add(item);
+            PeopleStore.instance.add(item);
+            additions.add(
+              PaymentNotice(
+                id: 'auto-added:${item.id}',
+                title: Strings.t('notice_auto_added_title'),
+                message: Strings.autoAddedPersonMessage(item.name),
+                createdAt: now,
+                reminder: false,
+                kind: PaymentNoticeKind.autoAdded,
+                itemId: item.id,
+                autoAddedDomain: 'person',
+              ),
+            );
+        }
+      }
+
+      if (additions.isEmpty) return;
+      notices.value = [...notices.value, ...additions]
+        ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+      readState.updateIds(notices.value.map((notice) => notice.id));
+    } finally {
+      _autoDetectionRunning = false;
+    }
   }
 
   /// Flags utility bills whose latest charge is unusual relative to their

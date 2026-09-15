@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'tracked_category.dart';
 
 /// One selectable entry in a "choose from scratch" catalog (utility
-/// providers, staff roles, ...). Either a real [logoAsset] photo, or an
+/// providers, people roles, ...). Either a real [logoAsset] photo, or an
 /// [icon]/[iconColor] pair to render as a colored badge instead.
 class CatalogEntry {
   const CatalogEntry({

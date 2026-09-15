@@ -4,8 +4,8 @@ import 'item_status.dart';
 import 'subscription.dart' show BillingCycle;
 import 'tracked_category.dart';
 
-/// A recurring cost being tracked — a utility bill or a staff member's pay,
-/// mirroring [Subscription]'s shape so the Utilities/Staff pages can reuse
+/// A recurring cost being tracked — a utility bill or a person's pay,
+/// mirroring [Subscription]'s shape so the Utilities/People pages can reuse
 /// the same UI as the Subscriptions page.
 class TrackedItem {
   const TrackedItem({
@@ -35,12 +35,12 @@ class TrackedItem {
   final TrackedCategory category;
   final ItemStatus status;
 
-  /// Free-text notes — surfaced on the Staff/People details page; harmless
+  /// Free-text notes — surfaced on the People details page; harmless
   /// and simply unused for Utilities, which don't render it.
   final String? notes;
 
   /// When set (and still in the future), this person's allowance/pay is
-  /// paused until this date — the Staff/People details page's pause
+  /// paused until this date — the People details page's pause
   /// scheduling control reads and writes this.
   final DateTime? pausedUntil;
   final bool notificationsEnabled;
@@ -78,7 +78,7 @@ class TrackedItem {
   );
 }
 
-/// Holds the list of tracked items for one domain (Utilities, Staff, ...).
+/// Holds the list of tracked items for one domain (Utilities, People, ...).
 class TrackedItemsStore {
   TrackedItemsStore(List<TrackedItem> seed) : items = ValueNotifier(seed);
 

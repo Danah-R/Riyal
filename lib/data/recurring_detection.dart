@@ -49,8 +49,17 @@ class RecurringDetectionEngine {
   RecurringDetectionEngine._();
 
   /// A merchant needs at least this many charges before it's confirmed as
-  /// recurring rather than a coincidence.
+  /// recurring rather than a coincidence — the floor for showing up as a
+  /// manual "possible" suggestion at all.
   static const _minOccurrences = 3;
+
+  /// At or above this many occurrences, a recurring charge is confident
+  /// enough to skip the manual confirm step entirely and go straight from
+  /// detected to added (see lib/data/notifications_store.dart's
+  /// `_refreshAutoDetection` and lib/screens/accounts_screen.dart). Below
+  /// this — i.e. exactly [_minOccurrences] — it still surfaces as a manual
+  /// suggestion instead.
+  static const autoAddOccurrences = 4;
 
   /// Amounts within this fraction of the group average still count as
   /// "the same" — banks occasionally show tiny FX/rounding variance on

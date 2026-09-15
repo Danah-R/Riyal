@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'tracked_category.dart';
 
 /// A mock recent transaction offered in the "from a previous transaction"
-/// add flow for Utilities/Staff, mirroring [MockTransaction].
+/// add flow for Utilities/People, mirroring [MockTransaction].
 class MockCharge {
   const MockCharge({
     required this.merchant,

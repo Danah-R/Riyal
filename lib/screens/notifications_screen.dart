@@ -1,11 +1,13 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import '../data/notifications_store.dart';
+import '../data/people_domain.dart';
 import '../data/utilities_domain.dart';
 import '../l10n/strings.dart';
 import '../theme/app_theme.dart';
 import '../widgets/coin_back_button.dart';
 import 'monthly_review_screen.dart';
+import 'subscription_view_screen.dart';
 import 'tracked_item_view_screen.dart';
 
 /// The destination for tapping [notice], if any — shared by the full
@@ -33,6 +35,24 @@ VoidCallback? noticeTapHandler(
           MaterialPageRoute<void>(
             builder: (_) =>
                 TrackedItemViewScreen(domain: utilitiesDomain, itemId: itemId),
+          ),
+        );
+      };
+    case PaymentNoticeKind.autoAdded:
+      final itemId = notice.itemId;
+      if (itemId == null) return null;
+      return () {
+        beforeNavigate?.call();
+        navigator.push(
+          MaterialPageRoute<void>(
+            builder: (_) => switch (notice.autoAddedDomain) {
+              'subscription' => SubscriptionViewScreen(subscriptionId: itemId),
+              'utility' => TrackedItemViewScreen(
+                domain: utilitiesDomain,
+                itemId: itemId,
+              ),
+              _ => TrackedItemViewScreen(domain: peopleDomain, itemId: itemId),
+            },
           ),
         );
       };
@@ -90,6 +110,7 @@ class NoticeTile extends StatelessWidget {
             switch (notice.kind) {
               PaymentNoticeKind.monthlyReview => Icons.assignment_outlined,
               PaymentNoticeKind.utilityAnomaly => Icons.warning_amber_rounded,
+              PaymentNoticeKind.autoAdded => Icons.auto_awesome_rounded,
               PaymentNoticeKind.itemAdded || PaymentNoticeKind.paymentReminder =>
                 notice.reminder
                     ? Icons.notifications_active_outlined

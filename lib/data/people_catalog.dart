@@ -2,55 +2,55 @@ import 'package:flutter/material.dart';
 
 import '../theme/app_theme.dart';
 import 'catalog_entry.dart';
-import 'staff_categories.dart';
+import 'people_categories.dart';
 
-const List<CatalogEntry> staffCatalog = [
+const List<CatalogEntry> peopleCatalog = [
   CatalogEntry(
     name: 'Driver',
     icon: Icons.directions_car_outlined,
-    iconColor: AppColors.staffDriving,
-    category: StaffCategories.driving,
+    iconColor: AppColors.peopleDriving,
+    category: PeopleCategories.driving,
   ),
   CatalogEntry(
     name: 'Housekeeper',
     icon: Icons.cleaning_services_outlined,
-    iconColor: AppColors.staffHousekeeping,
-    category: StaffCategories.household,
+    iconColor: AppColors.peopleHousekeeping,
+    category: PeopleCategories.household,
   ),
   CatalogEntry(
     name: 'Nanny',
     icon: Icons.child_care_outlined,
-    iconColor: AppColors.staffChildcare,
-    category: StaffCategories.childcare,
+    iconColor: AppColors.peopleChildcare,
+    category: PeopleCategories.childcare,
   ),
   CatalogEntry(
     name: 'Cook',
     icon: Icons.restaurant_outlined,
-    iconColor: AppColors.staffHousekeeping,
-    category: StaffCategories.household,
+    iconColor: AppColors.peopleHousekeeping,
+    category: PeopleCategories.household,
   ),
   CatalogEntry(
     name: 'Gardener',
     icon: Icons.grass_outlined,
-    iconColor: AppColors.staffGardening,
-    category: StaffCategories.household,
+    iconColor: AppColors.peopleGardening,
+    category: PeopleCategories.household,
   ),
   CatalogEntry(
     name: 'Security Guard',
     icon: Icons.shield_outlined,
-    iconColor: AppColors.staffSecurity,
-    category: StaffCategories.security,
+    iconColor: AppColors.peopleSecurity,
+    category: PeopleCategories.security,
   ),
   CatalogEntry(
     name: 'Tutor',
     icon: Icons.school_outlined,
-    iconColor: AppColors.staffTutoring,
-    category: StaffCategories.other,
+    iconColor: AppColors.peopleTutoring,
+    category: PeopleCategories.other,
   ),
   CatalogEntry(
     name: 'Personal Assistant',
     icon: Icons.badge_outlined,
-    iconColor: AppColors.staffAssistant,
-    category: StaffCategories.other,
+    iconColor: AppColors.peopleAssistant,
+    category: PeopleCategories.other,
   ),
 ];

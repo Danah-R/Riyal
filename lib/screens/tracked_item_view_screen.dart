@@ -4,7 +4,8 @@ import '../data/bank_transaction_matcher.dart';
 import '../data/item_payment_history.dart';
 import '../data/item_status.dart';
 import '../data/mock_bank_transaction.dart';
-import '../data/staff_domain.dart';
+import '../data/people_categories.dart';
+import '../data/people_domain.dart';
 import '../data/subscription.dart' show BillingCycle;
 import '../data/tracked_category.dart';
 import '../data/tracked_domain.dart';
@@ -14,15 +15,16 @@ import '../data/utility_anomaly_detection.dart';
 import '../l10n/strings.dart';
 import '../theme/app_theme.dart';
 import '../theme/app_typography.dart';
+import '../widgets/category_filter_bar.dart';
 import '../widgets/coin_back_button.dart';
 import '../widgets/logo_image.dart';
 import '../widgets/status_badge.dart';
 import '../widgets/trend_chart.dart';
 
-/// The read/manage details page for one existing Utilities/Staff item —
+/// The read/manage details page for one existing Utilities/People item —
 /// distinct from [TrackedItemDetailsScreen], which is the "add a new item"
 /// form. Shared between both domains (like [TrackedItemsScreen] already
-/// is), branching on `identical(domain, utilitiesDomain/staffDomain)` for
+/// is), branching on `identical(domain, utilitiesDomain/peopleDomain)` for
 /// the handful of sections that differ.
 class TrackedItemViewScreen extends StatefulWidget {
   const TrackedItemViewScreen({
@@ -43,7 +45,7 @@ class _TrackedItemViewScreenState extends State<TrackedItemViewScreen> {
       _loadHistory();
 
   bool get _isUtility => identical(widget.domain, utilitiesDomain);
-  bool get _isStaff => identical(widget.domain, staffDomain);
+  bool get _isPeople => identical(widget.domain, peopleDomain);
 
   Future<List<MockBankTransactionRow>> _loadHistory() async {
     final item = _find(widget.domain.store.items.value);
@@ -188,7 +190,7 @@ class _TrackedItemViewScreenState extends State<TrackedItemViewScreen> {
                       const SizedBox(height: 18),
                       _AnomalyBanner(anomaly: anomaly),
                     ],
-                    if (_isStaff) ...[
+                    if (_isPeople) ...[
                       const SizedBox(height: 22),
                       _SectionLabel(Strings.t('role_label')),
                       const SizedBox(height: 8),
@@ -213,7 +215,7 @@ class _TrackedItemViewScreenState extends State<TrackedItemViewScreen> {
                         color: AppColors.utilities,
                       ),
                     ],
-                    if (_isStaff) ...[
+                    if (_isPeople) ...[
                       const SizedBox(height: 22),
                       _SectionLabel(Strings.t('payment_history')),
                       const SizedBox(height: 8),
@@ -272,7 +274,7 @@ class _TrackedItemViewScreenState extends State<TrackedItemViewScreen> {
                     ),
                     const SizedBox(height: 22),
                     _ActionButtons(
-                      showPause: _isStaff,
+                      showPause: _isPeople,
                       status: item.status,
                       onEdit: () => _edit(context, item),
                       onTogglePause: () => _togglePause(item),
@@ -314,7 +316,7 @@ class _TrackedItemViewScreenState extends State<TrackedItemViewScreen> {
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
-      builder: (_) => _EditTrackedItemSheet(item: item, showNotes: _isStaff),
+      builder: (_) => _EditTrackedItemSheet(item: item, isPeople: _isPeople),
     );
     if (updated != null) {
       widget.domain.store.update(updated);
@@ -404,29 +406,39 @@ class _RoleChip extends StatelessWidget {
   const _RoleChip({required this.category});
   final TrackedCategory category;
   @override
-  Widget build(BuildContext context) => Container(
-    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
-    decoration: BoxDecoration(
-      color: AppColors.surface,
-      borderRadius: BorderRadius.circular(20),
-      border: Border.all(color: AppColors.cardBorder),
-    ),
-    child: Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Icon(category.icon, size: 14, color: AppColors.textSecondary),
-        const SizedBox(width: 6),
-        Text(
-          category.label,
-          style: const TextStyle(
-            color: AppColors.textSecondary,
-            fontSize: 12.5,
-            fontWeight: FontWeight.w500,
-          ),
+  Widget build(BuildContext context) {
+    final isUnassigned = category == PeopleCategories.unassigned;
+    final color = isUnassigned ? AppColors.gold : AppColors.textSecondary;
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+      decoration: BoxDecoration(
+        color: isUnassigned
+            ? AppColors.gold.withValues(alpha: 0.1)
+            : AppColors.surface,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: isUnassigned
+              ? AppColors.gold.withValues(alpha: 0.4)
+              : AppColors.cardBorder,
         ),
-      ],
-    ),
-  );
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(category.icon, size: 14, color: color),
+          const SizedBox(width: 6),
+          Text(
+            category.label,
+            style: TextStyle(
+              color: color,
+              fontSize: 12.5,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 }
 
 class _StatRow extends StatelessWidget {
@@ -827,9 +839,12 @@ class _ActionButtons extends StatelessWidget {
 }
 
 class _EditTrackedItemSheet extends StatefulWidget {
-  const _EditTrackedItemSheet({required this.item, required this.showNotes});
+  const _EditTrackedItemSheet({required this.item, required this.isPeople});
   final TrackedItem item;
-  final bool showNotes;
+
+  /// Gates both the notes field and the role/category picker below —
+  /// Utilities don't expose either from this sheet.
+  final bool isPeople;
 
   @override
   State<_EditTrackedItemSheet> createState() => _EditTrackedItemSheetState();
@@ -843,6 +858,7 @@ class _EditTrackedItemSheetState extends State<_EditTrackedItemSheet> {
     text: widget.item.notes ?? '',
   );
   late BillingCycle _cycle = widget.item.cycle;
+  late TrackedCategory _category = widget.item.category;
 
   @override
   void dispose() {
@@ -858,8 +874,9 @@ class _EditTrackedItemSheetState extends State<_EditTrackedItemSheet> {
       widget.item.copyWith(
         amount: amount,
         cycle: _cycle,
-        notes: widget.showNotes ? (notes.isEmpty ? null : notes) : null,
-        clearNotes: widget.showNotes && notes.isEmpty,
+        category: widget.isPeople ? _category : widget.item.category,
+        notes: widget.isPeople ? (notes.isEmpty ? null : notes) : null,
+        clearNotes: widget.isPeople && notes.isEmpty,
       ),
     );
   }
@@ -938,7 +955,16 @@ class _EditTrackedItemSheetState extends State<_EditTrackedItemSheet> {
                   ),
                 ],
               ),
-              if (widget.showNotes) ...[
+              if (widget.isPeople) ...[
+                const SizedBox(height: 18),
+                _SectionLabel(Strings.t('role_label')),
+                const SizedBox(height: 8),
+                CategoryFilterBar(
+                  categories: PeopleCategories.values,
+                  showAll: false,
+                  selected: _category,
+                  onChanged: (c) => setState(() => _category = c ?? _category),
+                ),
                 const SizedBox(height: 18),
                 _SectionLabel(Strings.t('notes_label')),
                 const SizedBox(height: 8),

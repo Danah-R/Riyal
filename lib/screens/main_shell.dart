@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import '../theme/app_theme.dart';
 import 'bottom_nav.dart';
 import 'home_screen.dart';
-import 'staff_screen.dart';
+import 'people_screen.dart';
 import 'subscriptions_screen.dart';
 import 'utilities_screen.dart';
 import 'riyal_bot_screen.dart';
@@ -31,7 +31,7 @@ class _MainShellState extends State<MainShell> {
           const HomeBody(),
           const SubscriptionsBody(),
           const UtilitiesBody(),
-          const StaffBody(),
+          const PeopleBody(),
         ],
       ),
       floatingActionButton: NavFab(

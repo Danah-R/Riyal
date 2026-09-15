@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 
 import '../data/bank_transaction_matcher.dart';
+import '../data/notifications_store.dart';
 import '../data/recurring_detection.dart';
-import '../data/staff_catalog.dart';
-import '../data/staff_domain.dart';
+import '../data/people_catalog.dart';
+import '../data/people_domain.dart';
 import '../data/subscription_catalog.dart';
 import '../data/subscriptions_store.dart';
 import '../data/user_bank_account.dart';
@@ -43,21 +44,34 @@ class _AccountsScreenState extends State<AccountsScreen> {
   }
 
   Future<void> _refreshSuggestions() async {
+    // Runs auto-detection first (rather than waiting for its periodic
+    // timer) so a charge that just crossed the auto-add threshold is
+    // already in its proper store — and excluded below — by the time this
+    // screen decides what still needs a manual confirm.
+    await NotificationsStore.instance.checkForAutoAdditions();
     final transactions = await loadAllConnectedTransactions();
     final detected = RecurringDetectionEngine.detect(transactions);
     // Exclude merchants that already became a tracked subscription/utility/
-    // staff entry — otherwise the same recurring charge keeps resurfacing
+    // people entry — otherwise the same recurring charge keeps resurfacing
     // every time this screen re-runs detection, since the engine itself has
     // no memory of what's already been added.
     final alreadyTracked = <String>{
       for (final s in SubscriptionsStore.instance.subscriptions.value)
         s.name.toUpperCase(),
       for (final i in utilitiesDomain.store.items.value) i.name.toUpperCase(),
-      for (final i in staffDomain.store.items.value) i.name.toUpperCase(),
+      for (final i in peopleDomain.store.items.value) i.name.toUpperCase(),
     };
     if (mounted) {
       _suggestions.value = detected
-          .where((s) => !alreadyTracked.contains(s.merchantName.toUpperCase()))
+          .where(
+            (s) =>
+                // Anything at or above the auto-add threshold either just
+                // got added above, or is mid-race with the periodic
+                // auto-detection tick — either way it no longer belongs in
+                // the manual "possible" list.
+                s.occurrences < RecurringDetectionEngine.autoAddOccurrences &&
+                !alreadyTracked.contains(s.merchantName.toUpperCase()),
+          )
           .toList();
     }
   }
@@ -86,7 +100,7 @@ class _AccountsScreenState extends State<AccountsScreen> {
           }
         }
       case 'person':
-        for (final entry in staffCatalog) {
+        for (final entry in peopleCatalog) {
           if (merchant.contains(entry.name.toUpperCase())) {
             return (
               logoAsset: entry.logoAsset,
@@ -163,7 +177,7 @@ class _AccountsScreenState extends State<AccountsScreen> {
               const SizedBox(height: 10),
               _DestinationOption(
                 icon: Icons.people_outline_rounded,
-                label: Strings.t('nav_staff'),
+                label: Strings.t('nav_people'),
                 onTap: () => Navigator.pop(sheetContext, 'person'),
               ),
             ],
@@ -186,7 +200,7 @@ class _AccountsScreenState extends State<AccountsScreen> {
             initialAmount: suggestion.amount,
           ),
           'person' => TrackedItemDetailsScreen(
-            domain: staffDomain,
+            domain: peopleDomain,
             name: suggestion.merchantName,
             logoAsset: visual.logoAsset,
             icon: visual.icon,

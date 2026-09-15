@@ -3,9 +3,9 @@ import 'package:flutter_svg/flutter_svg.dart';
 
 import '../theme/app_theme.dart';
 
-/// Renders a subscription/bill/staff-role "logo" tile: a real image asset
+/// Renders a subscription/bill/person-role "logo" tile: a real image asset
 /// (SVG or raster) on a white backing, or — when there's no photo, as for
-/// most utility providers and every staff role — a colored circle with a
+/// most utility providers and every person role — a colored circle with a
 /// Material icon instead.
 class LogoImage extends StatelessWidget {
   const LogoImage({

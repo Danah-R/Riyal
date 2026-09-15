@@ -2,12 +2,12 @@ import 'package:flutter/material.dart';
 
 import '../theme/app_theme.dart';
 import 'id_generator.dart';
-import 'staff_categories.dart';
+import 'people_categories.dart';
 import 'subscription.dart' show BillingCycle;
 import 'tracked_item.dart';
 
-class StaffStore {
-  StaffStore._();
+class PeopleStore {
+  PeopleStore._();
 
   static final TrackedItemsStore instance = TrackedItemsStore(_seed());
 
@@ -18,31 +18,31 @@ class StaffStore {
         id: IdGenerator.uuidV4(),
         name: 'Driver',
         icon: Icons.directions_car_outlined,
-        iconColor: AppColors.staffDriving,
+        iconColor: AppColors.peopleDriving,
         amount: 400,
         cycle: BillingCycle.monthly,
         nextBillingDate: now.add(const Duration(days: 10)),
-        category: StaffCategories.driving,
+        category: PeopleCategories.driving,
       ),
       TrackedItem(
         id: IdGenerator.uuidV4(),
         name: 'Housekeeper',
         icon: Icons.cleaning_services_outlined,
-        iconColor: AppColors.staffHousekeeping,
+        iconColor: AppColors.peopleHousekeeping,
         amount: 250,
         cycle: BillingCycle.monthly,
         nextBillingDate: now.add(const Duration(days: 18)),
-        category: StaffCategories.household,
+        category: PeopleCategories.household,
       ),
       TrackedItem(
         id: IdGenerator.uuidV4(),
         name: 'Nanny',
         icon: Icons.child_care_outlined,
-        iconColor: AppColors.staffChildcare,
+        iconColor: AppColors.peopleChildcare,
         amount: 120,
         cycle: BillingCycle.monthly,
         nextBillingDate: now.add(const Duration(days: 22)),
-        category: StaffCategories.childcare,
+        category: PeopleCategories.childcare,
       ),
     ];
   }

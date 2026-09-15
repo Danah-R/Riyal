@@ -11,7 +11,7 @@ class CapsuleTabOption<T> {
 /// A row of text options inside one shared capsule shell, with a single
 /// indicator that measures each option's real rendered bounds and slides
 /// between them — used for every top-of-page 2-3-way toggle (Home's
-/// Overview/Analytics/Accounts, and each Subscriptions/Utilities/Staff
+/// Overview/Analytics/Accounts, and each Subscriptions/Utilities/People
 /// page's own List/Analytics toggle), so they all look and move alike.
 class CapsuleTabSelector<T> extends StatefulWidget {
   const CapsuleTabSelector({

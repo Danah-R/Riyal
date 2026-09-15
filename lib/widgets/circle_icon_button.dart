@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import '../theme/app_theme.dart';
 
 /// A small circular icon button — used for the search toggle and the
-/// floating "add" button on the Subscriptions/Utilities/Staff pages.
+/// floating "add" button on the Subscriptions/Utilities/People pages.
 class CircleIconButton extends StatelessWidget {
   const CircleIconButton({
     super.key,

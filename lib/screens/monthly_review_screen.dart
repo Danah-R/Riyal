@@ -542,7 +542,7 @@ ${actionable.isEmpty ? 'No action recommended; current commitments appear suitab
   IconData _domainIcon(ReviewDomain domain) => switch (domain) {
     ReviewDomain.subscription => Icons.subscriptions_outlined,
     ReviewDomain.utility => Icons.bolt_outlined,
-    ReviewDomain.staff => Icons.groups_outlined,
+    ReviewDomain.people => Icons.groups_outlined,
   };
 
   String _activityQuestion(ReviewDomain domain) => switch (domain) {
@@ -554,7 +554,7 @@ ${actionable.isEmpty ? 'No action recommended; current commitments appear suitab
       'كيف تغيرت تكلفة هذه الخدمة هذا الشهر؟',
       'How did this service cost change this month?',
     ),
-    ReviewDomain.staff => t(
+    ReviewDomain.people => t(
       'كم كان هذا الالتزام فعالًا هذا الشهر؟',
       'How active was this commitment this month?',
     ),
@@ -569,7 +569,7 @@ ${actionable.isEmpty ? 'No action recommended; current commitments appear suitab
         ReviewActivity.high => t('أعلى بكثير', 'Much higher'),
       };
     }
-    if (domain == ReviewDomain.staff) {
+    if (domain == ReviewDomain.people) {
       return switch (value) {
         ReviewActivity.none => t('غير فعال', 'Not active'),
         ReviewActivity.low => t('أحيانًا', 'Occasionally'),
@@ -594,7 +594,7 @@ ${actionable.isEmpty ? 'No action recommended; current commitments appear suitab
       'ما وضع هذه الخدمة الآن؟',
       'What is the status of this service?',
     ),
-    ReviewDomain.staff => t(
+    ReviewDomain.people => t(
       'ما قرارك المبدئي لهذا الالتزام؟',
       'What is your current intention for this commitment?',
     ),
@@ -608,7 +608,7 @@ ${actionable.isEmpty ? 'No action recommended; current commitments appear suitab
         ReviewNeed.stop => t('لم تعد فعالة', 'No longer active'),
       };
     }
-    if (domain == ReviewDomain.staff) {
+    if (domain == ReviewDomain.people) {
       return switch (value) {
         ReviewNeed.keep => t('استمرار', 'Continue'),
         ReviewNeed.unsure => t('إيقاف مؤقت', 'Pause'),
@@ -631,7 +631,7 @@ ${actionable.isEmpty ? 'No action recommended; current commitments appear suitab
       'هل تتوقع استمرار الخدمة للسنة القادمة؟',
       'Do you expect to keep the service next year?',
     ),
-    ReviewDomain.staff => t(
+    ReviewDomain.people => t(
       'هل تتوقع استمرار الالتزام 12 شهرًا؟',
       'Do you expect this commitment to continue for 12 months?',
     ),
